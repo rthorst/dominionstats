@@ -351,7 +351,7 @@ def score_duke(deck_comp):
     return deck_comp['Duke'] * deck_comp.get('Duchy', 0)
 
 def score_fairgrounds(deck_comp):
-    return 2 * len(deck_comp.keys()) / 5 * deck_comp['Fairgrounds']
+    return 2 * (len(deck_comp.keys()) / 5) * deck_comp['Fairgrounds']
 
 def score_vineyard(deck_comp):
     return sum(deck_comp[card] if card_info.is_action(card) else 0
