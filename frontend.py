@@ -210,7 +210,7 @@ class PlayerPage(object):
         rec_by_date = collections.defaultdict(RecordSummary)
         rec_by_turn_order =  collections.defaultdict(RecordSummary)
 
-        date_buckets = ( 1, 3, 5, 10 )
+        date_buckets = [1, 3, 5, 10]
         for g in games_coll:
             game_val = game.Game(g)
             if game_val.dubious_quality():
@@ -234,9 +234,6 @@ class PlayerPage(object):
                         (p.name(), target_player_cur_name, game_val))
                     real_name_usage[other_norm_name][p.name()] += 1
                 else:
-                    #this is getting fidgety about 80 chars, which sometimes
-                    #can mean that it's getting too nested and could use a
-                    #rethink
                     res = game_val.win_loss_tie(p.name())
                     overall_record.record_result(res, p.WinPoints())
                     game_len = len(game_val.get_player_decks())
@@ -333,6 +330,8 @@ class GamePage(object):
         query_dict = dict(urlparse.parse_qsl(web.ctx.env['QUERY_STRING']))
         debug = int(query_dict.get('debug', 0))
         game_id = query_dict['game_id']
+        if game_id.endswith('.gz'):
+            game_id = game_id[:-len('.gz')]
         yyyymmdd = game.Game.get_date_from_id(game_id)
         contents = codecs.open('static/scrape_data/%s/%s' % (
                 yyyymmdd, game_id), 'r', encoding='utf-8').read()
