@@ -150,11 +150,9 @@ class PlayerJsonPage(object):
         return json.dumps(games_arr, default=json_util.default)
 
 def render_record_row(label, rec):
-
     _row = ('<tr><th>%s</th>' % label,
             '<td>%s</td>' % rec.display_win_loss_tie(),
             '<td>%.3f</td></tr>\n' % rec.average_win_points())
-
     return ''.join(_row)
 
 def render_record_table(table_name, overall_record,

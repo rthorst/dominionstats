@@ -104,6 +104,7 @@ class Turn(object):
             change.gains.extend(info_dict.get('gains', []))
             change.trashes.extend(info_dict.get('trashes', []))
             change.returns.extend(info_dict.get('returns', []))
+            change.vp_tokens += info_dict.get('vp_tokens', 0)
             ret.append(change)
 
         return ret
@@ -214,10 +215,6 @@ class Game(object):
     def all_player_names(self):
         return [pd.name() for pd in self.player_decks]
 
-    #TODO: Nonfunctional?
-    def get_winning_score(self):
-        return self.winning_score
-
     @staticmethod
     def get_date_from_id(game_id):
         yyyymmdd_date = game_id.split('-')[1]
@@ -266,7 +263,12 @@ class Game(object):
         else:
             other_win_points = self.get_player_deck(other).WinPoints()
 
-        if targ_deck.WinPoints() > 1 and other_win_points < 1:
+        if targ_deck.WinPoints() == other_win_points:
+            if targ_deck.WinPoints() > 0:
+                return TIE
+            return LOSS
+
+        if targ_deck.WinPoints() > 1:
             return WIN
         if other_win_points > 1:
             return LOSS

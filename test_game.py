@@ -29,6 +29,22 @@ class ScoreDeckTest(unittest.TestCase):
         self.assertEquals(game.score_deck({'Vineyard': 2, 'Jester': 3,
                                            'Fishing Village': 3}), 4)
 
+def make_deck(name, points, win_points, order):
+    return {'name': name, 'points': points, 'win_points': win_points, 
+            'deck': [], 'order': order, 'turns': [],}
+
+class WinLossTieTest(unittest.TestCase):
+    def test_win_loss_tie_3p(self):
+        g = game.Game(
+            {'decks': [make_deck('p1', 1, 1.5, 1),
+                       make_deck('p2', 1, 1.5, 2),
+                       make_deck('p3', 0, 0, 3),],
+             'supply': [], '_id': ''})
+        self.assertEquals(game.TIE, g.win_loss_tie('p1', 'p2'))
+        self.assertEquals(game.TIE, g.win_loss_tie('p2', 'p1'))
+        self.assertEquals(game.WIN, g.win_loss_tie('p1', 'p3'))
+        self.assertEquals(game.LOSS, g.win_loss_tie('p3', 'p1'))
+
 class GameStateTest(unittest.TestCase):
     def _get_turn_labels(self, game_state_it):
         return [game_state_it.turn_label() for t in game_state_it]
