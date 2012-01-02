@@ -139,7 +139,7 @@ def do_scan(scanner, games_col, accum_stats, max_games):
     games_col:  Mongo collection to scan.
     accum_stats: DeckBuyStats instance to store results.
     """
-    accum_buy_stats(analysis_utils.games_stream(games_col), 
+    accum_buy_stats(analysis_util.games_stream(games_col), 
                     accum_stats, max_games=max_games)
 
 def main():
