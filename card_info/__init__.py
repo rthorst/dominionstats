@@ -10,20 +10,25 @@ _card_index = {}
 
 _card_info_rows = {}
 _card_names = []
+_card_var_names = []
 
 # the way this file is being used, it seems like a good candidate for some sort
 # of Card class with properties, etc
 def _init():
-    for idx, cardlist_row in enumerate(_cardlist_reader):
+    for cardlist_row in _cardlist_reader:
         single, plural = cardlist_row['Singular'], cardlist_row['Plural']
         _to_singular[single] = single
         _to_singular[plural] = single
         _to_plural[single] = plural
         _to_plural[plural] = plural
 
-        _card_index[single] = idx
+        _card_index[single] = int(cardlist_row['Index'])
         _card_info_rows[single] = cardlist_row
         _card_names.append(single)
+    _card_names.sort(key = lambda x: _card_index[x])
+    for c in _card_names:
+        _card_var_names.append(c.lower().replace(
+                ' ', '_').replace('-', '_').replace("'", ''))
 
 _init()
 
@@ -98,3 +103,6 @@ def card_index(singular):
 
 def card_names():
     return _card_names
+
+def card_var_names():
+    return _card_var_names
