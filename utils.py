@@ -5,6 +5,7 @@ import argparse
 import os
 import time
 import ConfigParser
+import primitive_util
 import pymongo
 
 def get_mongo_connection():
@@ -43,7 +44,7 @@ def read_object_from_db(obj, collection, _id):
       obj.from_primitive_object(prim)
 
 def write_object_to_db(obj, collection, _id):
-    prim = obj.to_primitive_object()
+    prim = primitive_util.to_primitive(obj)
     prim['_id'] = _id
     collection.save(prim)
 
