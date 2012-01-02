@@ -53,16 +53,16 @@ class MeanVarStat(primitive_util.ListSlotPrimitiveConversion,
 
     def __add__(self, o):
         ret = MeanVarStat()
-        ret.freq = self.freq + o.freq - o.pfreq
-        ret.sum = self.sum + o.sum - o.psum
-        ret.sum_sq = self.sum_sq + o.sum_sq - o.psum_sq
+        ret.freq = self.freq + o.freq
+        ret.sum = self.sum + o.sum
+        ret.sum_sq = self.sum_sq + o.sum_sq
         return ret
     
     def __sub__(self, o):
         ret = MeanVarStat()
-        ret.freq = self.freq - o.freq + o.pfreq
-        ret.sum = self.sum - o.sum + o.psum
-        ret.sum_sq = self.sum_sq - o.sum_sq + o.psum_sq
+        ret.freq = self.freq - o.freq
+        ret.sum = self.sum - o.sum
+        ret.sum_sq = self.sum_sq - o.sum_sq
         return ret
 
     def mean_diff(self, o):
