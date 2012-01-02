@@ -95,7 +95,8 @@ def accum_buy_stats(games_stream, accum_stats,
             for card in any_gained:
                 accum_stats[card].any_gained.add_outcome(win_points)
 
-            all_avail = analysis_util.available_cards(game, any_gained)
+            all_avail = analysis_util.available_cards(game_val, 
+                                                      any_gained)
             for card in all_avail:
                 accum_stats[card].available.add_outcome(win_points)
 
@@ -139,7 +140,7 @@ def do_scan(scanner, games_col, accum_stats, max_games):
     games_col:  Mongo collection to scan.
     accum_stats: DeckBuyStats instance to store results.
     """
-    accum_buy_stats(analysis_util.games_stream(games_col), 
+    accum_buy_stats(analysis_util.games_stream(scanner, games_col), 
                     accum_stats, max_games=max_games)
 
 def main():
