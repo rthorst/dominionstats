@@ -108,12 +108,9 @@ class EventAccumulator:
                 
                 print 'after merge', self.event_stats[event_type_name][key]
 
-def accumulate_card_stats(games_stream, stats_accumulator):
+def accumulate_card_stats(games_stream, stats_accumulator, max_games=-1):
     ct = 0
     for game in games_stream:
-        ct += 1
-        if ct >= 100:
-            break
         detected_events = detect_events(game)
 
         per_player_accum = game.cards_accumalated_per_player().iteritems()
@@ -132,6 +129,9 @@ def accumulate_card_stats(games_stream, stats_accumulator):
                 card_index = str(card_info.card_index(card))
                 stats_accumulator.merge_stats(detected_events, card_index,
                                               small_gain_stat)
+        max_games -= 1
+        if max_games == 0:
+            break
 
 def main():
     args = utils.incremental_max_parser().parse_args()
@@ -148,7 +148,7 @@ def main():
     print scanner.status_msg()
     games_stream = analysis_util.games_stream(scanner, c.test.games)
     accumulator = EventAccumulator()
-    accumulate_card_stats(games_stream, accumulator)
+    accumulate_card_stats(games_stream, accumulator, args.max_games)
 
     print 'saving to database'
     accumulator.update_db(db)
