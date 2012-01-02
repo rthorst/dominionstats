@@ -11,7 +11,7 @@ import time
 import pymongo
 
 from stats import MeanVarStat as MVS
-import analysis_utils
+import analysis_util
 import card_info
 import game
 import incremental_scanner
@@ -95,7 +95,7 @@ def accum_buy_stats(games_stream, accum_stats,
             for card in any_gained:
                 accum_stats[card].any_gained.add_outcome(win_points)
 
-            all_avail = analysis_utils.available_cards(game, any_gained)
+            all_avail = analysis_util.available_cards(game, any_gained)
             for card in all_avail:
                 accum_stats[card].available.add_outcome(win_points)
 

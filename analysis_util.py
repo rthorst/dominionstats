@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import card_info
 import game
 import utils
 
