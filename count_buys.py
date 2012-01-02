@@ -11,6 +11,7 @@ import time
 import pymongo
 
 from stats import MeanVarStat as MVS
+import analysis_utils
 import card_info
 import game
 import incremental_scanner
@@ -93,12 +94,8 @@ def accum_buy_stats(games_stream, accum_stats,
 
             for card in any_gained:
                 accum_stats[card].any_gained.add_outcome(win_points)
-            #for card in supply_cards - any_gained:
-            #    accum_stats[card].none_gained.add_outcome(win_points)
 
-            all_avail = supply_cards.union(any_gained)
-            if 'Tournament' in all_avail:
-                all_avail = all_avail.union(card_info.TOURNAMENT_WINNINGS)
+            all_avail = analysis_utils.available_cards(game, any_gained)
             for card in all_avail:
                 accum_stats[card].available.add_outcome(win_points)
 
@@ -142,11 +139,8 @@ def do_scan(scanner, games_col, accum_stats, max_games):
     games_col:  Mongo collection to scan.
     accum_stats: DeckBuyStats instance to store results.
     """
-    def games_stream():
-        for raw_game in utils.progress_meter(
-            scanner.scan(games_col, {}), 1000):
-            yield game.Game(raw_game)
-    accum_buy_stats(games_stream(), accum_stats, max_games=max_games)
+    accum_buy_stats(analysis_utils.games_stream(games_col), 
+                    accum_stats, max_games=max_games)
 
 def main():
     """ Scan and update buy data"""
