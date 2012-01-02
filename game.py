@@ -281,8 +281,11 @@ class Game(object):
                 ret[accumed_card] += 1
         return ret
 
-    # TODO(rrenaud): Get rid of this, and use DeckChangesPerPlayer() instead?
     def cards_accumalated_per_player(self):
+        """ Return a dict of dict of counts by player name and then card.
+
+        This only keeps track of cards accumulated on a given players turn.
+        """
         if 'card_accum_cache' in self.__dict__:
             return self.card_accum_cache
         ret = dict((pd.name(), collections.defaultdict(int)) for
