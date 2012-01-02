@@ -14,25 +14,24 @@ import math
 import primitive_util
 import mergeable
 
-class MeanVarStat(primitive_util.PrimitiveConversion, 
+class MeanVarStat(primitive_util.ListSlotPrimitiveConversion, 
                   mergeable.MergeableObject):
-    __slots__ = ('freq', 'sum', 'sum_sq', 'pfreq', 'psum', 'psum_sq')
+    __slots__ = ('freq', 'sum', 'sum_sq')
     
-    def __init__(self, prior_freq=2.0, prior_sum=2.0, prior_sum_sq=4.0):
+    def __init__(self, prior_freq=0, prior_sum=0, prior_sum_sq=0):
         self.freq = prior_freq
         self.sum = prior_sum
         self.sum_sq = prior_sum_sq
-        self.pfreq = prior_freq
-        self.psum = prior_sum
-        self.psum_sq = prior_sum_sq
 
     def add_outcome(self, val):
         self.freq += 1
         self.sum += val
         self.sum_sq += val * val
 
-    def real_frequency(self):
-        return self.freq - self.pfreq
+    def add_many_outcomes(self, val, freq):
+        self.freq += freq
+        self.sum += val * freq
+        self.sum_sq += val * val * freq
 
     def frequency(self):
         return self.freq
@@ -53,7 +52,6 @@ class MeanVarStat(primitive_util.PrimitiveConversion,
         return (self.variance() / (self.freq or 1)) ** .5
 
     def __add__(self, o):
-        self._assert_priors_match(o)
         ret = MeanVarStat()
         ret.freq = self.freq + o.freq - o.pfreq
         ret.sum = self.sum + o.sum - o.psum
@@ -61,7 +59,6 @@ class MeanVarStat(primitive_util.PrimitiveConversion,
         return ret
     
     def __sub__(self, o):
-        self._assert_priors_match(o)
         ret = MeanVarStat()
         ret.freq = self.freq - o.freq + o.pfreq
         ret.sum = self.sum - o.sum + o.psum
@@ -82,27 +79,10 @@ class MeanVarStat(primitive_util.PrimitiveConversion,
                 self.sum == o.sum and
                 self.sum_sq == o.sum_sq)
 
-    def to_primitive_object(self):
-        return [self.freq, self.sum, self.sum_sq]
-
-    def from_primitive_object(self, obj):
-        if type(obj) == list:
-            self.freq, self.sum, self.sum_sq = obj
-        elif type(obj) == dict:
-            self.__dict__ = obj
-        else:
-            assert 'Confused by obj %s' % str(obj) and False
-
-    def _assert_priors_match(self, obj):
-        assert self.pfreq == obj.pfreq
-        assert self.psum == obj.psum
-        assert self.psum_sq == obj.psum_sq
-
     def merge(self, obj):
-        self._assert_priors_match(obj)
-        self.freq += obj.freq - obj.pfreq
-        self.sum += obj.sum - obj.psum
-        self.sum_sq += obj.sum_sq - obj.psum_sq
+        self.freq += obj.freq
+        self.sum += obj.sum
+        self.sum_sq += obj.sum_sq
 
     def __str__(self):
         return '%s, %s, %s' % (self.freq, self.sum, self.sum_sq)
