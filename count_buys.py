@@ -76,7 +76,6 @@ def accum_buy_stats(games_stream, accum_stats,
     for idx, game_val in enumerate(games_stream):
         counted_game_len = False
         every_set_cards = card_info.EVERY_SET_CARDS
-        supply_cards = set(game_val.get_supply()).union(every_set_cards)
 
         for changes in game_val.deck_changes_per_player():
             if not acceptable_deck_filter(game_val, changes.name):
@@ -103,7 +102,7 @@ def accum_buy_stats(games_stream, accum_stats,
             if not counted_game_len:  # don't double count this
                 counted_game_len = True
                 game_len = game_val.get_turns()[-1].get_turn_no()
-                for card in supply_cards:
+                for card in all_avail:
                     stats_obj = accum_stats[card]
                     stats_obj.game_length.add_outcome(game_len)
                     if 'Colony' in game_val.get_supply():
