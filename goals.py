@@ -251,13 +251,49 @@ def CheckMatchDukeOfEarl(g):
 
 # == Every Turn
 # Protego: Reacted to all attacks against you (and at least 5).
-#("Bully") Play an attack every turn after the fourth.
 # Empty Throne Room
 # Empty Kings Court
 
+def CheckMatchBully(g):
+    """Played an attack every turn after turn 4"""
+    players = set(g.all_player_names())
+    start = 4 * len(players)
+
+    for turn in g.get_turns()[start:]:
+        player = turn.player.player_name
+        if player not in players:
+            continue
+        attack = False
+        for play in turn.plays:
+            if card_info.is_attack(play):
+                attack = True
+                break
+        if not attack:
+            players.remove(player)
+            if len(players)==0:
+                break
+    if len(players)> 0:
+        print g.get_turns()
+    return [ achievement(player, 'Played an attack every turn after turn 4') for player in players ] 
+
 
 # == Number of Cards acquired
-# King of the Joust - acquire all five prizes
+def CheckMatchKingOfTheJoust(g):
+    """Acquire all five prizes"""
+    ret = []
+    if 'Tournament' not in g.supply:
+        return []
+
+    for pdeck in g.get_player_decks():
+        (player, deck) = (pdeck.player_name, pdeck.deck)
+        n_prizes = 0
+        for prize in card_info.TOURNAMENT_WINNINGS:
+            if prize in deck:
+                n_prizes += 1
+        if n_prizes==len(card_info.TOURNAMENT_WINNINGS):
+            ret.append( achievement(player, 'Acquired all five prizes') )
+    return ret
+
 # Researcher: Acquire 7 Alchemists or Laboratories.
 # Evil Overlord: Acquire 7 or more Minions.
 # It's Good to be the King: Acquire 4 Throne Rooms or King's Courts.
