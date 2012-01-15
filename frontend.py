@@ -7,8 +7,9 @@ import pprint
 import urllib
 import urlparse
 
-import web
 import pymongo
+import simplejson as json
+import web
 
 import game
 import goals
@@ -17,6 +18,7 @@ from name_merger import norm_name
 import annotate_game
 import parse_game
 from record_summary import RecordSummary
+from small_gain_stat import SmallGainStat
 import datetime
 
 import utils
@@ -34,6 +36,8 @@ urls = (
   '/popular_buys', 'PopularBuyPage',
   '/openings', 'OpeningPage',
   '/goals', 'GoalsPage',
+  '/supply_win_api', 'SupplyWinApi',
+  '/supply_win', 'SupplyWinPage',
   '/(.*)', 'StaticPage'
 )
 
@@ -142,7 +146,6 @@ class PlayerJsonPage(object):
         norm_target_player = norm_name(target_player)
         games_coll = games.find({'players': norm_target_player})
 
-        import simplejson as json
         from pymongo import json_util
 
         games_arr = [{'game': g['decks'], 'id': g['_id']} for g in games_coll]
@@ -443,11 +446,67 @@ class GoalsPage(object):
 
         return ret
 
+class SupplyWinApi(object):
+    def GET(self):
+        query_dict = dict(urlparse.parse_qsl(web.ctx.env['QUERY_STRING']))
+        # params:
+        # targets, opt
+        # cond1, opt
+        # cond2, opt
+        # format? json, csv?
+        db = utils.get_mongo_database()
+        targets = query_dict.get('targets', '').split(',')
+        if sum(len(t) for t in targets) == 0:
+            targets = card_info.card_names()
+
+        # print targets
+        def str_card_index(card_name):
+            title = card_info.sane_title(card_name)
+            if title:
+                return str(card_info.card_index(title))
+            return ''
+        target_inds = map(str_card_index, targets)
+        # print targets, target_inds
+
+        cond1 = str_card_index(query_dict.get('cond1', ''))
+        cond2 = str_card_index(query_dict.get('cond2', ''))
+        
+        if cond1 < cond2:
+            cond1, cond2 = cond2, cond1
+
+        card_stats = {}
+        for target_ind in target_inds:
+            key = target_ind + ';'
+            if cond1:
+                key += cond1
+            if cond2:
+                key += ',' + cond2
+
+            db_val = db.card_supply.find_one({'_id': key})
+            if db_val:
+                small_gain_stat = SmallGainStat()
+                small_gain_stat.from_primitive_object(db_val['vals'])
+                card_name = card_info.card_names()[int(target_ind)]
+                card_stats[card_name] = small_gain_stat
+        
+        format = query_dict.get('format', 'json')
+        if format == 'json':
+            readable_card_stats = {}
+            for card_name, card_stat in card_stats.iteritems():
+                readable_card_stats[card_name] = (
+                    card_stat.to_readable_primitive_object())
+            return json.dumps(readable_card_stats)
+        return 'unsupported format ' + format
+
+class SupplyWinPage(object):
+    def GET(self):
+        return open('static/supply_win.html').read()
+
 
 class StaticPage(object):
     def GET(self, arg):
         import os.path
-        if os.path.exists( arg ):
+        if os.path.exists(arg):
             return open(arg, 'r').read()
         else:
             raise web.notfound()
