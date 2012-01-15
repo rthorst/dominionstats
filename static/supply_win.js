@@ -9,8 +9,8 @@ var saved_stats = {};
 var fetched_cards = {};
 var suppressed_cards = {};
 
-if (have_local_server_instance) {
-    full_path_to_councilroom = "http://councilroom.com:8080/"
+if (!have_local_server_instance) {
+    full_path_to_councilroom = "http://councilroom.com/"
 }
 
 function MergeStats(new_stats, cond1, cond2) {
