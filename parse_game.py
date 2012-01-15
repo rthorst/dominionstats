@@ -674,7 +674,7 @@ def parse_turn(turn_blob, names_list):
         for k in ['gains', 'trashes']:
             _delete_if_exists(possessee_info, k)
 
-        possessee_info['vp_token'], vp_tokens = vp_tokens, 0
+        possessee_info['vp_tokens'], vp_tokens = vp_tokens, 0
         possessee_info['returns'], returns = returns, []
         ret['buys'] = []  # buys handled by possesion gain line.
 
