@@ -98,6 +98,9 @@ OPENING_CARDS = [card for card in _card_info_rows
                  if cost(card) in ('0', '2', '3', '4', '5')]
 OPENING_CARDS.sort()
 
+def sane_title(card):
+    return card.title().replace("'S", "'s").replace(' Of ', ' of ').strip()
+
 def card_index(singular):
     return _card_index[singular]
 
