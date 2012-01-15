@@ -6,38 +6,15 @@ import os
 
 import analysis_util
 import card_info
-from stats import MeanVarStat
 from game import Game
 import incremental_scanner
 import pymongo
 import collections
 import simplejson as json
-from primitive_util import ListSlotPrimitiveConversion
 
+from small_gain_stat import SmallGainStat
 import utils
 
-class SmallGainStat(ListSlotPrimitiveConversion):
-    __slots__ = ('win_given_any_gain', 
-                 'win_given_no_gain',
-                 'win_weighted_gain')
-
-    def __init__(self):
-        self.win_given_any_gain = MeanVarStat()
-        self.win_given_no_gain = MeanVarStat()
-        self.win_weighted_gain = MeanVarStat()
-
-    def merge(self, other):
-        self.win_given_any_gain.merge(other.win_given_any_gain)
-        self.win_given_no_gain.merge(other.win_given_no_gain)
-        self.win_weighted_gain.merge(other.win_weighted_gain)
-
-    def avail(self):
-        return self.win_given_any_gain.freq() + self.win_given_no_gain.freq()
-
-    def __str__(self):
-        return 'a <%s> n <%s> w <%s>' % (self.win_given_any_gain,
-                                         self.win_given_no_gain,
-                                         self.win_weighted_gain)
 
 def card_supply_events(game_obj):
     yield ''
@@ -96,17 +73,6 @@ class EventAccumulator:
                 key_wrap_obj = {'vals': gain_stats_obj.to_primitive_object()}
                 utils.write_object_to_db(key_wrap_obj, mongo_collection,
                                          full_key)
-
-    def read_from_db(self, mongo_db_inst):
-        for event_type_name, _ in event_detectors:
-            for obj in mongo_db_inst[event_type_name].find():
-                key, vals = obj['_id'], obj['vals']
-                gain_stat = SmallGainStat()
-                gain_stat.from_primitive_object(vals)
-                print 'read', key, vals, gain_stat.win_given_any_gain()
-                print 'existing', self.event_stats[event_type_name][key]
-                
-                print 'after merge', self.event_stats[event_type_name][key]
 
 def accumulate_card_stats(games_stream, stats_accumulator, max_games=-1):
     ct = 0
