@@ -448,6 +448,8 @@ class GoalsPage(object):
 
 class SupplyWinApi(object):
     def GET(self):
+        web.header("Content-Type", "text/html; charset=utf-8")
+        web.header("Access-Control-Allow-Origin", "*")
         query_dict = dict(urlparse.parse_qsl(web.ctx.env['QUERY_STRING']))
         # params:
         # targets, opt
@@ -500,7 +502,7 @@ class SupplyWinApi(object):
 
 class SupplyWinPage(object):
     def GET(self):
-        return open('static/supply_win.html').read()
+        return open('supply_win.html').read()
 
 
 class StaticPage(object):
