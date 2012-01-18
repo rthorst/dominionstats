@@ -38,6 +38,7 @@ urls = (
   '/goals', 'GoalsPage',
   '/supply_win_api', 'SupplyWinApi',
   '/supply_win', 'SupplyWinPage',
+  '/optimal_card_ratios', 'OptimalCardRatios',
   '/(.*)', 'StaticPage'
 )
 
@@ -504,6 +505,76 @@ class SupplyWinPage(object):
     def GET(self):
         return open('supply_win.html').read()
 
+class OptimalCardRatios(object):
+    def GET(self):
+        web.header("Content-Type", "text/html; charset=utf-8")
+        query_dict = dict(urlparse.parse_qsl(web.ctx.env['QUERY_STRING']))
+
+        card_list = sorted(set(card_info.card_names()) - set(card_info.TOURNAMENT_WINNINGS))
+
+        if query_dict.has_key('card_x'):
+            card_x = query_dict['card_x']
+        else:
+            card_x = 'Minion'
+        if query_dict.has_key('card_y'):
+            card_y = query_dict['card_y']
+        else:
+            card_y = 'Gold'
+
+        if card_x < card_y:
+            db_id = card_x + ':' + card_y
+            swap_x_and_y = False
+        else:
+            db_id = card_y + ':' + card_x
+            swap_x_and_y = True
+
+        db = utils.get_mongo_database()
+        db_val = db.optimal_card_ratios.find_one({'_id': db_id})
+
+        if not db_val:
+            return 'No stats for "' + card_x + '" and "' + card_y + '".'
+
+        x_to_y_to_win_points = {}
+        min_x = 1000000
+        max_x = -1000000
+        min_y = 1000000
+        max_y = -1000000
+        min_win_points = 1000000
+        max_win_points = -1000000
+
+        num_games = 0
+        for value in db_val['stats'].itervalues():
+            num_games = max(num_games, value[1])
+        num_games_threshold = int(round(num_games * .01))
+
+        for key, value in db_val['stats'].iteritems():
+            if value[1] < num_games_threshold:
+                continue
+
+            x, y = key.split(':')
+            x, y = int(x), int(y)
+            if swap_x_and_y:
+                x, y = y, x
+            win_points = value[0] / value[1]
+
+            min_x = min(min_x, x)
+            max_x = max(max_x, x)
+            min_y = min(min_y, y)
+            max_y = max(max_y, y)
+            min_win_points = min(min_win_points, win_points)
+            max_win_points = max(max_win_points, win_points)
+
+            if not x_to_y_to_win_points.has_key(x):
+                x_to_y_to_win_points[x] = {}
+            x_to_y_to_win_points[x][y] = win_points
+
+        # clamp to 0, for now
+        min_x = 0
+        min_y = 0
+
+        render = web.template.render('')
+        return render.optimal_card_ratios_template(card_list, card_x, card_y, min_x, max_x, min_y, max_y,
+                min_win_points, max_win_points, x_to_y_to_win_points, num_games, num_games_threshold)
 
 class StaticPage(object):
     def GET(self, arg):

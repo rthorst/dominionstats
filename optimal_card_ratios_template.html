@@ -1,0 +1,96 @@
+$def with ( card_list, card_x, card_y, min_x, max_x, min_y, max_y, min_win_points, max_win_points, x_to_y_to_win_points, num_games, num_games_threshold )
+$code:
+    colors = [
+        [min_win_points, [255, 0, 0]],
+        [(max_win_points + min_win_points) / 2, [255, 255, 0]],
+        [max_win_points, [0, 255, 0]],
+    ]
+    def get_background_color(value):
+        for index in xrange(1, len(colors)):
+            if value <= colors[index][0]:
+                break
+        value_min, color_min = colors[index-1]
+        value_max, color_max = colors[index]
+        color = '#'
+        amount = (value - value_min) / (value_max - value_min)
+        for x in xrange(3):
+            component = int(color_min[x] + amount * (color_max[x] - color_min[x]))
+            component = max(0, component)
+            component = min(component, 255)
+            color += '{0:02x}'.format(component)
+        return color
+<html><head>
+<title>Optimal Card Ratios</title>
+<style type="text/css">
+table {
+    border-width: 1px;
+    border-spacing: 2px;
+    border-style: outset;
+    border-color: gray;
+    border-collapse: separate;
+}
+table th {
+    border-width: 1px;
+    padding: 1px;
+    border-style: inset;
+    border-color: gray;
+}
+table td {
+    border-width: 1px;
+    padding: 1px;
+    border-style: inset;
+    border-color: gray;
+}
+</style>
+</head>
+<body>
+<table>
+    <form action="/optimal_card_ratios" method="get">
+    <label for="card">X-axis card:</label>
+    <select name="card_x">
+    $for card in card_list:
+        $if card == card_x:
+            <option selected>$card</option>
+        $else:
+            <option>$card</option>
+    </select>
+
+    <label for="card">Y-axis card:</label>
+    <select name="card_y">
+    $for card in card_list:
+        $if card == card_y:
+            <option selected>$card</option>
+        $else:
+            <option>$card</option>
+    </select>
+
+    <input type="submit" value="Go">
+    </form>
+
+    <hr>
+
+    X-axis card: $card_x<br>
+    Y-axis card: $card_y<br>
+    # games: $num_games<br>
+    # games threshold: $num_games_threshold<br>
+
+    $for y in xrange(max_y, min_y-1, -1):
+        <tr>
+        <th>$y</th>
+        $for x in xrange(min_x, max_x+1):
+            $if x_to_y_to_win_points.has_key(x) and x_to_y_to_win_points[x].has_key(y):
+                $ value = x_to_y_to_win_points[x][y]
+                <td style="background-color: $( get_background_color(value) )">$( '{0:.3f}'.format(value) )</td>
+            $else:
+                <td></td>
+        </tr>
+
+    <tr>
+    <th></th>
+    $for x in xrange(min_x, max_x+1):
+        <th>$x</th>
+    </tr>
+</table>
+</body>
+</html>
+
