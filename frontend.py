@@ -541,7 +541,7 @@ class OptimalCardRatios(object):
 
         stats = db_val['progressive']
         num_games = max(value[1] for value in stats.itervalues())
-        num_games_threshold = int(round(num_games * .004))
+        num_games_threshold = int(round(num_games * .002))
         progressive_table = self.getHtmlTableForStats(stats, swap_x_and_y, num_games, num_games_threshold)
 
         render = web.template.render('')
