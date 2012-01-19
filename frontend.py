@@ -534,7 +534,22 @@ class OptimalCardRatios(object):
         if not db_val:
             return 'No stats for "' + card_x + '" and "' + card_y + '".'
 
-        x_to_y_to_win_points = {}
+        stats = db_val['final']
+        num_games = sum(value[1] for value in stats.itervalues())
+        num_games_threshold = int(round(num_games * .002))
+        final_table = self.getHtmlTableForStats(stats, swap_x_and_y, num_games, num_games_threshold)
+
+        stats = db_val['progressive']
+        num_games = max(value[1] for value in stats.itervalues())
+        num_games_threshold = int(round(num_games * .004))
+        progressive_table = self.getHtmlTableForStats(stats, swap_x_and_y, num_games, num_games_threshold)
+
+        render = web.template.render('')
+        return render.optimal_card_ratios_template(card_list, card_x, card_y, final_table, progressive_table)
+
+    @staticmethod
+    def getHtmlTableForStats(stats, swap_x_and_y, num_games, num_games_threshold):
+        x_to_y_to_data = {}
         min_x = 1000000
         max_x = -1000000
         min_y = 1000000
@@ -542,12 +557,7 @@ class OptimalCardRatios(object):
         min_win_points = 1000000
         max_win_points = -1000000
 
-        num_games = 0
-        for value in db_val['stats'].itervalues():
-            num_games = max(num_games, value[1])
-        num_games_threshold = int(round(num_games * .01))
-
-        for key, value in db_val['stats'].iteritems():
+        for key, value in stats.iteritems():
             if value[1] < num_games_threshold:
                 continue
 
@@ -564,17 +574,37 @@ class OptimalCardRatios(object):
             min_win_points = min(min_win_points, win_points)
             max_win_points = max(max_win_points, win_points)
 
-            if not x_to_y_to_win_points.has_key(x):
-                x_to_y_to_win_points[x] = {}
-            x_to_y_to_win_points[x][y] = win_points
+            if not x_to_y_to_data.has_key(x):
+                x_to_y_to_data[x] = {}
+            x_to_y_to_data[x][y] = value
 
         # clamp to 0, for now
         min_x = 0
         min_y = 0
 
-        render = web.template.render('')
-        return render.optimal_card_ratios_template(card_list, card_x, card_y, min_x, max_x, min_y, max_y,
-                min_win_points, max_win_points, x_to_y_to_win_points, num_games, num_games_threshold)
+        render = web.template.render('', globals={'get_background_color': OptimalCardRatios.getBackgroundColor})
+        return render.optimal_card_ratios_table_template(min_x, max_x, min_y, max_y, min_win_points, max_win_points, x_to_y_to_data, num_games, num_games_threshold)
+
+    @staticmethod
+    def getBackgroundColor(min_win_points, max_win_points, value):
+        background_colors = [
+            [min_win_points, [255, 0, 0]],
+            [(max_win_points + min_win_points) / 2, [255, 255, 0]],
+            [max_win_points, [0, 255, 0]],
+        ]
+        for index in xrange(1, len(background_colors)):
+            if value <= background_colors[index][0]:
+                break
+        value_min, color_min = background_colors[index-1]
+        value_max, color_max = background_colors[index]
+        color = '#'
+        amount = (value - value_min) / (value_max - value_min)
+        for x in xrange(3):
+            component = int(color_min[x] + amount * (color_max[x] - color_min[x]))
+            component = max(0, component)
+            component = min(component, 255)
+            color += '{0:02x}'.format(component)
+        return color
 
 class StaticPage(object):
     def GET(self, arg):
