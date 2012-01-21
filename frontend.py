@@ -20,6 +20,7 @@ import parse_game
 from record_summary import RecordSummary
 from small_gain_stat import SmallGainStat
 import datetime
+from optimal_card_ratios import DBCardRatioTracker
 
 import utils
 import card_info
@@ -534,15 +535,16 @@ class OptimalCardRatios(object):
         if not db_val:
             return 'No stats for "' + card_x + '" and "' + card_y + '".'
 
-        stats = db_val['final']
-        num_games = sum(value[1] for value in stats.itervalues())
-        num_games_threshold = int(round(num_games * .002))
-        final_table = self.getHtmlTableForStats(stats, swap_x_and_y, num_games, num_games_threshold)
+        tracker = DBCardRatioTracker()
+        tracker.from_primitive_object(db_val)
 
-        stats = db_val['progressive']
-        num_games = max(value[1] for value in stats.itervalues())
+        num_games = sum(meanvarstat.frequency() for meanvarstat in tracker.final.itervalues())
         num_games_threshold = int(round(num_games * .002))
-        progressive_table = self.getHtmlTableForStats(stats, swap_x_and_y, num_games, num_games_threshold)
+        final_table = self.getHtmlTableForStats(tracker.final, swap_x_and_y, num_games, num_games_threshold)
+
+        num_games = max(meanvarstat.frequency() for meanvarstat in tracker.progressive.itervalues())
+        num_games_threshold = int(round(num_games * .002))
+        progressive_table = self.getHtmlTableForStats(tracker.progressive, swap_x_and_y, num_games, num_games_threshold)
 
         render = web.template.render('')
         return render.optimal_card_ratios_template(card_list, card_x, card_y, final_table, progressive_table)
@@ -550,47 +552,47 @@ class OptimalCardRatios(object):
     @staticmethod
     def getHtmlTableForStats(stats, swap_x_and_y, num_games, num_games_threshold):
         x_to_y_to_data = {}
-        min_x = 1000000
-        max_x = -1000000
-        min_y = 1000000
-        max_y = -1000000
-        min_win_points = 1000000
-        max_win_points = -1000000
+        min_x = 1e6
+        max_x = -1e6
+        min_y = 1e6
+        max_y = -1e6
+        min_mean = 1e6
+        max_mean = -1e6
 
-        for key, value in stats.iteritems():
-            if value[1] < num_games_threshold:
+        for key, meanvarstat in stats.iteritems():
+            if meanvarstat.frequency() < num_games_threshold:
                 continue
 
             x, y = key.split(':')
             x, y = int(x), int(y)
             if swap_x_and_y:
                 x, y = y, x
-            win_points = value[0] / value[1]
+            mean = meanvarstat.mean()
 
             min_x = min(min_x, x)
             max_x = max(max_x, x)
             min_y = min(min_y, y)
             max_y = max(max_y, y)
-            min_win_points = min(min_win_points, win_points)
-            max_win_points = max(max_win_points, win_points)
+            min_mean = min(min_mean, mean)
+            max_mean = max(max_mean, mean)
 
             if not x_to_y_to_data.has_key(x):
                 x_to_y_to_data[x] = {}
-            x_to_y_to_data[x][y] = value
+            x_to_y_to_data[x][y] = (mean, meanvarstat.render_interval())
 
         # clamp to 0, for now
         min_x = 0
         min_y = 0
 
         render = web.template.render('', globals={'get_background_color': OptimalCardRatios.getBackgroundColor})
-        return render.optimal_card_ratios_table_template(min_x, max_x, min_y, max_y, min_win_points, max_win_points, x_to_y_to_data, num_games, num_games_threshold)
+        return render.optimal_card_ratios_table_template(min_x, max_x, min_y, max_y, min_mean, max_mean, x_to_y_to_data, num_games, num_games_threshold)
 
     @staticmethod
-    def getBackgroundColor(min_win_points, max_win_points, value):
+    def getBackgroundColor(min_mean, max_mean, value):
         background_colors = [
-            [min_win_points, [255, 0, 0]],
-            [(max_win_points + min_win_points) / 2, [255, 255, 0]],
-            [max_win_points, [0, 255, 0]],
+            [min_mean, [255, 0, 0]],
+            [(max_mean + min_mean) / 2, [255, 255, 0]],
+            [max_mean, [0, 255, 0]],
         ]
         for index in xrange(1, len(background_colors)):
             if value <= background_colors[index][0]:

@@ -4,75 +4,103 @@
 import utils
 import pymongo
 import incremental_scanner
+from primitive_util import PrimitiveConversion, ConvertibleDefaultDict
+from stats import MeanVarStat
+from game import Game
 
-class DBCardRatioTracker:
+class DBCardRatioTracker(PrimitiveConversion):
+    """ This keeps track of every final and progressive card ratio for one
+    pair of cards.
+    """
+    def __init__(self):
+        self.final = ConvertibleDefaultDict(MeanVarStat)
+        self.progressive = ConvertibleDefaultDict(MeanVarStat)
+
+    def add_outcome(self, tracker_type, ratio, win_points):
+        if tracker_type is 'final':
+            tracker = self.final
+        elif tracker_type is 'progressive':
+            tracker = self.progressive
+        else:
+            raise
+
+        if ratio not in tracker:
+            tracker[ratio] = MeanVarStat()
+
+        tracker[ratio].add_outcome(win_points)
+
+class DBCardRatioTrackerManager:
+    """ This keeps track of every final and progressive card ratio for all
+    pairs of cards. This manages DBCardRatioTracker instances.
+    """
     def __init__(self, collection, incremental=True):
         self.collection = collection
         self.incremental = incremental
-        self.data = {}
+        self.trackers = {}
         if self.incremental:
             for entry in collection.find():
-                self.data[entry['_id']] = entry
+                tracker = DBCardRatioTracker()
+                tracker.from_primitive_object(entry)
+                self.trackers[entry['_id']] = tracker
 
-    def integrateResults(self, tracker_type, win_points, final_ratio_dict):
-        for key in final_ratio_dict:
-            if key not in self.data:
-                self.data[key] = {'_id':key}
-            if tracker_type not in self.data[key]:
-                self.data[key][tracker_type] = {}
-            stats = self.data[key][tracker_type]
-            for ratio in final_ratio_dict[key]:
+    def integrate_results(self, tracker_type, ratio_dict, win_points):
+        for key in ratio_dict:
+            if key not in self.trackers:
+                self.trackers[key] = DBCardRatioTracker()
+            tracker = self.trackers[key]
+            for ratio in ratio_dict[key]:
                 ratio = str(ratio[0]) + ':' + str(ratio[1])
-                if ratio not in stats:
-                    stats[ratio] = [0, 0]
-                stats[ratio][0] += win_points
-                stats[ratio][1] += 1
+                tracker.add_outcome(tracker_type, ratio, win_points)
 
     def save(self):
         if not self.incremental:
             self.collection.drop()
-        for key in self.data.iterkeys():
-            self.collection.update({'_id': key}, self.data[key], True)
+        for key, tracker in self.trackers.iteritems():
+            utils.write_object_to_db(tracker, self.collection, key)
 
 class CardRatioTracker:
+    """ Base class for the final and progressive card ratio trackers.
+    """
     def __init__(self, supply):
         self.card_counts = {}
         for card in [u'Estate', u'Duchy', u'Province', u'Curse', u'Copper', u'Silver', u'Gold'] + supply:
             self.card_counts[card] = 0
 
-    def getCardRatios(self):
+    def get_card_ratios(self):
         ratios = {}
         for card1 in self.card_counts.iterkeys():
             for card2 in self.card_counts.iterkeys():
-                if card1 != card2:
-                    if card1 < card2:
-                        c1, c2 = card1, card2
-                    else:
-                        c1, c2 = card2, card1
-                    ratios[c1 + ':' + c2] = set([(self.card_counts[c1], self.card_counts[c2])])
+                if card1 < card2:
+                    ratios[card1 + ':' + card2] = set([(self.card_counts[card1], self.card_counts[card2])])
         return ratios
 
 class FinalCardRatioTracker(CardRatioTracker):
+    """ This is used to get the ratios between all of the cards in the supply
+    that a player has at the end of the game.
+    """
     def __init__(self, supply):
         CardRatioTracker.__init__(self, supply)
 
-    def adjustCardCount(self, card, adjustment):
+    def adjust_card_count(self, card, adjustment):
         if card not in self.card_counts:
             return
 
         self.card_counts[card] += adjustment
 
-    def getRatioDict(self):
-        return CardRatioTracker.getCardRatios(self)
+    def get_ratio_dict(self):
+        return CardRatioTracker.get_card_ratios(self)
 
 class ProgressiveCardRatioTracker(CardRatioTracker):
+    """ This tracks all of the ratios between all of the cards in the supply
+    that a player has at any point throughout the whole game.
+    """
     def __init__(self, supply):
         CardRatioTracker.__init__(self, supply)
         self.card_counts[u'Estate'] = 3
         self.card_counts[u'Copper'] = 7
-        self.ratios = self.getCardRatios()
+        self.ratios = self.get_card_ratios()
 
-    def adjustCardCount(self, card, adjustment):
+    def adjust_card_count(self, card, adjustment):
         if card not in self.card_counts:
             return
 
@@ -80,73 +108,41 @@ class ProgressiveCardRatioTracker(CardRatioTracker):
 
         for card2 in self.card_counts.iterkeys():
             if card != card2:
-                if card < card2:
-                    c1, c2 = card, card2
-                else:
-                    c1, c2 = card2, card
+                c1, c2 = sorted([card, card2])
                 self.ratios[c1 + ':' + c2].add((self.card_counts[c1], self.card_counts[c2]))
 
-    def getRatioDict(self):
+    def get_ratio_dict(self):
         return self.ratios
 
 def process_game(game):
-    num_players = len(game['decks'])
-    player_name_to_order = dict((deck['name'], deck['order'] - 1) for deck in game['decks'])
-    win_points = dict((deck['order'] - 1, deck['win_points']) for deck in game['decks'])
+    names = game.all_player_names()
+    supply = game.get_supply()
+    name_to_final_tracker = dict((name, FinalCardRatioTracker(supply)) for name in names)
+    name_to_progressive_tracker = dict((name, ProgressiveCardRatioTracker(supply)) for name in names)
+    name_to_win_points = dict((player_deck.name(), player_deck.WinPoints()) for player_deck in game.get_player_decks())
 
-    decks = dict((deck['order'] - 1, deck['deck']) for deck in game['decks'])
-    final_trackers = dict((x, FinalCardRatioTracker(game['supply'])) for x in xrange(num_players))
-    for current_player in xrange(num_players):
-        for card, count in decks[current_player].iteritems():
-            final_trackers[current_player].adjustCardCount(card, count)
+    for player_deck in game.get_player_decks():
+        tracker = name_to_final_tracker[player_deck.name()]
+        for card, count in player_deck.Deck().iteritems():
+            tracker.adjust_card_count(card, count)
 
-    tricky_turns = False
-    for deck in game['decks']:
-        for turn in deck['turns']:
-            if 'plays' in turn:
-                for card in turn['plays']:
-                    if card == 'Outpost' or card == 'Possession':
-                        tricky_turns = True
-
-    if not tricky_turns:
-        turns = dict((deck['order'] - 1, deck['turns']) for deck in game['decks'])
-        progressive_trackers = dict((x, ProgressiveCardRatioTracker(game['supply'])) for x in xrange(num_players))
-        current_player = 0
-        next_turn_indexes = [0] * num_players
-        while next_turn_indexes[current_player] < len(turns[current_player]):
-            turn = turns[current_player][next_turn_indexes[current_player]]
-            if 'buys' in turn:
-                for card in turn['buys']:
-                    progressive_trackers[current_player].adjustCardCount(card, 1)
-            if 'gains' in turn:
-                for card in turn['gains']:
-                    progressive_trackers[current_player].adjustCardCount(card, 1)
-            if 'trashes' in turn:
-                for card in turn['trashes']:
-                    progressive_trackers[current_player].adjustCardCount(card, -1)
-            if 'opp' in turn:
-                for opp_player_name in turn['opp'].iterkeys():
-                    opp_turn = turn['opp'][opp_player_name]
-                    opp_current_player = player_name_to_order[opp_player_name]
-                    if 'gains' in opp_turn:
-                        for card in opp_turn['gains']:
-                            progressive_trackers[opp_current_player].adjustCardCount(card, 1)
-                    if 'trashes' in opp_turn:
-                        for card in opp_turn['trashes']:
-                            progressive_trackers[opp_current_player].adjustCardCount(card, -1)
-            next_turn_indexes[current_player] += 1
-            current_player = (current_player + 1) % num_players
+    for turn in game.get_turns():
+        for deck_change in turn.deck_changes():
+            tracker = name_to_progressive_tracker[deck_change.name]
+            for card in deck_change.buys:
+                tracker.adjust_card_count(card, 1)
+            for card in deck_change.gains:
+                tracker.adjust_card_count(card, 1)
+            for card in deck_change.returns:
+                tracker.adjust_card_count(card, -1)
+            for card in deck_change.trashes:
+                tracker.adjust_card_count(card, -1)
 
     retval = []
-    for x in xrange(num_players):
-        row = []
-        row.append(win_points[x])
-        row.append(final_trackers[x].getRatioDict())
-        if tricky_turns:
-            row.append(None)
-        else:
-            row.append(progressive_trackers[x].getRatioDict())
-        retval.append(row)
+    for name in names:
+        retval.append([name_to_final_tracker[name].get_ratio_dict(),
+                       name_to_progressive_tracker[name].get_ratio_dict(),
+                       name_to_win_points[name]])
     return retval
 
 def main():
@@ -163,7 +159,7 @@ def main():
     if not args.incremental:
         scanner.reset()
 
-    db_tracker = DBCardRatioTracker(collection, args.incremental)
+    db_tracker = DBCardRatioTrackerManager(collection, args.incremental)
 
     print scanner.status_msg()
 
@@ -171,12 +167,10 @@ def main():
     for game in utils.progress_meter(scanner.scan(games, {})):
         total_checked += 1
 
-        result = process_game(game)
-        for win_points, final_ratio_dict, progressive_ratio_dict in result:
-            if final_ratio_dict:
-                db_tracker.integrateResults('final', win_points, final_ratio_dict)
-            if progressive_ratio_dict:
-                db_tracker.integrateResults('progressive', win_points, progressive_ratio_dict)
+        result = process_game(Game(game))
+        for final_ratio_dict, progressive_ratio_dict, win_points in result:
+            db_tracker.integrate_results('final', final_ratio_dict, win_points)
+            db_tracker.integrate_results('progressive', progressive_ratio_dict, win_points)
 
         if args.max_games >= 0 and total_checked >= args.max_games:
             break
