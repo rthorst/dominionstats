@@ -578,7 +578,7 @@ class OptimalCardRatios(object):
 
             if not x_to_y_to_data.has_key(x):
                 x_to_y_to_data[x] = {}
-            x_to_y_to_data[x][y] = (mean, meanvarstat.render_interval())
+            x_to_y_to_data[x][y] = (mean, meanvarstat.render_interval(), meanvarstat.frequency())
 
         # clamp to 0, for now
         min_x = 0
