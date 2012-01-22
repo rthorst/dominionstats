@@ -1,0 +1,40 @@
+<html><head><title>Card Winningness</title>
+    <script language="javascript" type="text/javascript" 
+	    src="static/flot/jquery.js"></script>
+    <script language="javascript" type="text/javascript"
+            src="static/flot/jquery.parsequery.js"></script>
+    <script language="javascript" type="text/javascript"
+            src="static/stat_utils.js"></script>
+    <script language="javascript" type="text/javascript"
+            src="static/utils.js"></script>
+    <script language="javascript" type="text/javascript"
+            src="static/supply_win.js"></script>
+    <script language="javascript" type="text/javascript"
+            src="static/jquery.dataTables.js"></script>
+  </head>
+  <body>
+    This contains a very poor interface to card winning stats that depend
+    on having up to two other cards available in the supply.
+
+    <ul>
+      <li><b>Availability</b>:  The number of games in which the card is 
+        present, multiplied by the number of players in each game. 
+        It represents the number of "decks" that could have purchased 
+        that card.
+      <li><b>%+</b>: Percentage of times the named card was gained at 
+        least once.
+      <li><b>Per Gain</b>: This is win rate on the card on a per gain basis.
+        If player 1 bought the card 5 times and won, and player 2 bought the 
+        card 3 times and lost, then this would count as 5 wins and 3 losses
+        in two player games, giving a win rate of 5 * 2 / (5 + 3) =
+        10 / 8 = 1.25.  
+      <li><b>Any Gain</b>: This is a win rate that does not include multiple
+        gains of a card in the same game.  In the above 5 winning vs 3 losing
+        example, the card would have a win rate of 1, because both players
+        purchased it.
+      <li><b>Num Gained</b>: The average number of the card gained per player.
+    </ul>
+
+    <div id="data_display"><b>Loading...</b></div>
+  </body>
+</html>

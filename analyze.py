@@ -26,8 +26,8 @@ class CardStatistic(PrimitiveConversion):
             turn, it counts twice for that turn.
 
         win_diff_accum:  Dictionary keyed by relative card advantage that
-            correlates winning and have an advantage/disadvantage in the
-            number of a given card.  Card advantages are rounded relative
+            correlates winning and have a surplus in the quanitity
+            of a given card.  Card advantages are rounded relative
             to the average number gained/bought by other players through the
             game.
     """

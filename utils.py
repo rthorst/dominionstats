@@ -95,3 +95,4 @@ def progress_meter(iterable, chunksize=1000):
             since_last = time.time()
             print
         yield val
+

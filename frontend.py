@@ -7,8 +7,9 @@ import pprint
 import urllib
 import urlparse
 
-import web
 import pymongo
+import simplejson as json
+import web
 
 import game
 import goals
@@ -17,7 +18,9 @@ from name_merger import norm_name
 import annotate_game
 import parse_game
 from record_summary import RecordSummary
+from small_gain_stat import SmallGainStat
 import datetime
+from optimal_card_ratios import DBCardRatioTracker
 
 import utils
 import card_info
@@ -34,6 +37,9 @@ urls = (
   '/popular_buys', 'PopularBuyPage',
   '/openings', 'OpeningPage',
   '/goals', 'GoalsPage',
+  '/supply_win_api', 'SupplyWinApi',
+  '/supply_win', 'SupplyWinPage',
+  '/optimal_card_ratios', 'OptimalCardRatios',
   '/(.*)', 'StaticPage'
 )
 
@@ -142,7 +148,6 @@ class PlayerJsonPage(object):
         norm_target_player = norm_name(target_player)
         games_coll = games.find({'players': norm_target_player})
 
-        import simplejson as json
         from pymongo import json_util
 
         games_arr = [{'game': g['decks'], 'id': g['_id']} for g in games_coll]
@@ -443,11 +448,170 @@ class GoalsPage(object):
 
         return ret
 
+class SupplyWinApi(object):
+    def GET(self):
+        web.header("Content-Type", "text/html; charset=utf-8")
+        web.header("Access-Control-Allow-Origin", "*")
+        query_dict = dict(urlparse.parse_qsl(web.ctx.env['QUERY_STRING']))
+        # params:
+        # targets, opt
+        # cond1, opt
+        # cond2, opt
+        # format? json, csv?
+        db = utils.get_mongo_database()
+        targets = query_dict.get('targets', '').split(',')
+        if sum(len(t) for t in targets) == 0:
+            targets = card_info.card_names()
+
+        # print targets
+        def str_card_index(card_name):
+            title = card_info.sane_title(card_name)
+            if title:
+                return str(card_info.card_index(title))
+            return ''
+        target_inds = map(str_card_index, targets)
+        # print targets, target_inds
+
+        cond1 = str_card_index(query_dict.get('cond1', ''))
+        cond2 = str_card_index(query_dict.get('cond2', ''))
+        
+        if cond1 < cond2:
+            cond1, cond2 = cond2, cond1
+
+        card_stats = {}
+        for target_ind in target_inds:
+            key = target_ind + ';'
+            if cond1:
+                key += cond1
+            if cond2:
+                key += ',' + cond2
+
+            db_val = db.card_supply.find_one({'_id': key})
+            if db_val:
+                small_gain_stat = SmallGainStat()
+                small_gain_stat.from_primitive_object(db_val['vals'])
+                card_name = card_info.card_names()[int(target_ind)]
+                card_stats[card_name] = small_gain_stat
+        
+        format = query_dict.get('format', 'json')
+        if format == 'json':
+            readable_card_stats = {}
+            for card_name, card_stat in card_stats.iteritems():
+                readable_card_stats[card_name] = (
+                    card_stat.to_readable_primitive_object())
+            return json.dumps(readable_card_stats)
+        return 'unsupported format ' + format
+
+class SupplyWinPage(object):
+    def GET(self):
+        return open('supply_win.html').read()
+
+class OptimalCardRatios(object):
+    def GET(self):
+        web.header("Content-Type", "text/html; charset=utf-8")
+        query_dict = dict(urlparse.parse_qsl(web.ctx.env['QUERY_STRING']))
+
+        card_list = sorted(set(card_info.card_names()) - set(card_info.TOURNAMENT_WINNINGS))
+
+        if query_dict.has_key('card_x'):
+            card_x = query_dict['card_x']
+        else:
+            card_x = 'Minion'
+        if query_dict.has_key('card_y'):
+            card_y = query_dict['card_y']
+        else:
+            card_y = 'Gold'
+
+        if card_x < card_y:
+            db_id = card_x + ':' + card_y
+            swap_x_and_y = False
+        else:
+            db_id = card_y + ':' + card_x
+            swap_x_and_y = True
+
+        db = utils.get_mongo_database()
+        db_val = db.optimal_card_ratios.find_one({'_id': db_id})
+
+        if not db_val:
+            return 'No stats for "' + card_x + '" and "' + card_y + '".'
+
+        tracker = DBCardRatioTracker()
+        tracker.from_primitive_object(db_val)
+
+        num_games = sum(meanvarstat.frequency() for meanvarstat in tracker.final.itervalues())
+        num_games_threshold = int(round(num_games * .002))
+        final_table = self.getHtmlTableForStats(tracker.final, swap_x_and_y, num_games, num_games_threshold)
+
+        num_games = max(meanvarstat.frequency() for meanvarstat in tracker.progressive.itervalues())
+        num_games_threshold = int(round(num_games * .002))
+        progressive_table = self.getHtmlTableForStats(tracker.progressive, swap_x_and_y, num_games, num_games_threshold)
+
+        render = web.template.render('')
+        return render.optimal_card_ratios_template(card_list, card_x, card_y, final_table, progressive_table)
+
+    @staticmethod
+    def getHtmlTableForStats(stats, swap_x_and_y, num_games, num_games_threshold):
+        x_to_y_to_data = {}
+        min_x = 1e6
+        max_x = -1e6
+        min_y = 1e6
+        max_y = -1e6
+        min_mean = 1e6
+        max_mean = -1e6
+
+        for key, meanvarstat in stats.iteritems():
+            if meanvarstat.frequency() < num_games_threshold:
+                continue
+
+            x, y = key.split(':')
+            x, y = int(x), int(y)
+            if swap_x_and_y:
+                x, y = y, x
+            mean = meanvarstat.mean()
+
+            min_x = min(min_x, x)
+            max_x = max(max_x, x)
+            min_y = min(min_y, y)
+            max_y = max(max_y, y)
+            min_mean = min(min_mean, mean)
+            max_mean = max(max_mean, mean)
+
+            if not x_to_y_to_data.has_key(x):
+                x_to_y_to_data[x] = {}
+            x_to_y_to_data[x][y] = (mean, meanvarstat.render_interval(), meanvarstat.frequency())
+
+        # clamp to 0, for now
+        min_x = 0
+        min_y = 0
+
+        render = web.template.render('', globals={'get_background_color': OptimalCardRatios.getBackgroundColor})
+        return render.optimal_card_ratios_table_template(min_x, max_x, min_y, max_y, min_mean, max_mean, x_to_y_to_data, num_games, num_games_threshold)
+
+    @staticmethod
+    def getBackgroundColor(min_mean, max_mean, value):
+        background_colors = [
+            [min_mean, [255, 0, 0]],
+            [(max_mean + min_mean) / 2, [255, 255, 0]],
+            [max_mean, [0, 255, 0]],
+        ]
+        for index in xrange(1, len(background_colors)):
+            if value <= background_colors[index][0]:
+                break
+        value_min, color_min = background_colors[index-1]
+        value_max, color_max = background_colors[index]
+        color = '#'
+        amount = (value - value_min) / (value_max - value_min)
+        for x in xrange(3):
+            component = int(color_min[x] + amount * (color_max[x] - color_min[x]))
+            component = max(0, component)
+            component = min(component, 255)
+            color += '{0:02x}'.format(component)
+        return color
 
 class StaticPage(object):
     def GET(self, arg):
         import os.path
-        if os.path.exists( arg ):
+        if os.path.exists(arg):
             return open(arg, 'r').read()
         else:
             raise web.notfound()

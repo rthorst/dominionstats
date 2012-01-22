@@ -1,4 +1,4 @@
-$def with ( cards, player_data = None )
+$def with (cards, player_data=None)
 <html><head><title>Popular Buys</title>
     <script language="javascript" type="text/javascript" 
             src="static/flot/jquery.js"></script>
@@ -38,8 +38,9 @@ $def with ( cards, player_data = None )
       <LI>"Buys", "Gains", "Trashes", and "Returns" are defined as the total number of Buys/Gains/Trashes/Returns for the card, divided by "Availability".  It represents the average number of Buys, Gains, Trashes, or Returns of that card by each player's deck.
       <LI>"% +" refers to the percentage of decks in which the card was bought or gained at least once.
       <LI>"Turns" refers to the average length of games in which the card was present.  "Turns (C)" refers the average length in a game with Colonies.
-      <LI>Success is measured in Win Points: 0 for a loss, (# players) for a
-      win, and draws are split evenly between the winners.</LI>
+      <LI>Win Points are a measure of success.  Players receive 0 for a loss, 
+        # players for a win, and draws are split evenly between the winners.
+      </LI>
       <LI>"Win Rate with" is the number of Win Points per game you get when you
       buy or gain at least one of this card.</LI>
       <LI>"Win Rate without" is the number of Win Points per game you get when 

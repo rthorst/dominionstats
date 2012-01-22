@@ -155,10 +155,7 @@ class QueryMatcher(object):
         if 'p2_name' in args:
             self._add_name(args['p2_name'])
         if 'kingdom' in args:
-            def sane_title(card):
-                return card.title().replace("'S", "'s").replace(' Of ', ' of ')
-
-            self.kingdom_restrict = [sane_title(k).strip()
+            self.kingdom_restrict = [card_info.sane_title(k)
                                      for k in args['kingdom'].split(',')]
 
         self.db_query = {}

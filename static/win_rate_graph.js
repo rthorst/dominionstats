@@ -1,24 +1,3 @@
-function MeanVarStat(mvs_data) {
-  mvs_data.freq = mvs_data.freq || mvs_data[0];
-  mvs_data.sum = mvs_data.sum || mvs_data[1];
-  mvs_data.sum_sq = mvs_data.sum_sq || mvs_data[2];
-  var mvs = {};
-  mvs.Mean =  function() { return (mvs_data.sum + 2) / (mvs_data.freq + 2); };
-  mvs.Variance = function() {
-    if (mvs_data.freq <= 1) {
-      return 1e10;
-    }
-    return ((mvs_data.sum_sq + 4) - ((mvs_data.sum+2) * (mvs_data.sum+2)) /
-	    (mvs_data.freq + 1)) / (mvs_data.freq + 1);
-  };
-  mvs.SampleStdDev = function() {
-    return Math.sqrt(mvs.Variance() / (mvs_data.freq + 2));
-  };
-  mvs.Freq = function() {
-    return mvs_data.freq;
-  };
-  return mvs;
-};
 
 var card_list;
 
@@ -87,7 +66,7 @@ function DisplayCardData(card_names_str, graph_name, weight_func) {
     keys.sort(function(a, b) { return a - b; });
     var quality = 0;
     for (var i = 0; i < keys.length; ++i) {
-      var mean_var_stat = MeanVarStat(point_data[keys[i]]);
+      var mean_var_stat = MeanVarStat(point_data[keys[i]], SimpleWinPrior());
       var std_dev = mean_var_stat.SampleStdDev() * 2;
       if (mean_var_stat.Freq() > 50 && std_dev < .1) {
 	series.push([keys[i],
@@ -205,23 +184,5 @@ $(document).click(
   }
 );
 
-function MakeTable() {
-  var table_contents = '<table>';
-  for (var card in all_card_data.card_stats) {
-    var per_card_data = all_card_data.card_stats[card];
-    var any_accum_data = per_card_data.win_any_accum;
-    var mvs_any_accum = MeanVarStat(any_accum_data);
-    var prob_any_gained = mvs_any_accum.Freq() / per_card_data.available;
-
-    table_contents += ('<tr>' +
-		       '<td>' + card + '</td>' +
-		       '<td>' + prob_any_gained + '</td>' +
-		       '<td>' + mvs_any_accum.Mean() + '</td>' +
-		       '</tr>');
-  }
-  table_contents += '</table>';
-  // $('#card_data_table').html(table_contents);
-}
-
 jQuery.event.add(window, "load", GetCardInfo);
-// jQuery.event.add(window, "load", MakeTable);
+
