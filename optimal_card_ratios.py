@@ -17,9 +17,9 @@ class DBCardRatioTracker(PrimitiveConversion):
         self.progressive = ConvertibleDefaultDict(MeanVarStat)
 
     def add_outcome(self, tracker_type, ratio, win_points):
-        if tracker_type is 'final':
+        if tracker_type == 'final':
             tracker = self.final
-        elif tracker_type is 'progressive':
+        elif tracker_type == 'progressive':
             tracker = self.progressive
         else:
             raise
