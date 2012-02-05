@@ -188,6 +188,13 @@ def CheckMatchAnticlimactic(g):
 
     return ret
 
+def CheckMatchTheFlash(g):
+    """Won in less than 10 turns"""
+    for player in g.get_player_decks():
+        if player.WinPoints() > 1.0 and player.num_turns() < 10:
+            return [achievement(player.name(), "Won in %d turns" % player.num_turns())]
+
+    return []
 
 #("The Biggest Loser") Losing with over 60 points.
 # Surprise Attack - end the game on supply piles when those three piles had totaled at least 5 cards at the start of your turn.
@@ -196,9 +203,8 @@ def CheckMatchAnticlimactic(g):
 #("Penny Pincher") Winning by buying out the Coppers
 #("Estate Sale") Winning by buying out the Estates
 # Denied: Won the game by ending it on piles after a turn featuring 10 or more buys
-# Quickie - Winning in less than 10 turns
-# == Value of victory points
 
+# == Value of victory points
 def CheckMatchCarny(g):
     """Obtained at least 30 VP from Fairgrounds"""
     # Original suggestion: Blue ribbon - ended game with a Fairgrounds worth 
@@ -245,8 +251,19 @@ def CheckMatchDukeOfEarl(g):
                                    d_pts, d_pts))
     return ret
 
+def CheckMatchSilkTrader(g):
+    """ Obtained at least 20 points from Silk Road"""
+    ret = []
+    for pdeck in g.get_player_decks():
+        (player, deck) = (pdeck.player_name, pdeck.deck)
+        if 'Silk Road' not in deck:
+            continue
+        g_pts = game.score_silk_road(deck)
+        if g_pts >= 20:
+            ret.append(achievement(player, 
+                                   '%d VP from Silk Road' % g_pts, g_pts))
 
-# X VP from silk road
+    return ret    
 
 # == Use of one card in a turn
 #("Puppet Master") Play more than 4 Possession in one turn.
@@ -276,8 +293,6 @@ def CheckMatchBully(g):
             players.remove(player)
             if len(players)==0:
                 break
-    if len(players)> 0:
-        print g.get_turns()
     return [ achievement(player, 'Played an attack every turn after turn 4') for player in players ] 
 
 
@@ -344,13 +359,53 @@ def CheckMatchChampionPrizeFighter(g):
 # Used Possession+Masquerade to send yourself a Province or Colony
 # gifted a Province or Colony to an opponent (through Masquerade or Ambassador),
 # De-model - remodeled a card into a card that costs less
-# Banker - played a Bank worth $10
 # Look Out! - revealed three 6+-cost cards with Lookout
 # Goon Squad - acquired 42 VP tokens from Goons in a single turn
-# played 20 actions in a turn
 # Name it - 5 Correct wishes
 #("This card sucks?") Winning with an Opening Chancellor
 
+# Banker - played a Bank worth $10
+def CheckMatchBanker(g):
+    """Played a Bank worth $10"""
+    ret = []
+    if 'Bank' not in g.supply:
+        return ret
+
+    for turn in g.get_turns():
+        treasure_count = 0
+        for card in turn.plays:
+            if card_info.is_treasure(card):
+                treasure_count += 1
+                if card == 'Bank':
+                    if treasure_count >= 10:
+                        ret.append(achievement(turn.player.player_name, 
+                                "Played a Bank worth $%d" % treasure_count))
+    return ret    
+
+def CheckActionsPerTurn(g, low, high=None):
+    ret = []
+    for turn in g.get_turns():
+        action_count = 0
+        for card in turn.plays:
+            if card_info.is_action(card):
+                action_count += 1
+
+        if action_count >= low and (high is None or action_count < high):
+            ret.append(achievement(turn.player.player_name, 
+                    "Played %d or more actions in one turn" % low, action_count))
+    return ret
+
+def CheckMatchActionStar(g):
+    """Played at least 25 actions in a turn"""
+    return CheckActionsPerTurn(g, 25, 30)
+
+def CheckMatchMegaActionStar(g):
+    """Played at least 30 actions in a turn"""
+    return CheckActionsPerTurn(g, 30, 40)
+
+def CheckMatchSuperActionStar(g):
+    """Played at least 40 actions in a turn"""
+    return CheckActionsPerTurn(g, 40)
 
 def CheckPointsPerTurn(g, low, high=None):
     ret = []
