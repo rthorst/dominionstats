@@ -499,6 +499,9 @@ for name in dict(globals()):
 def GetGoalImageFilename(goal_name):
     return 'static/images/%s.png' % goal_name
 
+def GetGoalDescription(goal_name):
+    return goal_check_funcs[goal_name].__doc__
+
 def MaybeRenderGoals(db, norm_target_player):
     game_matches = list(db.goals.find({'goals.player': norm_target_player}))
     ret = ''

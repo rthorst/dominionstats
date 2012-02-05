@@ -16,6 +16,7 @@ cmds = [
     'python count_buys.py',
     'python run_trueskill.py',
     'python optimal_card_ratios.py',
+    'python goal_stats.py',
 ]
 
 extra_args = sys.argv[1:]
