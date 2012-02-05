@@ -195,7 +195,8 @@ def CheckMatchAnticlimactic(g):
 
 #("Penny Pincher") Winning by buying out the Coppers
 #("Estate Sale") Winning by buying out the Estates
-
+# Denied: Won the game by ending it on piles after a turn featuring 10 or more buys
+# Quickie - Winning in less than 10 turns
 # == Value of victory points
 
 def CheckMatchCarny(g):
@@ -244,6 +245,9 @@ def CheckMatchDukeOfEarl(g):
                                    d_pts, d_pts))
     return ret
 
+
+# X VP from silk road
+
 # == Use of one card in a turn
 #("Puppet Master") Play more than 4 Possession in one turn.
 # Crucio: Use the Torturer three times in a single turn.
@@ -278,11 +282,25 @@ def CheckMatchBully(g):
 
 
 # == Number of Cards acquired
-def CheckMatchKingOfTheJoust(g):
-    """Acquire all five prizes"""
-    ret = []
+
+def one_turn(g, player, cardList):
+    """Returns true if 'player' bought/gained the cards in the cardList only on one turn"""
+    found = False
+    for turn in g.turns:
+        if turn.player.player_name==player:
+            buysgains = turn.buys + turn.gains
+            for card in cardList:
+                if card in buysgains:
+                    if found:
+                        return False
+                    else:
+                        found = True
+                        break 
+    return found
+
+def prize_check(g):
     if 'Tournament' not in g.supply:
-        return []
+        return (False, False)
 
     for pdeck in g.get_player_decks():
         (player, deck) = (pdeck.player_name, pdeck.deck)
@@ -291,9 +309,28 @@ def CheckMatchKingOfTheJoust(g):
             if prize in deck:
                 n_prizes += 1
         if n_prizes==len(card_info.TOURNAMENT_WINNINGS):
-            ret.append( achievement(player, 'Acquired all five prizes') )
+            return (player, one_turn(g, player, card_info.TOURNAMENT_WINNINGS))
+    return (False, False)
+
+def CheckMatchPrizeFighter(g):
+    """Acquire all five prizes"""
+    # a.k.a. King of the Joust
+    (player, in_one_turn) = prize_check(g)
+    ret = []
+    if player and not in_one_turn:
+        ret.append( achievement(player, 'Acquired all five prizes') )
     return ret
 
+def CheckMatchChampionPrizeFighter(g):
+    """Acquire all five prizes"""
+    # a.k.a. King of the Joust
+    (player, in_one_turn) = prize_check(g)
+    ret = []
+    if player and in_one_turn:
+        ret.append( achievement(player, 'Acquired all five prizes in one turn') )
+    return ret
+
+# Get all the curses and still win
 # Researcher: Acquire 7 Alchemists or Laboratories.
 # Evil Overlord: Acquire 7 or more Minions.
 # It's Good to be the King: Acquire 4 Throne Rooms or King's Courts.
@@ -311,7 +348,7 @@ def CheckMatchKingOfTheJoust(g):
 # Look Out! - revealed three 6+-cost cards with Lookout
 # Goon Squad - acquired 42 VP tokens from Goons in a single turn
 # played 20 actions in a turn
-
+# Name it - 5 Correct wishes
 #("This card sucks?") Winning with an Opening Chancellor
 
 
