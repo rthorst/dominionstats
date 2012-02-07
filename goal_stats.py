@@ -19,8 +19,8 @@ if __name__ == '__main__':
 
 	for goal_name in all_goals:
 		found_goals = list(goal_db.find({'goals.goal_name': goal_name}))
-		count = len(found_goals)
-		print goal_name, count
+		total = len(found_goals)
+		print goal_name, total
 
 		pcount = collections.defaultdict(int)
 		for goal in found_goals:
@@ -37,13 +37,13 @@ if __name__ == '__main__':
 			(player, count) = psorted[i]
 			players = [player]
 			i += 1
-			while psorted[i][1] == count and i < len(psorted):
+			while i < len(psorted) and psorted[i][1] == count:
 				players.append(psorted[i][0])
 				i += 1
 			leaders += len(players)
 			top.append((players, count))
 			
-		mongo_val = {'_id': goal_name, 'count': count, 'top': top}
+		mongo_val = {'_id': goal_name, 'count': total, 'top': top}
 		gstats_db.save(mongo_val)
 
 """  # Un-integrated code for top goal scorers

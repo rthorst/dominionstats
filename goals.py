@@ -78,6 +78,8 @@ def CheckMatchPileDriver(g):
 
 def CheckMatchOneTrickPony(g):
     """Bought only one type of action"""
+    if g.any_resigned():
+        return []
     accumed_per_player = g.cards_accumalated_per_player()
     ret = []
     for player, card_dict in accumed_per_player.iteritems():
@@ -154,6 +156,8 @@ GroupFuncs([CheckMatchPeer, CheckMatchRegent, CheckMatchRoyalHeir,
 # == How the game ends
 def CheckMatchBuzzerBeater(g):
     """Won by exactly one point"""
+    if g.any_resigned():
+        return []
     scores = {}
     for player in g.get_player_decks():
         score = player.points
@@ -190,6 +194,8 @@ def CheckMatchAnticlimactic(g):
 
 def CheckMatchTheFlash(g):
     """Won in less than 10 turns"""
+    if g.any_resigned():
+        return []
     for player in g.get_player_decks():
         if player.WinPoints() > 1.0 and player.num_turns() < 10:
             return [achievement(player.name(), "Won in %d turns" % player.num_turns())]
@@ -277,6 +283,8 @@ def CheckMatchSilkTrader(g):
 
 def CheckMatchBully(g):
     """Played an attack every turn after turn 4"""
+    if g.any_resigned():
+        return []
     players = set(g.all_player_names())
     start = 4 * len(players)
 
@@ -337,7 +345,7 @@ def CheckMatchPrizeFighter(g):
     return ret
 
 def CheckMatchChampionPrizeFighter(g):
-    """Acquire all five prizes"""
+    """Acquire all five prizes in one turn"""
     # a.k.a. King of the Joust
     (player, in_one_turn) = prize_check(g)
     ret = []
@@ -546,6 +554,8 @@ function toggle(item) {
                     goals_achieved.append(goal_name)
         
         def GroupPriorityAndName(goal):
+            if goal not in goal_check_funcs:
+                return None
             func = goal_check_funcs[goal]
             return func.group, func.priority, func.__name__
 
