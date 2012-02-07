@@ -271,6 +271,9 @@ def CheckMatchSilkTrader(g):
 
     return ret    
 
+GroupFuncs([CheckMatchCarny, CheckMatchGardener, CheckMatchDukeOfEarl,
+            CheckMatchSilkTrader], 'vvp')
+
 # == Use of one card in a turn
 #("Puppet Master") Play more than 4 Possession in one turn.
 # Crucio: Use the Torturer three times in a single turn.
@@ -353,6 +356,9 @@ def CheckMatchChampionPrizeFighter(g):
         ret.append( achievement(player, 'Acquired all five prizes in one turn') )
     return ret
 
+
+GroupFuncs([CheckMatchPrizeFighter, CheckMatchChampionPrizeFighter], 'prizes')
+
 # Get all the curses and still win
 # Researcher: Acquire 7 Alchemists or Laboratories.
 # Evil Overlord: Acquire 7 or more Minions.
@@ -371,6 +377,7 @@ def CheckMatchChampionPrizeFighter(g):
 # Goon Squad - acquired 42 VP tokens from Goons in a single turn
 # Name it - 5 Correct wishes
 #("This card sucks?") Winning with an Opening Chancellor
+# Treasure Map multiple times
 
 # Banker - played a Bank worth $10
 def CheckMatchBanker(g):
@@ -414,6 +421,9 @@ def CheckMatchMegaActionStar(g):
 def CheckMatchSuperActionStar(g):
     """Played at least 40 actions in a turn"""
     return CheckActionsPerTurn(g, 40)
+
+
+GroupFuncs([CheckMatchActionStar, CheckMatchMegaActionStar, CheckMatchSuperActionStar], 'actions')
 
 def CheckPointsPerTurn(g, low, high=None):
     ret = []
