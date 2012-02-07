@@ -40,6 +40,7 @@ urls = (
   '/supply_win_api', 'SupplyWinApi',
   '/supply_win', 'SupplyWinPage',
   '/optimal_card_ratios', 'OptimalCardRatios',
+  '/expansions', 'ExpansionsPage',
   '/(.*)', 'StaticPage'
 )
 
@@ -596,6 +597,48 @@ class OptimalCardRatios(object):
             component = min(component, 255)
             color += '{0:02x}'.format(component)
         return color
+
+class ExpansionsPage(object):
+    def GET(self):
+        web.header("Content-Type", "text/html; charset=utf-8")  
+
+        query_dict = dict(urlparse.parse_qsl(web.ctx.env['QUERY_STRING']))
+        target_player = query_dict['player'].decode('utf-8')
+
+        db = utils.get_mongo_database()
+        games = db.games
+        norm_target_player = norm_name(target_player)
+        games_coll = games.find({'players': norm_target_player})
+        ret = ''
+
+        game_dist = collections.defaultdict(float)
+        win_dist = collections.defaultdict(float)
+        wp_total = 0
+        games = 0
+
+        for g in [game.Game(g) for g in games_coll]:
+            pd = g.get_player_deck(norm_target_player)
+            wp = pd.WinPoints()
+
+            for (ex, wt) in g.get_expansion_weight().items():
+                game_dist[ex] += wt
+                win_dist[ex] += wt * wp
+            games += 1
+            wp_total += wp
+
+        average = wp_total/games
+
+        for ex in game_dist:
+            wp = win_dist[ex]/game_dist[ex]
+
+            ret += '<h2>%s</h2>'%ex
+            ret += 'Games %.2f%%<br>'% (game_dist[ex] / games)
+            ret += 'Win points %.2f<br>' % wp
+            ret += 'Favor %.2f%%<br>'% ( (wp - average)/average )
+
+
+    	return ret
+
 
 class StaticPage(object):
     def GET(self, arg):
