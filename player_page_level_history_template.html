@@ -1,4 +1,4 @@
-$def with ( entries )
+$def with ( raw_history_data )
 
 <h2>Leaderboard History</h2>
 
@@ -7,68 +7,14 @@ $def with ( entries )
 
 <script language="javascript" type="text/javascript" src="static/flot/jquery.js"></script>
 <script language="javascript" type="text/javascript" src="static/flot/jquery.flot.js"></script>
+<script language="javascript" type="text/javascript" src="static/isotropic_leaderboard_history.js"></script>
 
 <script language="javascript" type="text/javascript">
 jQuery(document).ready(function() {
-    var entries = $:entries,
-        index,
-        entry,
-        date,
-        skill_mean,
-        skill_error,
-        rank,
-        eligible_games_played,
-        timestamp,
-        level_points = [],
-        num_games_points = [],
-        level_data,
-        num_games_data,
-        options;
-
-    for (index in entries) {
-        entry = entries[index];
-        date = entry[0];
-        skill_mean = entry[1];
-        skill_error = entry[2];
-        rank = entry[3];
-        eligible_games_played = entry[4];
-        timestamp = Date.parse(date);
-        level_points.push([timestamp, skill_mean - skill_error]);
-        num_games_points.push([timestamp, eligible_games_played]);
-    }
-
-    level_data = [{
-        label: 'Level',
-        data: level_points,
-        lines: {
-            show: true
-        },
-        points: {
-            show: true
-        }
-    }]
-    num_games_data = [{
-        label: '# Games',
-        data: num_games_points,
-        lines: {
-            show: true
-        },
-        points: {
-            show: true
-        }
-    }];
-    options = {
-        legend: {
-            position: 'nw'
-        },
-        xaxis: {
-            mode: 'time',
-            timeformat: '%b %d, %y'
-        },
-    }
-
-    jQuery.plot(jQuery('#level_graph'), level_data, options);
-    jQuery.plot(jQuery('#num_games_graph'), num_games_data, options);
+    var raw_history_data = $:raw_history_data;
+    var entries = ILH.process_raw_history_data(raw_history_data);
+    ILH.plot_level_graph(entries, 'level_graph');
+    ILH.plot_num_games_graph(entries, 'num_games_graph');
 });
 </script>
 
