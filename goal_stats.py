@@ -48,7 +48,7 @@ if __name__ == '__main__':
 		mongo_val = {'_id': goal_name, 'count': total, 'top': top}
 		gstats_db.save(mongo_val)
 
-	stat_scanner.max_game_id = goal_scanner.get_max_game_id()
+	stat_scanner.set_max_game_id(goal_scanner.get_max_game_id())
 	stat_scanner.save()
 
 """  # Un-integrated code for top goal scorers

@@ -291,7 +291,7 @@ def CheckMatchBully(g):
     players = set(g.all_player_names())
 
     for turn in g.get_turns():
-        if turn.turn_no <= 4:
+        if turn.get_turn_no() <= 4:
             continue
         player = turn.player.player_name
         if player not in players:
