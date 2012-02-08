@@ -1,14 +1,10 @@
 #!/usr/bin/python
 
 import pymongo
-import card_info
 import collections
-import game
-import incremental_scanner
-import name_merger
-import utils
 import operator
 import goals
+import incremental_scanner
 
 if __name__ == '__main__':
 	c = pymongo.Connection()
@@ -16,6 +12,12 @@ if __name__ == '__main__':
 	gstats_db = c.test.goal_stats
 	all_goals = goals.goal_check_funcs.keys()
 	total_pcount = collections.defaultdict(int)
+        goal_scanner = incremental_scanner.IncrementalScanner('goals', c.test)
+        stat_scanner = incremental_scanner.IncrementalScanner('goal_stats', c.test)
+
+	if goal_scanner.get_max_game_id() == stat_scanner.get_max_game_id():
+		print "Stats already set! Skip"
+		exit(0)
 
 	for goal_name in all_goals:
 		found_goals = list(goal_db.find({'goals.goal_name': goal_name}))
@@ -45,6 +47,9 @@ if __name__ == '__main__':
 			
 		mongo_val = {'_id': goal_name, 'count': total, 'top': top}
 		gstats_db.save(mongo_val)
+
+	stat_scanner.max_game_id = goal_scanner.get_max_game_id()
+	stat_scanner.save()
 
 """  # Un-integrated code for top goal scorers
         player_scores = {}
