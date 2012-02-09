@@ -22,7 +22,7 @@ ILH.process_raw_history_data = function (raw_history_data) {
     return entries;
 };
 
-ILH.plot_level_graph = function (entries, id) {
+ILH.plot_graph = function (entries, label, dom_id, callback) {
     var index,
         entry,
         points = [],
@@ -31,16 +31,13 @@ ILH.plot_level_graph = function (entries, id) {
 
     for (index in entries) {
         entry = entries[index];
-        points.push([entry.timestamp, entry.skill_mean - entry.skill_error]);
+        points.push([entry.timestamp, callback(entry)]);
     }
 
     data = [{
-        label: 'Level',
+        label: label,
         data: points,
         lines: {
-            show: true
-        },
-        points: {
             show: true
         }
     }];
@@ -54,41 +51,6 @@ ILH.plot_level_graph = function (entries, id) {
         }
     };
 
-    $.plot($('#' + id), data, options);
-};
-
-ILH.plot_num_games_graph = function (entries, id) {
-    var index,
-        entry,
-        points = [],
-        data,
-        options;
-
-    for (index in entries) {
-        entry = entries[index];
-        points.push([entry.timestamp, entry.eligible_games_played]);
-    }
-
-    data = [{
-        label: '# Games',
-        data: points,
-        lines: {
-            show: true
-        },
-        points: {
-            show: true
-        }
-    }];
-    options = {
-        legend: {
-            position: 'nw'
-        },
-        xaxis: {
-            mode: 'time',
-            timeformat: '%b %d, %y'
-        }
-    };
-
-    $.plot($('#' + id), data, options);
+    $.plot($('#' + dom_id), data, options);
 };
 

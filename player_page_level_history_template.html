@@ -10,11 +10,11 @@ $def with ( raw_history_data )
 <script language="javascript" type="text/javascript" src="static/isotropic_leaderboard_history.js"></script>
 
 <script language="javascript" type="text/javascript">
-jQuery(document).ready(function() {
+jQuery(document).ready(function () {
     var raw_history_data = $:raw_history_data;
     var entries = ILH.process_raw_history_data(raw_history_data);
-    ILH.plot_level_graph(entries, 'level_graph');
-    ILH.plot_num_games_graph(entries, 'num_games_graph');
+    ILH.plot_graph(entries, 'Level', 'level_graph', function (entry) { return entry.skill_mean - entry.skill_error; });
+    ILH.plot_graph(entries, '# Games', 'num_games_graph', function (entry) { return entry.eligible_games_played; });
 });
 </script>
 
