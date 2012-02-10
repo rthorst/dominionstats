@@ -1,6 +1,6 @@
-ILH = {};
+LeaderboardHistory = {};
 
-ILH.process_raw_history_data = function (raw_history_data) {
+LeaderboardHistory.process_raw_history_data = function (raw_history_data) {
     var entries = [],
         index,
         row,
@@ -22,7 +22,7 @@ ILH.process_raw_history_data = function (raw_history_data) {
     return entries;
 };
 
-ILH.plot_graph = function (entries, label, dom_id, callback) {
+LeaderboardHistory.plot_graph = function (entries, label, dom_id, callback) {
     var index,
         entry,
         points = [],
