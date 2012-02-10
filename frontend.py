@@ -300,7 +300,7 @@ class PlayerPage(object):
 
         if leaderboard_history:
             render = web.template.render('')
-            ret += str(render.player_page_level_history_template(json.dumps(leaderboard_history)))
+            ret += str(render.player_page_leaderboard_history_template(json.dumps(leaderboard_history)))
 
         ret += '<h2>Most recent games</h2>\n'
         game_list.sort(key = game.Game.get_id, reverse = True)
