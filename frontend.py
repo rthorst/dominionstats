@@ -201,8 +201,8 @@ class PlayerPage(object):
         norm_target_player = norm_name(target_player)
         games_coll = games.find({'players': norm_target_player})
 
-        isotropic_leaderboard_history = db.isotropic_leaderboard_history.find_one({'_id': norm_target_player})
-        isotropic_leaderboard_history = isotropic_leaderboard_history['history'] if isotropic_leaderboard_history else None
+        leaderboard_history = db.leaderboard_history.find_one({'_id': norm_target_player})
+        leaderboard_history = leaderboard_history['history'] if leaderboard_history else None
 
         keyed_by_opp = collections.defaultdict(list)
         real_name_usage = collections.defaultdict(
@@ -264,9 +264,9 @@ class PlayerPage(object):
         ret += '<form action="/player" method="get">'
         ret += '<span class="subhead">Profile for %s</span>' % target_player
 
-        isotropic_leaderboard_most_recent = isotropic_leaderboard_history[-1] if isotropic_leaderboard_history else None
-        if isotropic_leaderboard_most_recent:
-            level = isotropic_leaderboard_most_recent[1] - isotropic_leaderboard_most_recent[2]
+        leaderboard_history_most_recent = leaderboard_history[-1] if leaderboard_history else None
+        if leaderboard_history_most_recent:
+            level = leaderboard_history_most_recent[1] - leaderboard_history_most_recent[2]
             level = int(max(math.floor(level), 0))
             ret += '<span class="level">Level ' + str(level) + '</span>'
 
@@ -298,9 +298,9 @@ class PlayerPage(object):
 
         ret += '<A HREF="/popular_buys?player=%s"><h2>Stats by card</h2></A><BR>\n' % target_player
 
-        if isotropic_leaderboard_history:
+        if leaderboard_history:
             render = web.template.render('')
-            ret += str(render.player_page_level_history_template(json.dumps(isotropic_leaderboard_history)))
+            ret += str(render.player_page_level_history_template(json.dumps(leaderboard_history)))
 
         ret += '<h2>Most recent games</h2>\n'
         game_list.sort(key = game.Game.get_id, reverse = True)

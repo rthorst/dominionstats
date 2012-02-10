@@ -17,10 +17,10 @@ def main():
 
     conn = pymongo.Connection()
     database = conn.test
-    history_collection = database.isotropic_leaderboard_history
+    history_collection = database.leaderboard_history
     scanner_collection = database.scanner
 
-    db_val = scanner_collection.find_one({'_id': 'isotropic_leaderboard_history'})
+    db_val = scanner_collection.find_one({'_id': 'leaderboard_history'})
     last_date = db_val['last_date'] if db_val else '0000-00-00'
 
     directory = 'static/leaderboard/'
@@ -89,7 +89,7 @@ def main():
 
         last_date = date
 
-    scanner_collection.update({'_id': 'isotropic_leaderboard_history'}, {'$set': {'last_date': last_date}}, upsert=True)
+    scanner_collection.update({'_id': 'leaderboard_history'}, {'$set': {'last_date': last_date}}, upsert=True)
 
 if __name__ == '__main__':
     main()
