@@ -120,6 +120,8 @@ def prob_any_gained(card):
 
 def log_odds_any_gained(card):
     p = prob_any_gained(card)
+    if p >= .995:  # this happens due to oddness with tournament winnings
+        return 1
     return math.log(p / (1 - p))
 
 def trashing(card):
@@ -164,8 +166,16 @@ def main():
             (is_reaction, .1),
             ])
     rank_eval = RankEvaluator(ranker, rankings, ranking_accuracy)
-    print scipy.optimize.fmin(rank_eval, rank_eval.ranker.weights)
-    # print ranking_accuracy(ranker, rankings)
+    learned_weights = scipy.optimize.fmin(rank_eval, rank_eval.ranker.weights)
+    ranker.weights = learned_weights
+    
+    grouped_by_cost = collections.defaultdict(list)
+    for card in card_info.card_names():
+        grouped_by_cost[card_info.cost(card)].append(card)
+    for cost, card_list in grouped_by_cost.iteritems():
+        if len(card_list) >= 4:
+            card_list.sort(key=ranker.score)
+            print cost, ','.join(card_list)
     
 
 if __name__ == '__main__':
