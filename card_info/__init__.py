@@ -50,6 +50,9 @@ def vp_per_card(singular_card_name):
 def is_treasure(singular_card_name):
     return _card_info_rows[singular_card_name]['Treasure'] == '1'
 
+def is_reaction(singular_card_name):
+    return _card_info_rows[singular_card_name]['Reaction'] == '1'
+
 def cost(singular_card_name):
     return _card_info_rows[singular_card_name]['Cost']
 
@@ -66,8 +69,15 @@ def is_victory(singular_card_name):
 def is_action(singular_card_name):
     return _card_info_rows[singular_card_name]['Action'] == '1'
 
+
 def is_attack(singular_card_name):
     return _card_info_rows[singular_card_name]['Attack'] == '1'
+
+def trashes(singular_card_name):
+    trash_str = _card_info_rows[singular_card_name]['Trash']
+    if trash_str == '?': 
+        trash_str = 1
+    return int(trash_str)
 
 def num_plus_actions(singular_card_name):
     r = _card_info_rows[singular_card_name]['Actions']
