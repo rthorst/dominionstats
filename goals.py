@@ -9,6 +9,12 @@ import name_merger
 import utils
 import operator
 
+def GroupFuncs(funcs, group_name):
+    """Attach group and priority to functions in funcs so they are sortable."""
+    for idx, func in enumerate(funcs):
+        func.group = group_name
+        func.priority = idx
+
 def achievement(player, reason, sort_key=None):
     achievement = {'player': player,
                    'reason': reason}
@@ -61,20 +67,74 @@ def CheckMatchGolfer(g):
                         points))
     return ret
 
+def CollectedAllCopies(g):
+    """Return a dict mapping a player to a list of all the card
+       names that the player gained all the copies of"""
+    accumed_per_player = g.cards_accumalated_per_player()
+    gain_map = collections.defaultdict(list)
+    game_size = len(g.get_player_decks())
+
+    for player, card_dict in accumed_per_player.iteritems():
+        for card, quant in card_dict.iteritems():
+            if quant >= card_info.num_copies_per_game(card, game_size):
+                gain_map[player].append(card)
+    return gain_map
 
 def CheckMatchPileDriver(g):
-    """Owned all copies of a card."""
-    accumed_per_player = g.cards_accumalated_per_player()
+    """Gained all copies of a card and won."""
+    gain_map = CollectedAllCopies(g)
     ret = []
-    game_size = len(g.get_player_decks())
-    for player, card_dict in accumed_per_player.iteritems():
+    for player, piles_gained in gain_map.iteritems():
         if g.get_player_deck(player).WinPoints() > 1.0:
-            for card, quant in card_dict.iteritems():
-                if quant == card_info.num_copies_per_game(card, game_size):
-                    ret.append(
-                        achievement(player, 'Bought all %d copies of %s' % (
-                                quant, card), (card, quant)))
+            if len(piles_gained)==1:
+                card = piles_gained[0]
+                if card == 'Curse':
+                    continue
+                ret.append(
+                    achievement(player, 'Gained all copies of %s (and won)' % card, card))
     return ret
+
+def CheckMatchPurplePileDriver(g):
+    """Gained all the curses and won."""
+    gain_map = CollectedAllCopies(g)
+    ret = []
+
+    for player, piles_gained in gain_map.iteritems():
+        if g.get_player_deck(player).WinPoints() > 1.0:
+            if len(piles_gained)==1:
+                card = piles_gained[0]
+                if card == 'Curse':
+                    ret.append(
+                        achievement(player, 'Gained all the curses (and won)' % card, card))
+    return ret
+
+def CheckMatchDoublePileDriver(g):
+    """Gained all copies of twp different cards and won."""
+    gain_map = CollectedAllCopies(g)
+    ret = []
+
+    for player, piles_gained in gain_map.iteritems():
+        if g.get_player_deck(player).WinPoints() > 1.0:
+            if len(piles_gained)==2:
+                ret.append(
+                    achievement(player, 'Gained all copies of %s AND %s (and won)' % (
+                            piles_gained[0], piles_gained[1]), piles_gained))
+    return ret
+
+def CheckMatchTriplePileDriver(g):
+    """Gained all copies of three different cards and won."""
+    gain_map = CollectedAllCopies(g)
+    ret = []
+
+    for player, piles_gained in gain_map.iteritems():
+        if g.get_player_deck(player).WinPoints() > 1.0:
+            if len(piles_gained)==3:
+                ret.append(
+                    achievement(player, 'Gained all copies of %s, %s AND %s (and won)' % (
+                            piles_gained[0], piles_gained[1], piles_gained[2]), piles_gained))
+    return ret
+
+GroupFuncs([CheckMatchPileDriver, CheckMatchDoublePileDriver, CheckMatchTriplePileDriver], 'piledriver')
 
 def CheckMatchOneTrickPony(g):
     """Bought only one type of action"""
@@ -144,14 +204,13 @@ def CheckMatchArchon(g):
     """Scored more than 110 points"""
     return CheckScore(g, 110)
 
-def GroupFuncs(funcs, group_name):
-    """Attach group and priority to functions in funcs so they are sortable."""
-    for idx, func in enumerate(funcs):
-        func.group = group_name
-        func.priority = idx
-
 GroupFuncs([CheckMatchPeer, CheckMatchRegent, CheckMatchRoyalHeir,
             CheckMatchMonarch, CheckMatchImperial, CheckMatchArchon], 'vp')
+
+# Win by X points
+# Come From X points behind
+# "Subjugation" ... win a 3-player game with more points than the other 2 players combined 
+# "Domination"... win a 4-player game with more points than the other 3 players combined
 
 # == How the game ends
 def CheckMatchBuzzerBeater(g):
@@ -202,6 +261,7 @@ def CheckMatchTheFlash(g):
 
     return []
 
+# "Walk-off Home Run" -- when you come from behind on your last turn to both end and win the game.
 #("The Biggest Loser") Losing with over 60 points.
 # Surprise Attack - end the game on supply piles when those three piles had totaled at least 5 cards at the start of your turn.
 # Badges? We Don't Need No Stinking Badges: Win a game while holding no VP Tokens and your opponent holds 25 or more.
@@ -271,6 +331,11 @@ def CheckMatchSilkTrader(g):
 
     return ret    
 
+# Who Needs Green Cards?
+# vineyards award would be nice. how about "sideways" ... http://www.sideways-movie.com/sideways.jpg
+# Underboss/Mafia Don/Godfather for scoring 30/40/50 VP with Goons?
+# DHARMA Initiative: set aside 8+ Islands 
+
 GroupFuncs([CheckMatchCarny, CheckMatchGardener, CheckMatchDukeOfEarl,
             CheckMatchSilkTrader], 'vvp')
 
@@ -278,11 +343,12 @@ GroupFuncs([CheckMatchCarny, CheckMatchGardener, CheckMatchDukeOfEarl,
 #("Puppet Master") Play more than 4 Possession in one turn.
 # Crucio: Use the Torturer three times in a single turn.
 # Imperio: Use Possession three times in a single turn.
+# Time Lord: played 10 (20?) Duration actions in one turn 
+# Buy-More: Used 10 Buy-actions in one turn (or 15?) 
 
 # == Every Turn
 # Protego: Reacted to all attacks against you (and at least 5).
-# Empty Throne Room
-# Empty Kings Court
+# Tour de France: Cycled through entire deck in 5 consecutive turns
 
 def CheckMatchBully(g):
     """Played an attack every turn after turn 4"""
@@ -307,6 +373,10 @@ def CheckMatchBully(g):
                 break
     return [achievement(player, 'Played an attack every turn after turn 4') for player in players] 
 
+# == Never Use Cards
+# Empty Throne Room
+# Empty Kings Court
+# Arrested Development: Bought 3+ Develop cards without ever using them 
 
 # == Number of Cards acquired
 
@@ -359,7 +429,15 @@ def CheckMatchChampionPrizeFighter(g):
 
 GroupFuncs([CheckMatchPrizeFighter, CheckMatchChampionPrizeFighter], 'prizes')
 
-# Get all the curses and still win
+# "Moneyball" should be winning a game without ever buying a card costing $5 or more (base cost, can't use Highway/Bridge to get around it)
+# Platinum Blonde: At game's end, have only Platinum and Gold Treasures (and at least 1 of each)
+
+# Fringe Division: Finished game with 5+ Potions and exactly 2 Bishops
+# Snow White: played 7 Wharves in one turn
+# O Canada!: Finish with exactly 10 Provinces and 3 Duchys (territories) [obviously only attainable in 3+ player games]
+# TARDIS: Finish a game with a deck where the total of all "+X Card(s)" is higher than (or if that's too easy, then over double) the number of cards. Not sure if this is an easy one to program or not.
+# Paid in Pennies: Won a game with no Gold/Platinum in your deck 
+
 # Researcher: Acquire 7 Alchemists or Laboratories.
 # Evil Overlord: Acquire 7 or more Minions.
 # It's Good to be the King: Acquire 4 Throne Rooms or King's Courts.
@@ -368,16 +446,19 @@ GroupFuncs([CheckMatchPrizeFighter, CheckMatchChampionPrizeFighter], 'prizes')
 # won without ever buying money
 #("Dominator") Have at least one of each type of available victory card (and at least 1 chip, if available).
 # buying at least one of every kingdom card in a game
+# Vairagya (Renunciation of Worldly Desires): Ended the game with less cards in the deck than you started with.
 
 # == Specific Uses
 # Used Possession+Masquerade to send yourself a Province or Colony
 # gifted a Province or Colony to an opponent (through Masquerade or Ambassador),
 # De-model - remodeled a card into a card that costs less
 # Look Out! - revealed three 6+-cost cards with Lookout
-# Goon Squad - acquired 42 VP tokens from Goons in a single turn
 # Name it - 5 Correct wishes
 #("This card sucks?") Winning with an Opening Chancellor
 # Treasure Map multiple times
+# "Supermodel" for having Remodelled X cards in one game...
+# "The Donald" -- Trashed 3+ Apprentices
+
 
 # Banker - played a Bank worth $10
 def CheckMatchBanker(g):

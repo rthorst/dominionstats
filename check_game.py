@@ -10,6 +10,7 @@ games_collection = c.test.games
 for arg in sys.argv[1:]:
     gs = games_collection.find({'_id': arg})
     for g in gs:
+        print arg
         game_val = game.Game(g)
 
         for x in check_goals(game_val):
