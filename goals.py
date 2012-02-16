@@ -289,9 +289,10 @@ def CheckMatchBully(g):
     if g.any_resigned():
         return []
     players = set(g.all_player_names())
-    start = 4 * len(players)
 
-    for turn in g.get_turns()[start:]:
+    for turn in g.get_turns():
+        if turn.get_turn_no() <= 4:
+            continue
         player = turn.player.player_name
         if player not in players:
             continue
@@ -302,9 +303,9 @@ def CheckMatchBully(g):
                 break
         if not attack:
             players.remove(player)
-            if len(players)==0:
+            if len(players) == 0:
                 break
-    return [ achievement(player, 'Played an attack every turn after turn 4') for player in players ] 
+    return [achievement(player, 'Played an attack every turn after turn 4') for player in players] 
 
 
 # == Number of Cards acquired
@@ -334,7 +335,7 @@ def prize_check(g):
         for prize in card_info.TOURNAMENT_WINNINGS:
             if prize in deck:
                 n_prizes += 1
-        if n_prizes==len(card_info.TOURNAMENT_WINNINGS):
+        if n_prizes == len(card_info.TOURNAMENT_WINNINGS):
             return (player, one_turn(g, player, card_info.TOURNAMENT_WINNINGS))
     return (False, False)
 
@@ -344,16 +345,15 @@ def CheckMatchPrizeFighter(g):
     (player, in_one_turn) = prize_check(g)
     ret = []
     if player and not in_one_turn:
-        ret.append( achievement(player, 'Acquired all five prizes') )
+        ret.append(achievement(player, 'Acquired all five prizes'))
     return ret
 
 def CheckMatchChampionPrizeFighter(g):
     """Acquire all five prizes in one turn"""
-    # a.k.a. King of the Joust
     (player, in_one_turn) = prize_check(g)
     ret = []
     if player and in_one_turn:
-        ret.append( achievement(player, 'Acquired all five prizes in one turn') )
+        ret.append(achievement(player, 'Acquired all five prizes in one turn'))
     return ret
 
 
