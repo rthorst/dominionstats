@@ -38,46 +38,61 @@ def get_date_of_current_isotropic_leaderboard():
         # so, we can ignore the hour, minute, and second
         return datetime.datetime.strptime(headers['last-modified'], '%a, %d %b %Y %H:%M:%S %Z').date()
 
-# originally from http://bggdl.square7.ch/leaderboard/
-def scrape_leaderboard_from_online_cache(date):
-    conn = httplib.HTTPConnection('councilroom.com', timeout=30)
-    conn.request('GET', '/static/leaderboard/' + str(date) + '.html.bz2')
-    res = conn.getresponse()
-    data = res.read()
-    conn.close()
-
-    if res.status == 200:
-        f = open(output_directory + str(date) + '.html.bz2', 'w')
-        f.write(data)
-        f.close()
-        return True
-    elif res.status == 404:
-        # doesn't exist, but pretend we got it
-        return True
-    else:
-        return False
-
-def scrape_leaderboard_from_isotropic(date):
-    conn = httplib.HTTPConnection('dominion.isotropic.org', timeout=30)
-    conn.request('GET', '/leaderboard/', headers={'Accept-Encoding': 'gzip'})
-    res = conn.getresponse()
-    gzipped_data = res.read()
-    conn.close()
-
-    if res.status == 200:
-        f = gzip.GzipFile(fileobj=StringIO.StringIO(gzipped_data))
+def save_file(date, data, is_gzipped):
+    if is_gzipped:
+        f = gzip.GzipFile(fileobj=StringIO.StringIO(data))
         data = f.read()
         f.close()
 
         data = bz2.compress(data)
 
-        f = open(output_directory + str(date) + '.html.bz2', 'w')
-        f.write(data)
-        f.close()
+    f = open(output_directory + str(date) + '.html.bz2', 'w')
+    f.write(data)
+    f.close()
 
-        return True
-    else:
-        return False
+def scrape_leaderboard(date, host, url, is_gzipped):
+    connection = httplib.HTTPConnection(host, timeout=30)
+    connection.request('GET', url, headers={'Accept-Encoding': 'gzip'} if is_gzipped else {})
+    response = connection.getresponse()
+    data = response.read()
+    connection.close()
+
+    if response.status == 200:
+        save_file(date, data, is_gzipped)
+
+    return response.status
+
+def scrape_leaderboard_from_isotropic(date):
+    return scrape_leaderboard(date, 'dominion.isotropic.org', '/leaderboard/', True)
+
+def scrape_leaderboard_from_councilroom(date):
+    return scrape_leaderboard(date, 'councilroom.com', '/static/leaderboard/' + str(date) + '.html.bz2', False)
+
+def scrape_leaderboard_from_bggdl(date):
+    return scrape_leaderboard(date, 'bggdl.square7.ch', '/leaderboard/leaderboard-' + str(date) + '.html', True)
+
+def run_scrape_function_with_retries(scrape_function, date):
+    num_attempts = 0
+
+    while True:
+        num_attempts += 1
+
+        status = scrape_function(date)
+
+        if status == 200:
+            print 'successful'
+            break
+        elif status == 404:
+            print 'file not found'
+            break
+        else:
+            if num_attempts < 3:
+                print 'retrying'
+            else:
+                print 'reached 3 attempts, aborting'
+                break
+
+    return status
 
 def main():
     utils.ensure_exists(output_directory)
@@ -93,8 +108,6 @@ def main():
 
     one_day_delta = datetime.timedelta(1)
     date = date_of_last_cached_leaderboard + one_day_delta
-    success = True
-    num_times_unsuccessful_in_a_row = 0
 
     while date <= date_of_current_isotropic_leaderboard:
         print
@@ -102,23 +115,24 @@ def main():
 
         if date == date_of_current_isotropic_leaderboard:
             print 'scraping from isotropic'
-            success = scrape_leaderboard_from_isotropic(date)
+            status = run_scrape_function_with_retries(scrape_leaderboard_from_isotropic, date)
         else:
-            print 'scraping from online cache'
-            success = scrape_leaderboard_from_online_cache(date)
+            print 'scraping from councilroom'
+            status = run_scrape_function_with_retries(scrape_leaderboard_from_councilroom, date)
 
-        if success:
-            print 'successful'
-            num_times_unsuccessful_in_a_row = 0
-            date += one_day_delta
+            if status != 200:
+                print 'scraping from bggdl'
+                status = run_scrape_function_with_retries(scrape_leaderboard_from_bggdl, date)
+
+        if status == 200:
+            pass
+        elif status == 404:
+            print 'file not found, so we will assume that it does not exist, and go to the next day'
         else:
-            num_times_unsuccessful_in_a_row += 1
-            print 'unsuccessful', num_times_unsuccessful_in_a_row, 'time(s) in a row'
-            if num_times_unsuccessful_in_a_row < 3:
-                print 'retrying...'
-            else:
-                print 'reached max unsuccessful attempts in a row, so please try again later'
-                break
+            print 'unknown file status, so please try again later'
+            break
+
+        date += one_day_delta
 
 if __name__ == '__main__':
     main()
