@@ -1,6 +1,6 @@
 import os
 import time
-from datetime import date
+from datetime import date, timedelta
 import utils 
 
 import sys
@@ -8,10 +8,10 @@ import sys
 utils.ensure_exists('static/status')
 
 cmds = [
-    'python scrape.py',            # downloads gamelogs from isotropic
-    'python parse_game.py',        # parses data into useable format
-    'python load_parsed_data.py',  # loads data into database
-    'python analyze.py',           # produces data for graphs
+    'python scrape.py --startdate=%(month_ago)s',            
+    'python parse_game.py --startdate=%(month_ago)s', 
+    'python load_parsed_data.py ',
+    'python analyze.py', 
     'python goals.py',
     'python count_buys.py',
     'python run_trueskill.py',
@@ -25,6 +25,9 @@ extra_args = sys.argv[1:]
 # should think about how to parrallelize this for multiprocessor machines.
 while True:
     for cmd in cmds:
+        month_ago = (date.today() - timedelta(days=30)).strftime('%Y%m%d')
+        fmt_dict = {'month_ago': month_ago}
+        cmd = (cmd % fmt_dict)
         status_fn = (cmd.replace(' ', '_') + '-' + 
                      date.today().isoformat() + '-' +
                      time.strftime('%H:%M:%S') + '.txt')
@@ -34,4 +37,5 @@ while True:
         os.system('mv %s static/status' % status_fn)
     print 'sleeping'
     time.sleep(60*15)  # try to update every 15 mins
+
 
