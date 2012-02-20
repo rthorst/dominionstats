@@ -302,7 +302,7 @@ class PlayerPage(object):
             if ex == 'Fan':
                 continue
 
-            wp = expansion_win_points[ex]/weight
+            wp = expansion_win_points[ex] / weight
             average = overall_record.average_win_points()
 
             ret += '<tr><th>%s</th>'%ex

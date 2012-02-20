@@ -330,14 +330,14 @@ class Game(object):
         return GameState(self)
 
     def get_expansion_weight(self):
-        weights = collections.defaultdict(int)
+        weights = collections.defaultdict(float)
         total = 0
 
         for c in self.supply:
             expansion = card_info.expansion(c)
             if expansion == 'Common':
                 continue
-            weights[expansion] += 1
+            weights[expansion] += 1.0
             total += 1
 
         for expansion in weights:
