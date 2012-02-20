@@ -431,6 +431,7 @@ GroupFuncs([CheckMatchPrizeFighter, CheckMatchChampionPrizeFighter], 'prizes')
 
 # "Moneyball" should be winning a game without ever buying a card costing $5 or more (base cost, can't use Highway/Bridge to get around it)
 # Platinum Blonde: At game's end, have only Platinum and Gold Treasures (and at least 1 of each)
+# Won without buying treasure
 
 # Fringe Division: Finished game with 5+ Potions and exactly 2 Bishops
 # Snow White: played 7 Wharves in one turn
@@ -712,7 +713,6 @@ def main():
     c = pymongo.Connection()
     games_collection = c.test.games
     output_collection = c.test.goals
-    stats_collection = c.test.goal_stats
     total_checked = 0
 
     checker_output = collections.defaultdict(int)
@@ -732,9 +732,6 @@ def main():
         if not valid_goals:
             exit(-1)
         goals_to_check = args.goals
-
-        for goal_name in args.goals:
-            stats_collection.save( {'_id': goal_name, 'total': 0} )
 
         scanner = incremental_scanner.IncrementalScanner('subgoals', c.test)
         scanner.reset()
@@ -795,12 +792,6 @@ def main():
         scanner.get_num_games()
     scanner.save()
     print_totals(checker_output, total_checked)
-    for goal_name, count in checker_output.items():
-        stats = stats_collection.find_one( {'_id': goal_name} )
-        if stats is None:
-            stats = {'_id': goal_name, 'total': 0}
-        stats['total'] += count
-        stats_collection.save( stats )
         
 if __name__ == '__main__':
     main()
