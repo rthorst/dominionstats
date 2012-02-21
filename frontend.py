@@ -238,7 +238,7 @@ class PlayerPage(object):
             pd = game_val.get_player_deck(target_player_cur_name)
             wp = pd.WinPoints()
 
-            res = game_val.win_loss_tie(norm_target_player)
+            res = game_val.win_loss_tie(target_player_cur_name)
             overall_record.record_result(res, wp)
             game_len = len(game_val.get_player_decks())
             rec_by_game_size[game_len].record_result(res, wp)
