@@ -235,7 +235,7 @@ class PlayerPage(object):
             target_player_cur_name = target_player_cur_name_cand[0]
             aliases.add(target_player_cur_name)
 
-            pd = game_val.get_player_deck(norm_target_player)
+            pd = game_val.get_player_deck(target_player_cur_name)
             wp = pd.WinPoints()
 
             res = game_val.win_loss_tie(norm_target_player)
