@@ -77,6 +77,7 @@ def incremental_date_range_cmd_line_parser():
     # 20101015 is the first day with standard turn labels
     parser.add_argument('--startdate', default='20101015')
     parser.add_argument('--enddate', default='99999999')
+    parser.add_argument('--passive', action='store_true')
     return parser
 
 def includes_day(args, str_yyyymmdd):
