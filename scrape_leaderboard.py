@@ -5,6 +5,7 @@ import re
 import os
 import datetime
 import httplib
+import socket
 import StringIO
 import gzip
 import bz2
@@ -27,11 +28,14 @@ def get_date_of_last_cached_leaderboard():
     return datetime.date(2011, 3, 10)
 
 def get_date_of_current_isotropic_leaderboard():
-    conn = httplib.HTTPConnection('dominion.isotropic.org')
-    conn.request('HEAD', '/leaderboard/')
-    res = conn.getresponse()
-    headers = dict(res.getheaders())
-    conn.close()
+    try:
+        conn = httplib.HTTPConnection('dominion.isotropic.org', timeout=30)
+        conn.request('HEAD', '/leaderboard/')
+        res = conn.getresponse()
+        headers = dict(res.getheaders())
+        conn.close()
+    except socket.error:
+        return
 
     if res.status == 200:
         # just after midnight Pacific time, GMT will have the same calendar date as Pacific time
@@ -51,11 +55,14 @@ def save_file(date, data, is_gzipped):
     f.close()
 
 def scrape_leaderboard(date, host, url, is_gzipped):
-    connection = httplib.HTTPConnection(host, timeout=30)
-    connection.request('GET', url, headers={'Accept-Encoding': 'gzip'} if is_gzipped else {})
-    response = connection.getresponse()
-    data = response.read()
-    connection.close()
+    try:
+        connection = httplib.HTTPConnection(host, timeout=30)
+        connection.request('GET', url, headers={'Accept-Encoding': 'gzip'} if is_gzipped else {})
+        response = connection.getresponse()
+        data = response.read()
+        connection.close()
+    except socket.error:
+        return 999
 
     if response.status == 200:
         save_file(date, data, is_gzipped)
