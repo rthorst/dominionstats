@@ -43,6 +43,41 @@ def RemoveSmallFileIfExists(fn):
         print 'removing small existing file', fn
         os.unlink(fn)
 
+def download_date(str_date, cur_date):
+    urls_by_priority = [CouncilroomGamesCollectionUrl(cur_date),
+                        IsotropicGamesCollectionUrl(cur_date)] 
+
+    for url in urls_by_priority:
+        if DEBUG:
+            print 'getting', saved_games_bundle, 'at', url
+
+        contents = urllib.urlopen(url).read()
+        if len(contents) > SMALL_FILE_SIZE:
+            if DEBUG:
+                print 'yay, success from', url, 'no more requests for', \
+                    str_date, 'needed'
+            open(saved_games_bundle, 'w').write(contents)
+            return True
+        elif DEBUG:
+            print 'request to', url, 'failed to find large file'
+    return False
+
+def unzip_date(directory, filename):
+    os.chdir(directory)
+    cmd = 'tar -xjvf %s >/dev/null 2>/dev/null'%filename
+    if DEBUG:
+        print cmd
+
+    ret = os.system(cmd)
+    if ret==0:
+        os.system('chmod -R 755 .')
+        code = True
+    else:
+        code = False
+    os.chdir('..')
+    return code
+    
+
 def scrape_date(str_date, cur_date, passive=False):
     directory = str_date
     games_short_name = str_date + '.all.tar.bz2'
@@ -57,44 +92,17 @@ def scrape_date(str_date, cur_date, passive=False):
             os.mkdir(directory)
         RemoveSmallFileIfExists(saved_games_bundle)
 
-        urls_by_priority = [CouncilroomGamesCollectionUrl(cur_date),
-                            IsotropicGamesCollectionUrl(cur_date)] 
-
         if passive:
             return MISSING
 
-        success = False
-        for url in urls_by_priority:
-            if DEBUG:
-                print 'getting', saved_games_bundle, 'at', url
-
-            contents = urllib.urlopen(url).read()
-            if len(contents) > SMALL_FILE_SIZE:
-                print 'yay, success from', url, 'no more requests for', \
-                    str_date, 'needed'
-                open(saved_games_bundle, 'w').write(contents)
-                success = True
-                break
-            elif DEBUG:
-                print 'request to', url, 'failed to find large file'
-
-        if not success:
+        if download_date(str_date, cur_date):
             return ERROR
 
         time.sleep(5)
-        os.chdir(directory)
-        cmd = 'tar -xjvf ' + games_short_name + ' >/dev/null 2>/dev/null'
-        if DEBUG:
-            print cmd
-
-        ret = os.system(cmd)
-        if ret==0:
-            os.system('chmod -R 755 .')
-            code = DOWNLOADED
+        if unzip_date(directory, games_short_name):
+            return DOWNLOADED
         else:
-            code = ERROR
-        os.chdir('..')
-        return code
+            return ERROR
 
 def scrape_games():
     parser = utils.incremental_date_range_cmd_line_parser()
