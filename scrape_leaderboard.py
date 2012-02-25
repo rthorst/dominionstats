@@ -29,15 +29,15 @@ def get_date_of_last_cached_leaderboard():
 
 def get_date_of_current_isotropic_leaderboard():
     try:
-        conn = httplib.HTTPConnection('dominion.isotropic.org', timeout=30)
-        conn.request('HEAD', '/leaderboard/')
-        res = conn.getresponse()
-        headers = dict(res.getheaders())
-        conn.close()
+        connection = httplib.HTTPConnection('dominion.isotropic.org', timeout=30)
+        connection.request('HEAD', '/leaderboard/')
+        response = connection.getresponse()
+        headers = dict(response.getheaders())
+        connection.close()
     except socket.error:
         return
 
-    if res.status == 200:
+    if response.status == 200:
         # just after midnight Pacific time, GMT will have the same calendar date as Pacific time
         # so, we can ignore the hour, minute, and second
         return datetime.datetime.strptime(headers['last-modified'], '%a, %d %b %Y %H:%M:%S %Z').date()
