@@ -13,6 +13,9 @@ import utils
 
 output_directory = 'static/leaderboard/'
 
+def date_from_http_header_time(http_header_time):
+    return datetime.datetime.strptime(http_header_time, '%a, %d %b %Y %H:%M:%S %Z').date()
+
 def get_date_of_last_cached_leaderboard():
     filename_pattern = re.compile('^(?P<year>\d\d\d\d)-(?P<month>\d\d)-(?P<day>\d\d)\.html\.bz2$')
     filenames = os.listdir(output_directory)
@@ -40,7 +43,7 @@ def get_date_of_current_isotropic_leaderboard():
     if response.status == 200:
         # just after midnight Pacific time, GMT will have the same calendar date as Pacific time
         # so, we can ignore the hour, minute, and second
-        return datetime.datetime.strptime(headers['last-modified'], '%a, %d %b %Y %H:%M:%S %Z').date()
+        return date_from_http_header_time(headers['last-modified'])
 
 def save_file(date, data, is_gzipped):
     if is_gzipped:
@@ -54,7 +57,7 @@ def save_file(date, data, is_gzipped):
     f.write(data)
     f.close()
 
-def scrape_leaderboard(date, host, url, is_gzipped):
+def scrape_leaderboard(date, host, url, is_gzipped, assert_same_date):
     try:
         connection = httplib.HTTPConnection(host, timeout=30)
         connection.request('GET', url, headers={'Accept-Encoding': 'gzip'} if is_gzipped else {})
@@ -62,7 +65,12 @@ def scrape_leaderboard(date, host, url, is_gzipped):
         data = response.read()
         connection.close()
     except socket.error:
-        return 999
+        return 'socket error'
+
+    if assert_same_date:
+        headers = dict(response.getheaders())
+        if date != date_from_http_header_time(headers['last-modified']):
+            return 'leaderboard updated'
 
     if response.status == 200:
         save_file(date, data, is_gzipped)
@@ -70,13 +78,13 @@ def scrape_leaderboard(date, host, url, is_gzipped):
     return response.status
 
 def scrape_leaderboard_from_isotropic(date):
-    return scrape_leaderboard(date, 'dominion.isotropic.org', '/leaderboard/', True)
+    return scrape_leaderboard(date, 'dominion.isotropic.org', '/leaderboard/', True, True)
 
 def scrape_leaderboard_from_councilroom(date):
-    return scrape_leaderboard(date, 'councilroom.com', '/static/leaderboard/' + str(date) + '.html.bz2', False)
+    return scrape_leaderboard(date, 'councilroom.com', '/static/leaderboard/' + str(date) + '.html.bz2', False, False)
 
 def scrape_leaderboard_from_bggdl(date):
-    return scrape_leaderboard(date, 'bggdl.square7.ch', '/leaderboard/leaderboard-' + str(date) + '.html', True)
+    return scrape_leaderboard(date, 'bggdl.square7.ch', '/leaderboard/leaderboard-' + str(date) + '.html', True, False)
 
 def run_scrape_function_with_retries(scrape_function, date):
     num_attempts = 0
@@ -91,6 +99,9 @@ def run_scrape_function_with_retries(scrape_function, date):
             break
         elif status == 404:
             print 'file not found'
+            break
+        elif status == 'leaderboard updated':
+            print 'the leaderboard was updated after this script was started, so re-run this script'
             break
         else:
             if num_attempts < 3:
@@ -136,7 +147,7 @@ def main():
         elif status == 404:
             print 'file not found, so we will assume that it does not exist, and go to the next day'
         else:
-            print 'unknown file status, so please try again later'
+            print 'please try again later'
             break
 
         date += one_day_delta
