@@ -612,6 +612,15 @@ DEF_NAME_LIST)
       ... revealing a <span class=card-victory>Province</span> and gaining a <span class=card-treasure>Gold</span> in hand.""", DEF_NAME_LIST)
         self.assertEquals(turn_info['gains'], ['Gold'])
 
+    def test_mining_village_money(self):
+        turn_info = parse_game.parse_turn(u"""--- player1's turn 9 ---
+   player1 plays a <span class=card-none>Mining Village</span>.
+   ... (player1 reshuffles.)
+   ... drawing 1 card and getting +2 actions.
+   ... trashing the <span class=card-none>Mining Village</span> for +$2.
+""", DEF_NAME_LIST)
+        self.assertEquals(turn_info['money'], 2)
+
     def test_fools_gold_reveal_turn(self):
         turn_info = parse_game.parse_turn(
 u""" --- player1's turn 10 ---
