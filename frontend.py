@@ -207,7 +207,7 @@ class PlayerPage(object):
             {'_id': norm_target_player})
         leaderboard_history = None
         if leaderboard_history_result:
-            leaderboard_history = leaderboard_history['history']
+            leaderboard_history = leaderboard_history_result['history']
 
         game_list = []
         aliases = set()
@@ -262,14 +262,17 @@ class PlayerPage(object):
 
 
         #TODO: a good choice for a template like jinja2
-        ret = standard_heading("CouncilRoom.com: Dominion Stats: %s" % target_player)
+        ret = standard_heading("CouncilRoom.com: Dominion Stats: %s" % 
+                               target_player)
 
         ret += '<form action="/player" method="get">'
         ret += '<span class="subhead">Profile for %s</span>' % target_player
 
-        leaderboard_history_most_recent = leaderboard_history[-1] if leaderboard_history else None
+        leaderboard_history_most_recent = (leaderboard_history[-1] if 
+                                           leaderboard_history else None)
         if leaderboard_history_most_recent:
-            level = leaderboard_history_most_recent[1] - leaderboard_history_most_recent[2]
+            level = (leaderboard_history_most_recent[1] - 
+                     leaderboard_history_most_recent[2])
             level = int(max(math.floor(level), 0))
             ret += '<span class="level">Level ' + str(level) + '</span>'
 
@@ -323,7 +326,8 @@ class PlayerPage(object):
 
         if leaderboard_history:
             render = web.template.render('')
-            ret += str(render.player_page_leaderboard_history_template(json.dumps(leaderboard_history)))
+            ret += str(render.player_page_leaderboard_history_template(
+                    json.dumps(leaderboard_history)))
 
         ret += '<h2>Most recent games</h2>\n'
         game_list.sort(key = game.Game.get_id, reverse = True)
