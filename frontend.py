@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 import codecs
 import collections
+import itertools
 import math
+import operator
 import pprint
 import urllib
 import urlparse
@@ -11,20 +13,18 @@ import pymongo
 import simplejson as json
 import web
 
-import game
-import goals
-import query_matcher
 from name_merger import norm_name
-import annotate_game
-import parse_game
+from optimal_card_ratios import DBCardRatioTracker
 from record_summary import RecordSummary
 from small_gain_stat import SmallGainStat
-import datetime
-from optimal_card_ratios import DBCardRatioTracker
-import operator
-
-import utils
+import annotate_game
 import card_info
+import datetime
+import game
+import goals
+import parse_game
+import query_matcher
+import utils
 
 urls = (
   '/', 'IndexPage',
@@ -526,58 +526,79 @@ class GoalsPage(object):
         return ret
 
 class SupplyWinApi(object):
+    def str_card_index(self, card_name):
+        title = card_info.sane_title(card_name)
+        if title:
+            return str(card_info.card_index(title))
+        return ''
+
+    def interaction_card_index_tuples(self, query_dict):
+        cards = query_dict.get('interaction', '').split(',')
+        cards = [c for c in cards if c]  # remove empty strings
+        indexes = sorted(map(self.str_card_index, cards), 
+                         key=lambda x: -int(x))
+
+        # Singleton tuples are weird, but they make the fetching logic simpler.
+        card_tuples = list(itertools.combinations(indexes, 1))
+        if 'nested' in query_dict:
+            card_tuples.extend(list(itertools.combinations(indexes, 2)))
+
+        if 'unconditional' in query_dict or not card_tuples:
+            card_tuples.append(tuple())
+        return card_tuples
+
+    def fetch_conditional_stats(self, target_inds, interaction_tuples):
+        db = utils.get_mongo_database()
+        card_stats = []
+        count_searched = 0
+        for target_ind in target_inds:
+            for interaction_tuple in interaction_tuples:
+                count_searched += 1
+                if count_searched > 1000:
+                    return card_stats
+                key = target_ind + ';' + (','.join(interaction_tuple))
+                db_val = db.card_supply.find_one({'_id': key})
+                if db_val:
+                    small_gain_stat = SmallGainStat()
+                    small_gain_stat.from_primitive_object(db_val['vals'])
+                    def name_getter(ind_str):
+                        return card_info.card_names()[int(ind_str)]
+                    card_name = name_getter(int(target_ind))
+                    condition = map(name_getter, interaction_tuple)
+                    stat_with_context = {'card_name': card_name,
+                                         'condition': condition,
+                                         'stats': small_gain_stat}
+                    card_stats.append(stat_with_context)
+        return card_stats
+
+    def readable_json_card_stats(self, card_stats):
+        # ugly and mutative, copy?
+        for stat_with_context in card_stats:
+            stat_with_context['stats'] = (stat_with_context['stats'].
+                                          to_readable_primitive_object())
+        return json.dumps(card_stats)
+
     def GET(self):
         web.header("Content-Type", "text/html; charset=utf-8")
         web.header("Access-Control-Allow-Origin", "*")
         query_dict = dict(urlparse.parse_qsl(web.ctx.env['QUERY_STRING']))
-        # params:
-        # targets, opt
-        # cond1, opt
-        # cond2, opt
-        # format? json, csv?
-        db = utils.get_mongo_database()
+        # query_dict supports the following options.
+        # targets: optional comma separated list of card names that want 
+        #   stats for, if empty/not given, use all of them
+        # interaction: optional comma separated list of cards that we want to
+        #   condition the target stats on.
+        # nested: optional param, if given present, also get second order
+        #   contional stats.
+        # unconditional: opt param, if present, also get unconditional stats.
         targets = query_dict.get('targets', '').split(',')
         if sum(len(t) for t in targets) == 0:
             targets = card_info.card_names()
-
-        # print targets
-        def str_card_index(card_name):
-            title = card_info.sane_title(card_name)
-            if title:
-                return str(card_info.card_index(title))
-            return ''
-        target_inds = map(str_card_index, targets)
-        # print targets, target_inds
-
-        cond1 = str_card_index(query_dict.get('cond1', ''))
-        cond2 = str_card_index(query_dict.get('cond2', ''))
-        
-        if cond1 < cond2:
-            cond1, cond2 = cond2, cond1
-
-        card_stats = {}
-        for target_ind in target_inds:
-            key = target_ind + ';'
-            if cond1:
-                key += cond1
-            if cond2:
-                key += ',' + cond2
-
-            db_val = db.card_supply.find_one({'_id': key})
-            if db_val:
-                small_gain_stat = SmallGainStat()
-                small_gain_stat.from_primitive_object(db_val['vals'])
-                card_name = card_info.card_names()[int(target_ind)]
-                card_stats[card_name] = small_gain_stat
-        
-        format = query_dict.get('format', 'json')
-        if format == 'json':
-            readable_card_stats = {}
-            for card_name, card_stat in card_stats.iteritems():
-                readable_card_stats[card_name] = (
-                    card_stat.to_readable_primitive_object())
-            return json.dumps(readable_card_stats)
-        return 'unsupported format ' + format
+            
+        target_inds = map(self.str_card_index, targets)
+        interaction_tuples = self.interaction_card_index_tuples(query_dict)
+        card_stats = self.fetch_conditional_stats(target_inds, 
+                                                  interaction_tuples)
+        return self.readable_json_card_stats(card_stats)
 
 class SupplyWinPage(object):
     def GET(self):
