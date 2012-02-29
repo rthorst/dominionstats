@@ -29,3 +29,10 @@ class SmallGainStat(ListSlotPrimitiveConversion):
         for name in self.__slots__:
             ret[name] = getattr(self, name).to_primitive_object()
         return ret
+
+def from_raw_stats_dict(raw_stats_dict):
+    ret = SmallGainStat()
+    ret.win_given_any_gain = raw_stats_dict['win_given_any_gain']
+    ret.win_given_no_gain = raw_stats_dict['win_given_no_gain']
+    ret.win_weighted_gain = raw_stats_dict['win_weighted_gain']
+    return ret

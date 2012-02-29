@@ -69,7 +69,6 @@ def is_victory(singular_card_name):
 def is_action(singular_card_name):
     return _card_info_rows[singular_card_name]['Action'] == '1'
 
-
 def is_attack(singular_card_name):
     return _card_info_rows[singular_card_name]['Attack'] == '1'
 

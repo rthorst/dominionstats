@@ -203,8 +203,11 @@ class PlayerPage(object):
         norm_target_player = norm_name(target_player)
         games_coll = games.find({'players': norm_target_player})
 
-        leaderboard_history = db.leaderboard_history.find_one({'_id': norm_target_player})
-        leaderboard_history = leaderboard_history['history'] if leaderboard_history else None
+        leaderboard_history_result = db.leaderboard_history.find_one(
+            {'_id': norm_target_player})
+        leaderboard_history = None
+        if leaderboard_history_result:
+            leaderboard_history = leaderboard_history['history']
 
         game_list = []
         aliases = set()
@@ -474,7 +477,8 @@ class WinRateDiffAccumPage(object):
             'Difference in number bought/gained on your turn',
             'win_diff_accum',
             'Minion,Gold,Adventurer,Witch,Mountebank',
-            'WeightProportionalToAccumDiff'
+            'WeightProportionalToAccumDiff',
+            render.card_filter_blurb()
             )
 
 class WinWeightedAccumTurnPage(object):
@@ -485,7 +489,8 @@ class WinWeightedAccumTurnPage(object):
             'Turn card was gained (only on your turn)',
             'win_weighted_accum_turn',
             'Silver,Cost==3 && Actions>=1 && Cards >= 1',
-            'WeightAllTurnsSame'
+            'WeightAllTurnsSame',
+            render.card_filter_blurb()
             )
 
 class GoalsPage(object):
@@ -576,23 +581,19 @@ class SupplyWinApi(object):
 
 class SupplyWinPage(object):
     def GET(self):
-        return open('supply_win.html').read()
+        render = web.template.render('')
+        return render.supply_win(render.card_filter_blurb())
 
 class OptimalCardRatios(object):
     def GET(self):
         web.header("Content-Type", "text/html; charset=utf-8")
         query_dict = dict(urlparse.parse_qsl(web.ctx.env['QUERY_STRING']))
 
-        card_list = sorted(set(card_info.card_names()) - set(card_info.TOURNAMENT_WINNINGS))
+        card_list = sorted(set(card_info.card_names()) - 
+                           set(card_info.TOURNAMENT_WINNINGS))
 
-        if query_dict.has_key('card_x'):
-            card_x = query_dict['card_x']
-        else:
-            card_x = 'Minion'
-        if query_dict.has_key('card_y'):
-            card_y = query_dict['card_y']
-        else:
-            card_y = 'Gold'
+        card_x = query_dict.get('card_x', 'Minion')
+        card_y = query_dct.get('card_y', 'Gold')
 
         if card_x < card_y:
             db_id = card_x + ':' + card_y
@@ -610,19 +611,25 @@ class OptimalCardRatios(object):
         tracker = DBCardRatioTracker()
         tracker.from_primitive_object(db_val)
 
-        num_games = sum(meanvarstat.frequency() for meanvarstat in tracker.final.itervalues())
+        num_games = sum(meanvarstat.frequency() for meanvarstat 
+                        in tracker.final.itervalues())
         num_games_threshold = int(round(num_games * .002))
-        final_table = self.getHtmlTableForStats(tracker.final, swap_x_and_y, num_games, num_games_threshold)
+        final_table = self.getHtmlTableForStats(
+            tracker.final, swap_x_and_y, num_games, num_games_threshold)
 
-        num_games = max(meanvarstat.frequency() for meanvarstat in tracker.progressive.itervalues())
+        num_games = max(meanvarstat.frequency() for meanvarstat 
+                        in tracker.progressive.itervalues())
         num_games_threshold = int(round(num_games * .002))
-        progressive_table = self.getHtmlTableForStats(tracker.progressive, swap_x_and_y, num_games, num_games_threshold)
+        progressive_table = self.getHtmlTableForStats(
+            tracker.progressive, swap_x_and_y, num_games, num_games_threshold)
 
         render = web.template.render('')
-        return render.optimal_card_ratios_template(card_list, card_x, card_y, final_table, progressive_table)
+        return render.optimal_card_ratios_template(
+            card_list, card_x, card_y, final_table, progressive_table)
 
     @staticmethod
-    def getHtmlTableForStats(stats, swap_x_and_y, num_games, num_games_threshold):
+    def getHtmlTableForStats(stats, swap_x_and_y, 
+                             num_games, num_games_threshold):
         x_to_y_to_data = {}
         min_x = 1e6
         max_x = -1e6
@@ -634,7 +641,6 @@ class OptimalCardRatios(object):
         for key, meanvarstat in stats.iteritems():
             if meanvarstat.frequency() < num_games_threshold:
                 continue
-
             x, y = key.split(':')
             x, y = int(x), int(y)
             if swap_x_and_y:
@@ -650,14 +656,19 @@ class OptimalCardRatios(object):
 
             if not x_to_y_to_data.has_key(x):
                 x_to_y_to_data[x] = {}
-            x_to_y_to_data[x][y] = (mean, meanvarstat.render_interval(), meanvarstat.frequency())
+            x_to_y_to_data[x][y] = (mean, meanvarstat.render_interval(), 
+                                    meanvarstat.frequency())
 
         # clamp to 0, for now
         min_x = 0
         min_y = 0
 
-        render = web.template.render('', globals={'get_background_color': OptimalCardRatios.getBackgroundColor})
-        return render.optimal_card_ratios_table_template(min_x, max_x, min_y, max_y, min_mean, max_mean, x_to_y_to_data, num_games, num_games_threshold)
+        render = web.template.render(
+            '', globals={'get_background_color': 
+                         OptimalCardRatios.getBackgroundColor})
+        return render.optimal_card_ratios_table_template(
+            min_x, max_x, min_y, max_y, min_mean, max_mean,
+            x_to_y_to_data, num_games, num_games_threshold)
 
     @staticmethod
     def getBackgroundColor(min_mean, max_mean, value):
@@ -674,7 +685,8 @@ class OptimalCardRatios(object):
         color = '#'
         amount = (value - value_min) / (value_max - value_min)
         for x in xrange(3):
-            component = int(color_min[x] + amount * (color_max[x] - color_min[x]))
+            component = int(color_min[x] + 
+                            amount * (color_max[x] - color_min[x]))
             component = max(0, component)
             component = min(component, 255)
             color += '{0:02x}'.format(component)

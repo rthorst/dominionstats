@@ -1,188 +1,164 @@
-// Change this if you aren't running a server locally, so you'll make requests
-// to councilroom.com.
-var have_local_server_instance = true;
+// Change this if you aren't running a server locally, so you'll
+// make requests to councilroom.com.
+var have_local_server_instance = false;
 // If you are changing this script, please change the developer name to
 // something unique, just for logging/server admin purposes.
 var developer_id = "rrenaud";
 var full_path_to_councilroom = "";
-var saved_stats = {};
-var fetched_cards = {};
-var suppressed_cards = {};
 
 if (!have_local_server_instance) {
-  full_path_to_councilroom = "http://councilroom.com/";
+  full_path_to_councilroom = "http://councilroom.com:8080/";
+// Change this if you aren't running a server locally, so you'll
 }
 
-function MergeStats(new_stats, cond1, cond2) {
-  for (k in new_stats) {
-    var key = k + cond1 + cond2;
-    saved_stats[key] = new_stats[k];
-    saved_stats[key].name = k;
-    saved_stats[key].condition = cond1;
-    saved_stats[key].condition2 = cond2;
-  }
+var saved_stats = [];
+
+function ScoreStats(card_name, win_given_any_gain, win_given_no_gain) {
+  var win_rate_given_gain = win_given_any_gain.Mean();
+  var wagf = win_given_any_gain.Freq() + 1;
+  var wngf = win_given_no_gain.Freq() + 1;
+  var log_odds_any_gained = Math.log(wagf / (wagf + wngf));
+  var num_plus_actions = NumActions(card_name);
+  var is_vp = IsVictory(card_name);
+  var is_reaction = IsReaction(card_name);
+  // This function was found by card_ranker/optimize_ranks.py
+  return (52.926 * win_rate_given_gain +
+          1.358 * log_odds_any_gained +
+          -1.161 * num_plus_actions +
+          -1.712 * is_vp +
+          1.625 * is_reaction);
 };
 
-function CardDataUrl(args) {
-    if (!args) args = {};
+function CardDataUrl() {
+  var targets = ExpandCardGlob($('#targets').val());
+  var interaction = ExpandCardGlob($('#interaction').val());
+  var nested =  $('#nested').is(':checked');
+  var unconditional = $('#unconditional').is(':checked');
 
-    var url = full_path_to_councilroom +
-        "supply_win_api?dev=" + developer_id;
-    if (args.cond1) {
-        url += '&cond1=' + encodeURIComponent(args.cond1);
-    }
-    if (args.cond2) {
-        url += "&cond2=" + encodeURIComponent(args.cond2);
-    }
-    return url;
+  var url = full_path_to_councilroom +
+    "supply_win_api?dev=" + developer_id;
+
+  if (targets) url += '&targets=' + encodeURIComponent(targets);
+  if (interaction) url += '&interaction=' + encodeURIComponent(interaction);
+  if (nested) url += '&nested=true';
+  if (unconditional) url += '&unconditional=true';
+  return url;
 }
 
-function IsSavedCard(card_name) {
-  return fetched_cards[card_name];
-}
-
-function IsSuppressedCard(card_name) {
-  return suppressed_cards[card_name];
-}
-
-function SuppressCard(card_name) {
-  card_name = unescape(card_name);
-  suppressed_cards[card_name] = true;
-  RenderWinStats();
-}
-
-function ConditionUpon(card_name) {
-    card_name = unescape(card_name);
-    if (IsSuppressedCard(card_name)) {
-      suppressed_cards[card_name] = false;
-      RenderWinStats();
-      return;
-    }
-
-    fetched_cards[card_name] = true;
-    console.log("conditioning on " + card_name);
-    var c = $.ajax(
-        {url: CardDataUrl({cond1: card_name}),
-         dataType: "json",
-         success: function(server_stats) {
-             MergeStats(server_stats, card_name);
-             RenderWinStats();
-         }
-        });
-};
-
-function SecondCondition(card_name) {
-  card_name = unescape(card_name);
-
-  var cond1s = [];
-  for (k in fetched_cards) {
-    if (!IsSuppressedCard(k)) {
-      cond1s.push(k);
-    }
-  }
-
-  // Should maybe limit size of cond1s, could end up making lots of requests
-  // to councilroom if not.
-  var all_results = {}
-  var countdown = cond1s.length;
-  $(cond1s).each(
-    function() {
-      var cond1 = this;
-      $.ajax(
-          {url: CardDataUrl({cond1: cond1, cond2: card_name}),
-           dataType: "json",
-           success:
-             function(server_stats) {
-               MergeStats(server_stats, cond1, card_name);
-               countdown--;
-               if (countdown == 0) {
-                 RenderWinStats();
-               }
-             }
-           });
-    });
-}
 
 function RenderWinStats() {
-    var output = '<table id="data_table">';
-    output += '<thead>';
-    output += '  <th>Name</th>';
-    output += '  <th>Condition</th>';
-    output += '  <th>Condition2</th>';
-    output += '  <th>Avail</th>';
-    output += '  <th>%+</th>';
-    output += '  <th>Per gain</th>';
-    output += '  <th>Any gain</th>';
-    output += '  <th>Num gained</th>';
-    output += '  <th>cond</th>';
-    //  output += '  <th>dep</th>';
-    output += '</thead>';
-    for (k in saved_stats) {
-        var stat = saved_stats[k];
+  var output = '<table id="data_table">';
+  output += '<thead>';
+  output += '  <th>Name</th>';
+  output += '  <th>Cond</th>';
+  output += '  <th>Cond2</th>';
+  output += '  <th>Avail</th>';
+  output += '  <th>%+</th>';
+  output += '  <th>Per gain</th>';
+  output += '  <th>Any gain</th>';
+  output += '  <th>Num gained</th>';
+  output += '  <th>Quality</th>';
+  output += '  <th>&Delta; Qual</th>';
+  output += '</thead>';
+  function LeastConditionedFirst(a, b) {
+    return a.condition.length - b.condition.length;
+  }
+  saved_stats.sort(LeastConditionedFirst);
+  var base_qualities = {};
+  for (var i = 0; i < saved_stats.length; ++i) {
+    var stat = saved_stats[i].stats;
+    var name = saved_stats[i].card_name;
 
-        if (stat.condition && suppressed_cards[stat.condition]) {
-          continue;
-        }
+    var condition = saved_stats[i].condition[0] || '';
+    var condition2 = saved_stats[i].condition[1] || '';
 
-        var weighted_gain_stat = MeanVarStat(stat.win_weighted_gain);
-        var any_gain_stat = MeanVarStat(stat.win_given_any_gain);
-        var no_gain_stat = MeanVarStat(stat.win_given_no_gain);
-        var avail = any_gain_stat.Freq() + no_gain_stat.Freq();
-        var percent_gained = Round(100 * any_gain_stat.Freq() / avail, 1);
-        var num_gain = Round(weighted_gain_stat.Freq() / avail, 2);
-        output += "<tr>";
-        output += "  <td>" + stat.name + "</td>";
-
-        if (stat.condition) {
-          output += "  <td>" + stat.condition;
-          output += "  <button onclick=SuppressCard('" +
-                escape(stat.condition) + "')>r</button></td>";
-        } else {
-          output += "  <td></td>";
-        }
-
-        if (stat.condition2) {
-          output += "  <td>" + stat.condition2 + "</td>";
-        } else {
-          output += "  <td></td>";
-        }
-
-        output += "  <td>" + avail + "</td>";
-        output += "  <td>" + percent_gained + "</td>";
-        output += "  <td>" + weighted_gain_stat.RenderMeanVar(2) + "</td>";
-        output += "  <td>" + any_gain_stat.RenderMeanVar(2) + "</td>";
-        output += "  <td>" + num_gain + "</td>";
-
-        output += "  <td>";
-        if (!stat.condition) {
-          if (!IsSavedCard(stat.name) || IsSuppressedCard(stat.name)) {
-            output += "    <button onclick=ConditionUpon('" +
-                  escape(stat.name) + "')>c</button>";
-          }
-            output += "    <button onclick=SecondCondition('" +
-                escape(stat.name) + "')>c2</button>";
-        }
-        output += "  </td>";
-        //        output += "  <td><button>d</button></td>";
-        output += "</tr>\n";
+    var weighted_gain_stat = MeanVarStat(stat.win_weighted_gain);
+    var any_gain_stat = MeanVarStat(stat.win_given_any_gain);
+    var no_gain_stat = MeanVarStat(stat.win_given_no_gain);
+    var avail = any_gain_stat.Freq() + no_gain_stat.Freq();
+    var percent_gained = Round(100 * any_gain_stat.Freq() / avail, 1);
+    var num_gain = Round(weighted_gain_stat.Freq() / avail, 2);
+    var quality = ScoreStats(name, any_gain_stat, no_gain_stat);
+    stat.quality = quality;
+    var delta_quality = '';
+    if (condition.length == 0) {
+      base_qualities[name] = quality;
+    } else {
+      delta_quality = Round(quality - base_qualities[name], 2);
     }
-    output += "</table>";
-    $("#data_display").html(output);
-    $("#data_table").dataTable(
-        {"aaSorting": [[ 0, "asc" ]],
-         "bPaginate": false});
+
+    output += "<tr>";
+    output += "  <td>" + name + "</td>";
+
+    output += "  <td>" + condition + '</td>';
+    output += "  <td>" + condition2 + "</td>";
+
+    output += "  <td>" + avail + "</td>";
+    output += "  <td>" + percent_gained + "</td>";
+    output += "  <td>" + weighted_gain_stat.RenderMeanVar(2) + "</td>";
+    output += "  <td>" + any_gain_stat.RenderMeanVar(2) + "</td>";
+    output += "  <td>" + num_gain + "</td>";
+
+    output += "  <td>" + Round(quality, 2) + "</td>";
+    output += "  <td>" + delta_quality + "</td>";
+
+    output += "</tr>\n";
+  }
+  output += "</table>";
+  $("#data_display").html(output);
+  $("#data_table").dataTable(
+    {"aaSorting": [[ 0, "asc" ]],
+     "bPaginate": false});
 };
 
 function RefreshData() {
-    console.log("calling refresh");
-    var c = $.ajax(
-        {url: CardDataUrl(),
-         dataType: "json",
-         success: function(base_stats) {
-             MergeStats(base_stats, "", "");
-             RenderWinStats();
-         }
-        });
+  console.log("calling refresh");
+  var c = $.ajax(
+    {url: CardDataUrl(),
+     dataType: "json",
+     success: function(base_stats) {
+       saved_stats = base_stats;
+       console.log('about to render');
+       RenderWinStats();
+     }
+    });
 };
 
-jQuery.event.add(window, "load", RefreshData);
+function DisplayUrl() {
+  var wl = window.location;
+  var new_url = 'http://' + wl.host + wl.pathname + '?';
+  if ($('#targets').val())
+    new_url += '&targets=' + encodeURIComponent($('#targets').val());
+  if ($('#interaction').val())
+    new_url += '&interaction=' + encodeURIComponent($('#interaction').val());
+  new_url += '&nested=' + $('#nested')[0].checked;
+  new_url += '&unconditional=' + $('#unconditional')[0].checked;
+  $('#url_display').val(new_url);
+  var offset = $('#getlink').offset();
+  $('#url_display').css(
+    { left:offset.left, top:offset.top,
+      height:"25px"}
+  ).show().select();
+};
+
+$(document).click(
+  function (e) {
+    if (e.target.id != "getlink") {
+      $('#url_display').hide();
+    }
+  }
+);
+
+jQuery.event.add(window, "load",
+  function() {
+    var q = $.parseQuery();
+    console.log(q);
+    if (q.targets) $('#targets').val(q.targets);
+    if (q.interaction) $('#interaction').val(q.interaction);
+    if (q.nested) $('#nested')[0].checked = q.nested != 'false';
+    if (q.unconditional)
+      $('#unconditional')[0].checked = q.unconditional != 'false';
+
+    InitCardGlobber().then(RefreshData);
+  }
+);
