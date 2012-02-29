@@ -7,13 +7,12 @@ import simplejson as json
 import game
 import goals
 import parse_game
-import sofia_predict
 
 def _pretty_format_html(v):
     return '<br>' + pprint.pformat(v).replace(
         '\n', '<br>').replace(' ', '&nbsp')
 
-win_predictor = sofia_predict.SofiaWinPredictor('data/logreg-peg.model')
+# win_predictor = sofia_predict.SofiaWinPredictor('data/logreg-peg.model')
 
 def make_graph(label, div_name):
     return """
@@ -46,7 +45,8 @@ def annotate_game(contents, game_id, debug=False):
     states = []
     
     game_val = game.Game(parsed_game)
-    win_prob_enabled = len(game_val.get_player_decks()) == 2
+    # win_prob_enabled = len(game_val.get_player_decks()) == 2
+    win_prob_enabled = False
     if win_prob_enabled:
         predictions = win_predictor.predict_all_turns(game_val)
 
