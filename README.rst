@@ -62,17 +62,17 @@ Python code:
   - Wrap lines at 80 characters.
   - Try not to write super long functions, break them up into logical subfunction even if those functions are only called once.
     
-   - Did you see something in the code is fugly and offends your natural sense of what is good in the world?  I'll happily take style cleanups.
+  - Did you see something in the code is fugly and offends your natural sense of what is good in the world?  I'll happily take style cleanups.
 
-   - Anatomy of an analysis.
-      + Want analysis to be incremental, can go day at a time.
+  - Anatomy of an analysis.
+     + Want analysis to be incremental, can go day at a time.
         * Use an incremental_scanner.
         * Prefer using game.Game objects over raw game docs from the database.  game.Game objects are easier to work with, and make maintence easier.
         * Since we want to be incremental, store raw counts in database, normalize them with divisions, etc at presentation time.
         * Want to keep track of a random variable that has some kind of spread? Use a stats.MeanVarStat.
-       * Consider using primitive_util for serializing/deserializing objects that store the aggregate information.  
+        * Consider using primitive_util for serializing/deserializing objects that store the aggregate information.  
    
-   - How to do display?
+  - How to do display?
       + Lots of existing server side templating in Python.
       + Prefer templates to programatically building up strings (even if if the existing code doesn't always).
       + Seriously consider outputting JSON from server like (/supply_win_api) and doing presententation in javascript (/supply_win), since it allows frontend development without running the whole system.  
