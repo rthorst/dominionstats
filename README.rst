@@ -13,6 +13,7 @@ Installation
 Turbo frontend javascript hacking
 ====
 super easy frontend modifications without any server setup::
+
      checkout code from github.
      google-chrome --allow-file-access-from-files
      browse to local html pages (eg, dominionstats/supply_win.html).
@@ -20,7 +21,7 @@ super easy frontend modifications without any server setup::
 
 I just want access to some data!
 ====
-Send me a mail and I'll see what I can do.
+Send (rrenaud@gmail.com) a mail and I'll see what I can do.
 
 Long, ardous but incredibly rewarding full setup
 ====
@@ -43,17 +44,16 @@ Run an instance of mongodb with::
      mongod --dbpath=db
 
 After install those packages, the system can be setup by running the 
-update_loop.py, which will take a few hours to download one months of games
-logs from councilroom, and then parse through it all and load it into a 
-database.  
-
-::
+update_loop.py script, which will take a few hours to download one months of 
+games logs from councilroom, and then parse through it all and load it into a 
+database::
 
 python update_loop.py
 
-::
 
-python frontend_local.py     # starts webserver running on localhost:8080
+And after that is down, this starts webserver running on localhost:8080::
+
+python frontend_local.py 
 
 Hacking Guidelines
 ====
@@ -80,6 +80,7 @@ Javascript code:
 * Keep non-trivial bits of Javascript in seperate .js files rather than embedded in HTML.  It makes my emacs happier.
 
 Got a technical problem/question/idea?  You can send an email to the dev group,
+
 https://groups.google.com/forum/?fromgroups#!forum/councilroom-dev
 
 Happy hacking.
