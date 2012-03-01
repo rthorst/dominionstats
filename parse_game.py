@@ -36,6 +36,7 @@ NUMBER_BEFORE_SPAN = re.compile('(\d+) <span')
 NUMBER_COPIES = re.compile('(0|2) copies to')
 GETTING_MONEY_RE = re.compile(' \+\$(\d)+')
 WHICH_IS_WORTH_RE = re.compile(' which is worth \+\$(\d)+')
+FOR_MONEY_RE = re.compile(' for \+\$(\d)+')
 VP_TOKEN_RE = re.compile(u'(?P<num>\d+) ▼', re.UNICODE)
 
 KW_ANOTHER_ONE = 'another one'
@@ -45,6 +46,7 @@ KW_GAINING = ' gaining '
 KW_DRAWS = ' draws '
 KW_GAINS_A = ' gains a'
 KW_GAMES_A = ' games a'  # short lived bug in iso, spelled gains as games
+KW_FOR_MONEY = ' for +$'
 KW_GAINS_THE = ' gains the '
 KW_GET = 'get +'
 KW_GETS = ' gets +'
@@ -632,6 +634,10 @@ def parse_turn(turn_blob, names_list):
                 turn_money += int(money_match.group(1))
         if KW_WHICH_IS_WORTH in line:
             worth_match = WHICH_IS_WORTH_RE.search(line)
+            assert bool(worth_match), line
+            turn_money += int(worth_match.group(1))
+        if KW_FOR_MONEY in line:
+            worth_match = FOR_MONEY_RE.search(line)
             assert bool(worth_match), line
             turn_money += int(worth_match.group(1))
         if u'▼' in line:

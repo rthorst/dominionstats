@@ -1,3 +1,4 @@
+$def with (cardFilterBlurb)
 <html><head><title>Card Winningness</title>
     <script language="javascript" type="text/javascript" 
 	    src="static/flot/jquery.js"></script>
@@ -11,10 +12,42 @@
             src="static/supply_win.js"></script>
     <script language="javascript" type="text/javascript"
             src="static/jquery.dataTables.js"></script>
+    <style type="text/css">
+      tr {
+        display: table-row;
+      }
+      table {
+        border-collapse: separate;
+        border-spacing: 2px 2px;
+      }
+      tr.odd {
+        background-color: #E2E4ff;
+      }
+      tr.even {
+        background-color: white;
+      }
+      th {
+        cursor: pointer;
+      }
+      th.overall {
+        background-color: #E2E4FF;
+      }
+      th.player {
+        background-color: #A3A9FF;
+      }
+    </style>
   </head>
   <body>
-    This contains a very poor interface to card winning stats that depend
+    <p>This contains a very poor interface to card winning stats that depend
     on having up to two other cards available in the supply.
+
+    <div style="float:left;width:40%;margin:10px">
+      <h3>Interpretting the stats</h3>
+
+      <p>This let's you see how cards perform when others are available to
+        be gained.  When a card is conditioned upon, it simply restricts
+        the statistics to games in which that card was available in the 
+        supply.  The conditioned upon card does not ever have to be gained.
 
     <ul>
       <li><b>Availability</b>:  The number of games in which the card is 
@@ -32,8 +65,60 @@
         gains of a card in the same game.  In the above 5 winning vs 3 losing
         example, the card would have a win rate of 1, because both players
         purchased it.
-      <li><b>Num Gained</b>: The average number of the card gained per player.
+      <li><b>Num Gained</b>: The average number of the times the card was
+        gained when it was available, per player.
+      <li><b>Quality</b>: This is a measure of card quality that tries to
+        recover the excellent 
+        <a href="http://forum.dominionstrategy.com/index.php?topic=1451.0">
+        community card rankings</a> using only the statistics about the 
+        cards and information about the cards themselves.  Currently
+        the function recovers almost 90% of the community ordered pairs, 
+        using only the following signals:
+        <ul>
+          <li>the win rate given any gain
+          <li>the chance of a card being gained
+          <li>the number plus actions
+          <li>whether it has vp
+          <li>whether it's a reaction
+        </ul>
+      <li><b>&Delta; Qual</b>: The change in quality given the conditioned
+        cards are available.
     </ul>
+
+    Post comments, questions, and insights on this 
+    <a href="http://forum.dominionstrategy.com/index.php?topic=1451.0">
+      thread on the DominionStrategy forum</a>.
+    </div>
+
+    <div style="float:left;width:45%;margin:10px">
+      $:cardFilterBlurb
+    </div>
+    <div style="clear:both;"></div>
+
+    <div>
+    <form onSubmit="RefreshData(); return false;">
+      <label for="targets">target cards</label>
+      <input id="targets" type="text" size=70>
+      <br>
+      <label for="interaction" style="width:100px;">interaction cards</label>
+      <input id="interaction" type="text" size=70>
+      <br>
+      <label for="unconditional">include unconditional stats</label>
+      <input id="unconditional" name="unconditional" type="checkbox" 
+             checked>
+      <br>
+      <label for="nested">include double conditions</label>
+      <input id="nested" name="nested" type="checkbox">
+      <br>
+      <button onclick="RefreshData();">Fetch</button>
+      <input type="button" onclick="DisplayUrl() && false;" value="Get Link"
+             id="getlink">
+    </form>
+    </div>
+      <input id="url_display" size="20" type="text"
+	style="position:absolute; z-index:10; display:none"
+	     value="blah">
+    <div style="clear:both;"></div>
 
     <div id="data_display"><b>Loading...</b></div>
   </body>
