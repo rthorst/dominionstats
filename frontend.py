@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 import codecs
 import collections
+import itertools
 import math
+import operator
 import pprint
 import urllib
 import urlparse
@@ -11,19 +13,18 @@ import pymongo
 import simplejson as json
 import web
 
-import game
-import goals
-import query_matcher
 from name_merger import norm_name
-import annotate_game
-import parse_game
+from optimal_card_ratios import DBCardRatioTracker
 from record_summary import RecordSummary
 from small_gain_stat import SmallGainStat
-import datetime
-from optimal_card_ratios import DBCardRatioTracker
-
-import utils
+import annotate_game
 import card_info
+import datetime
+import game
+import goals
+import parse_game
+import query_matcher
+import utils
 
 urls = (
   '/', 'IndexPage',
@@ -40,6 +41,7 @@ urls = (
   '/supply_win_api', 'SupplyWinApi',
   '/supply_win', 'SupplyWinPage',
   '/optimal_card_ratios', 'OptimalCardRatios',
+  '/games_by_opponent', 'GamesByOpponentPage',
   '/(.*)', 'StaticPage'
 )
 
@@ -201,12 +203,11 @@ class PlayerPage(object):
         norm_target_player = norm_name(target_player)
         games_coll = games.find({'players': norm_target_player})
 
-        leaderboard_history = db.leaderboard_history.find_one({'_id': norm_target_player})
-        leaderboard_history = leaderboard_history['history'] if leaderboard_history else None
-
-        keyed_by_opp = collections.defaultdict(list)
-        real_name_usage = collections.defaultdict(
-            lambda: collections.defaultdict(int))
+        leaderboard_history_result = db.leaderboard_history.find_one(
+            {'_id': norm_target_player})
+        leaderboard_history = None
+        if leaderboard_history_result:
+            leaderboard_history = leaderboard_history_result['history']
 
         game_list = []
         aliases = set()
@@ -215,6 +216,9 @@ class PlayerPage(object):
         rec_by_game_size = collections.defaultdict(RecordSummary)
         rec_by_date = collections.defaultdict(RecordSummary)
         rec_by_turn_order =  collections.defaultdict(RecordSummary)
+
+        expansion_dist = collections.defaultdict(float)
+        expansion_win_points = collections.defaultdict(float)
 
         date_buckets = [1, 3, 5, 10]
         for g in games_coll:
@@ -233,40 +237,42 @@ class PlayerPage(object):
             game_list.append(game_val)
             target_player_cur_name = target_player_cur_name_cand[0]
             aliases.add(target_player_cur_name)
-            for p in game_val.get_player_decks():
-                if p.name() != target_player_cur_name:
-                    other_norm_name = norm_name(p.name())
-                    keyed_by_opp[other_norm_name].append(
-                        (p.name(), target_player_cur_name, game_val))
-                    real_name_usage[other_norm_name][p.name()] += 1
-                else:
-                    res = game_val.win_loss_tie(p.name())
-                    overall_record.record_result(res, p.WinPoints())
-                    game_len = len(game_val.get_player_decks())
-                    rec_by_game_size[game_len].record_result(res,
-                                                             p.WinPoints())
-                    _ord = p.TurnOrder()
-                    rec_by_turn_order[_ord].record_result(res, p.WinPoints())
-                    for delta in date_buckets:
-                        _padded = (game_val.date() +
-                                   datetime.timedelta(days = delta))
-                        delta_padded_date = _padded.date()
-                        today = datetime.datetime.now().date()
-                        if delta_padded_date >= today:
-                            rec_by_date[delta].record_result(res,
-                                                             p.WinPoints())
 
-        keyed_by_opp_list = keyed_by_opp.items()
-        keyed_by_opp_list.sort(key = lambda x: (-len(x[1]), x[0]))
+            pd = game_val.get_player_deck(target_player_cur_name)
+            wp = pd.WinPoints()
+
+            res = game_val.win_loss_tie(target_player_cur_name)
+            overall_record.record_result(res, wp)
+            game_len = len(game_val.get_player_decks())
+            rec_by_game_size[game_len].record_result(res, wp)
+
+            _ord = pd.TurnOrder()
+            rec_by_turn_order[_ord].record_result(res, wp)
+            for delta in date_buckets:
+                _padded = (game_val.date() +
+                           datetime.timedelta(days = delta))
+                delta_padded_date = _padded.date()
+                today = datetime.datetime.now().date()
+                if delta_padded_date >= today:
+                    rec_by_date[delta].record_result(res, wp)
+
+            for (ex, wt) in game_val.get_expansion_weight().items():
+                expansion_dist[ex] += wt
+                expansion_win_points[ex] += wt * wp
+
+
         #TODO: a good choice for a template like jinja2
-        ret = standard_heading("CouncilRoom.com: Dominion Stats: %s" % target_player)
+        ret = standard_heading("CouncilRoom.com: Dominion Stats: %s" % 
+                               target_player)
 
         ret += '<form action="/player" method="get">'
         ret += '<span class="subhead">Profile for %s</span>' % target_player
 
-        leaderboard_history_most_recent = leaderboard_history[-1] if leaderboard_history else None
+        leaderboard_history_most_recent = (leaderboard_history[-1] if 
+                                           leaderboard_history else None)
         if leaderboard_history_most_recent:
-            level = leaderboard_history_most_recent[1] - leaderboard_history_most_recent[2]
+            level = (leaderboard_history_most_recent[1] - 
+                     leaderboard_history_most_recent[2])
             level = int(max(math.floor(level), 0))
             ret += '<span class="level">Level ' + str(level) + '</span>'
 
@@ -293,14 +299,35 @@ class PlayerPage(object):
                                    lambda pos: 'Table position %d' % pos)
 
         ret += '<div style="clear: both;">&nbsp;</div>'
+        ret += '<div class="cardborder yellow"><h3>Expansion Data</h3><table class="stats">'
+        ret += '<tr><th>Card Set<th>Avg. Cards<br/> Per Kingdom<th>Weighted<br/> Win Points<th>Favor'
+
+        for (ex, weight) in sorted(expansion_dist.iteritems(), 
+                      key=operator.itemgetter(1), reverse=True):
+
+            if ex == 'Fan':
+                continue
+
+            wp = expansion_win_points[ex] / weight
+            average = overall_record.average_win_points()
+
+            ret += '<tr><th>%s</th>'%ex
+            ret += '<td>%.2f'% (weight * 10. / len(game_list))
+            ret += '<td>%.2f' % wp
+            ret += '<td>%.2f%%'% ( (wp - average) * 100. / average )
+        ret += '</table></div>'
+
+        ret += '<div style="clear: both;">&nbsp;</div>'
 
         ret += goals.MaybeRenderGoals(db, norm_target_player)
 
-        ret += '<A HREF="/popular_buys?player=%s"><h2>Stats by card</h2></A><BR>\n' % target_player
+        ret += '<A HREF="/popular_buys?player=%s"><h2>Stats by card</h2></A>\n' % target_player
+        ret += '<A HREF="/games_by_opponent?player=%s"><h2>Record by opponent</h2></A>\n' % target_player
 
         if leaderboard_history:
             render = web.template.render('')
-            ret += str(render.player_page_leaderboard_history_template(json.dumps(leaderboard_history)))
+            ret += str(render.player_page_leaderboard_history_template(
+                    json.dumps(leaderboard_history)))
 
         ret += '<h2>Most recent games</h2>\n'
         game_list.sort(key = game.Game.get_id, reverse = True)
@@ -311,10 +338,59 @@ class PlayerPage(object):
 
         ret += ('<A HREF="/search_result?p1_name=%s">(See more)</A>' % 
                 target_player)
+        ret += '</body></html>'
 
-        ret += '<h2>Record by opponent</h2>'
+        return ret
+
+class GamesByOpponentPage(object):
+    def GET(self):
+        web.header("Content-Type", "text/html; charset=utf-8")  
+        query_dict = dict(urlparse.parse_qsl(web.ctx.env['QUERY_STRING']))
+        target_player = query_dict['player'].decode('utf-8')
+        ret = standard_heading("CouncilRoom.com: Dominion Stats: %s" % target_player)
+
+        ret += '<form action="/player" method="get">'
+        ret += '<span class="subhead">Record By Opponent for %s</span>' % target_player
+        ret += '<br/><br/>\n\n'
         ret += '<table border=1>'
         ret += '<tr><td>Opponent</td><td>Record</td></tr>'
+
+        db = utils.get_mongo_database()
+        games = db.games
+        norm_target_player = norm_name(target_player)
+        games_coll = games.find({'players': norm_target_player})
+
+        keyed_by_opp = collections.defaultdict(list)
+        game_list = []
+        real_name_usage = collections.defaultdict(
+            lambda: collections.defaultdict(int))
+
+        for g in games_coll:
+            game_val = game.Game(g)
+            if game_val.dubious_quality():
+                continue
+            all_player_names = game_val.all_player_names()
+            norm_names = map(norm_name, all_player_names)
+            if len(set(norm_names)) != len(all_player_names):
+                continue
+            target_player_cur_name_cand = [
+                n for n in all_player_names
+                if norm_name(n) == norm_target_player]
+            if len(target_player_cur_name_cand) != 1:
+                continue
+            game_list.append(game_val)
+            target_player_cur_name = target_player_cur_name_cand[0]
+
+            for p in game_val.get_player_decks():
+                if p.name() != target_player_cur_name:
+                    other_norm_name = norm_name(p.name())
+                    keyed_by_opp[other_norm_name].append(
+                        (p.name(), target_player_cur_name, game_val))
+                    real_name_usage[other_norm_name][p.name()] += 1
+
+        keyed_by_opp_list = keyed_by_opp.items()
+        keyed_by_opp_list.sort(key = lambda x: (-len(x[1]), x[0]))
+
         for opp_norm_name, game_list in keyed_by_opp_list:
             record = [0, 0, 0]
             for opp_name, tgt_player_curname, g in game_list:
@@ -405,7 +481,8 @@ class WinRateDiffAccumPage(object):
             'Difference in number bought/gained on your turn',
             'win_diff_accum',
             'Minion,Gold,Adventurer,Witch,Mountebank',
-            'WeightProportionalToAccumDiff'
+            'WeightProportionalToAccumDiff',
+            render.card_filter_blurb()
             )
 
 class WinWeightedAccumTurnPage(object):
@@ -416,7 +493,8 @@ class WinWeightedAccumTurnPage(object):
             'Turn card was gained (only on your turn)',
             'win_weighted_accum_turn',
             'Silver,Cost==3 && Actions>=1 && Cards >= 1',
-            'WeightAllTurnsSame'
+            'WeightAllTurnsSame',
+            render.card_filter_blurb()
             )
 
 class GoalsPage(object):
@@ -452,78 +530,95 @@ class GoalsPage(object):
         return ret
 
 class SupplyWinApi(object):
+    def str_card_index(self, card_name):
+        title = card_info.sane_title(card_name)
+        if title:
+            return str(card_info.card_index(title))
+        return ''
+
+    def interaction_card_index_tuples(self, query_dict):
+        cards = query_dict.get('interaction', '').split(',')
+        cards = [c for c in cards if c]  # remove empty strings
+        indexes = sorted(map(self.str_card_index, cards), 
+                         key=lambda x: -int(x))
+
+        # Singleton tuples are weird, but they make the fetching logic simpler.
+        card_tuples = list(itertools.combinations(indexes, 1))
+        if 'nested' in query_dict:
+            card_tuples.extend(list(itertools.combinations(indexes, 2)))
+
+        if 'unconditional' in query_dict or not card_tuples:
+            card_tuples.append(tuple())
+        return card_tuples
+
+    def fetch_conditional_stats(self, target_inds, interaction_tuples):
+        db = utils.get_mongo_database()
+        card_stats = []
+        count_searched = 0
+        for target_ind in target_inds:
+            for interaction_tuple in interaction_tuples:
+                count_searched += 1
+                if count_searched > 1000:
+                    return card_stats
+                key = target_ind + ';' + (','.join(interaction_tuple))
+                db_val = db.card_supply.find_one({'_id': key})
+                if db_val:
+                    small_gain_stat = SmallGainStat()
+                    small_gain_stat.from_primitive_object(db_val['vals'])
+                    def name_getter(ind_str):
+                        return card_info.card_names()[int(ind_str)]
+                    card_name = name_getter(int(target_ind))
+                    condition = map(name_getter, interaction_tuple)
+                    stat_with_context = {'card_name': card_name,
+                                         'condition': condition,
+                                         'stats': small_gain_stat}
+                    card_stats.append(stat_with_context)
+        return card_stats
+
+    def readable_json_card_stats(self, card_stats):
+        # ugly and mutative, copy?
+        for stat_with_context in card_stats:
+            stat_with_context['stats'] = (stat_with_context['stats'].
+                                          to_readable_primitive_object())
+        return json.dumps(card_stats)
+
     def GET(self):
         web.header("Content-Type", "text/html; charset=utf-8")
         web.header("Access-Control-Allow-Origin", "*")
         query_dict = dict(urlparse.parse_qsl(web.ctx.env['QUERY_STRING']))
-        # params:
-        # targets, opt
-        # cond1, opt
-        # cond2, opt
-        # format? json, csv?
-        db = utils.get_mongo_database()
+        # query_dict supports the following options.
+        # targets: optional comma separated list of card names that want 
+        #   stats for, if empty/not given, use all of them
+        # interaction: optional comma separated list of cards that we want to
+        #   condition the target stats on.
+        # nested: optional param, if given present, also get second order
+        #   contional stats.
+        # unconditional: opt param, if present, also get unconditional stats.
         targets = query_dict.get('targets', '').split(',')
         if sum(len(t) for t in targets) == 0:
             targets = card_info.card_names()
-
-        # print targets
-        def str_card_index(card_name):
-            title = card_info.sane_title(card_name)
-            if title:
-                return str(card_info.card_index(title))
-            return ''
-        target_inds = map(str_card_index, targets)
-        # print targets, target_inds
-
-        cond1 = str_card_index(query_dict.get('cond1', ''))
-        cond2 = str_card_index(query_dict.get('cond2', ''))
-        
-        if cond1 < cond2:
-            cond1, cond2 = cond2, cond1
-
-        card_stats = {}
-        for target_ind in target_inds:
-            key = target_ind + ';'
-            if cond1:
-                key += cond1
-            if cond2:
-                key += ',' + cond2
-
-            db_val = db.card_supply.find_one({'_id': key})
-            if db_val:
-                small_gain_stat = SmallGainStat()
-                small_gain_stat.from_primitive_object(db_val['vals'])
-                card_name = card_info.card_names()[int(target_ind)]
-                card_stats[card_name] = small_gain_stat
-        
-        format = query_dict.get('format', 'json')
-        if format == 'json':
-            readable_card_stats = {}
-            for card_name, card_stat in card_stats.iteritems():
-                readable_card_stats[card_name] = (
-                    card_stat.to_readable_primitive_object())
-            return json.dumps(readable_card_stats)
-        return 'unsupported format ' + format
+            
+        target_inds = map(self.str_card_index, targets)
+        interaction_tuples = self.interaction_card_index_tuples(query_dict)
+        card_stats = self.fetch_conditional_stats(target_inds, 
+                                                  interaction_tuples)
+        return self.readable_json_card_stats(card_stats)
 
 class SupplyWinPage(object):
     def GET(self):
-        return open('supply_win.html').read()
+        render = web.template.render('')
+        return render.supply_win(render.card_filter_blurb())
 
 class OptimalCardRatios(object):
     def GET(self):
         web.header("Content-Type", "text/html; charset=utf-8")
         query_dict = dict(urlparse.parse_qsl(web.ctx.env['QUERY_STRING']))
 
-        card_list = sorted(set(card_info.card_names()) - set(card_info.TOURNAMENT_WINNINGS))
+        card_list = sorted(set(card_info.card_names()) - 
+                           set(card_info.TOURNAMENT_WINNINGS))
 
-        if query_dict.has_key('card_x'):
-            card_x = query_dict['card_x']
-        else:
-            card_x = 'Minion'
-        if query_dict.has_key('card_y'):
-            card_y = query_dict['card_y']
-        else:
-            card_y = 'Gold'
+        card_x = query_dict.get('card_x', 'Minion')
+        card_y = query_dct.get('card_y', 'Gold')
 
         if card_x < card_y:
             db_id = card_x + ':' + card_y
@@ -541,19 +636,25 @@ class OptimalCardRatios(object):
         tracker = DBCardRatioTracker()
         tracker.from_primitive_object(db_val)
 
-        num_games = sum(meanvarstat.frequency() for meanvarstat in tracker.final.itervalues())
+        num_games = sum(meanvarstat.frequency() for meanvarstat 
+                        in tracker.final.itervalues())
         num_games_threshold = int(round(num_games * .002))
-        final_table = self.getHtmlTableForStats(tracker.final, swap_x_and_y, num_games, num_games_threshold)
+        final_table = self.getHtmlTableForStats(
+            tracker.final, swap_x_and_y, num_games, num_games_threshold)
 
-        num_games = max(meanvarstat.frequency() for meanvarstat in tracker.progressive.itervalues())
+        num_games = max(meanvarstat.frequency() for meanvarstat 
+                        in tracker.progressive.itervalues())
         num_games_threshold = int(round(num_games * .002))
-        progressive_table = self.getHtmlTableForStats(tracker.progressive, swap_x_and_y, num_games, num_games_threshold)
+        progressive_table = self.getHtmlTableForStats(
+            tracker.progressive, swap_x_and_y, num_games, num_games_threshold)
 
         render = web.template.render('')
-        return render.optimal_card_ratios_template(card_list, card_x, card_y, final_table, progressive_table)
+        return render.optimal_card_ratios_template(
+            card_list, card_x, card_y, final_table, progressive_table)
 
     @staticmethod
-    def getHtmlTableForStats(stats, swap_x_and_y, num_games, num_games_threshold):
+    def getHtmlTableForStats(stats, swap_x_and_y, 
+                             num_games, num_games_threshold):
         x_to_y_to_data = {}
         min_x = 1e6
         max_x = -1e6
@@ -565,7 +666,6 @@ class OptimalCardRatios(object):
         for key, meanvarstat in stats.iteritems():
             if meanvarstat.frequency() < num_games_threshold:
                 continue
-
             x, y = key.split(':')
             x, y = int(x), int(y)
             if swap_x_and_y:
@@ -581,14 +681,19 @@ class OptimalCardRatios(object):
 
             if not x_to_y_to_data.has_key(x):
                 x_to_y_to_data[x] = {}
-            x_to_y_to_data[x][y] = (mean, meanvarstat.render_interval(), meanvarstat.frequency())
+            x_to_y_to_data[x][y] = (mean, meanvarstat.render_interval(), 
+                                    meanvarstat.frequency())
 
         # clamp to 0, for now
         min_x = 0
         min_y = 0
 
-        render = web.template.render('', globals={'get_background_color': OptimalCardRatios.getBackgroundColor})
-        return render.optimal_card_ratios_table_template(min_x, max_x, min_y, max_y, min_mean, max_mean, x_to_y_to_data, num_games, num_games_threshold)
+        render = web.template.render(
+            '', globals={'get_background_color': 
+                         OptimalCardRatios.getBackgroundColor})
+        return render.optimal_card_ratios_table_template(
+            min_x, max_x, min_y, max_y, min_mean, max_mean,
+            x_to_y_to_data, num_games, num_games_threshold)
 
     @staticmethod
     def getBackgroundColor(min_mean, max_mean, value):
@@ -605,7 +710,8 @@ class OptimalCardRatios(object):
         color = '#'
         amount = (value - value_min) / (value_max - value_min)
         for x in xrange(3):
-            component = int(color_min[x] + amount * (color_max[x] - color_min[x]))
+            component = int(color_min[x] + 
+                            amount * (color_max[x] - color_min[x]))
             component = max(0, component)
             component = min(component, 255)
             color += '{0:02x}'.format(component)

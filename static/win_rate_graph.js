@@ -1,50 +1,3 @@
-
-var card_list;
-
-function GetCardInfo() {
-  var c = $.ajax(
-    {url: 'static/card_list.js',
-     dataType: 'json',
-     success: function(data) {
-       // hack, I don't understand this, according to the
-       // docs, this should be parsed for me already.
-       card_list = eval(data);
-       RefreshCardGraph(graph_type);
-     }});
-};
-
-function ExpandCardGlob(glob) {
-  var ret = [];
-  try {
-    // This should probably be an object to avoid the linear search.
-    for (var i = 0; i < card_list.length; ++i) {
-      var per_card_attrs = card_list[i];
-      if (glob.toLowerCase() == per_card_attrs.Singular.toLowerCase()) {
-	ret.push(per_card_attrs.Singular);
-	return ret;
-      }
-    }
-
-    for (var i = 0; i < card_list.length; ++i) {
-      var per_card_attrs = card_list[i];
-      for (k in per_card_attrs) {
-	var val = per_card_attrs[k];
-	if (isNaN(parseInt(val))) {
-	  eval(k + '= "' + val + '"');
-	} else {
-	  eval(k + '=' + val);
-	}
-      }
-      if (eval(glob)) {
-	ret.push(per_card_attrs.Singular);
-      }
-    }
-  } catch (err) {
-    console.log(err);
-  }
-  return ret;
-};
-
 function WeightAllTurnsSame(x_val) {
   return 1;
 }
@@ -108,18 +61,14 @@ function DisplayCardData(card_names_str, graph_name, weight_func) {
     return mx;
   };
 
-  var card_exprs = card_names_str.split(',');
   var series_list = [];
-  for (var i = 0; i < card_exprs.length; ++i) {
-    var card_name_or_glob = card_exprs[i].trim();
-    var card_names = ExpandCardGlob(card_name_or_glob);
-    for (var j = 0; j < card_names.length; ++j) {
-      if (all_card_data.card_stats[card_names[j]]) {
-	series_list.push(GrabDataIntoSeries(card_names[j]));
-      } else {
-	console.log('bogus ' + card_names[j]);
-	// handle bogus card name?
-      }
+  var card_names = ExpandCardGlob(card_names_str);
+  for (var i = 0; i < card_names.length; ++i) {
+  if (all_card_data.card_stats[card_names[i]]) {
+    series_list.push(GrabDataIntoSeries(card_names[i]));
+  } else {
+    console.log('bogus ' + card_names[j]);
+    // handle bogus card name?
     }
   }
 
@@ -184,5 +133,10 @@ $(document).click(
   }
 );
 
-jQuery.event.add(window, "load", GetCardInfo);
+jQuery.event.add(window, "load", function() {
+  InitCardGlobber().done(
+    function() {
+      RefreshCardGraph(graph_type);
+    });
+});
 

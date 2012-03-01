@@ -77,7 +77,7 @@ class ListSlotPrimitiveConversion(PrimitiveConversion):
         return ret
 
     def from_primitive_object(self, obj):
-        assert type(obj) == list
+        assert type(obj) == list, '%s is not a list' % str(obj)
         assert len(obj) == slot_index_count(self), '%d != %d' % (
             len(obj), slot_index_count(self))
                                                                 
