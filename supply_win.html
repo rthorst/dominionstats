@@ -38,10 +38,12 @@ $def with (cardFilterBlurb)
     </style>
   </head>
   <body>
-    <p>This contains a very poor interface to card winning stats that depend
-    on having up to two other cards available in the supply.
+    <p>This contains an interface to card winning stats that depend
+    on having up to two other cards available in the supply.  It also 
+    ranks cards and determines how much a cards quality changes as
+    a function of having other cards available.
 
-    <div style="float:left;width:40%;margin:10px">
+    <div style="float:left;width:45%;margin:10px">
       <h3>Interpretting the stats</h3>
 
       <p>This let's you see how cards perform when others are available to
@@ -69,10 +71,11 @@ $def with (cardFilterBlurb)
         gained when it was available, per player.
       <li><b>Quality</b>: This is a measure of card quality that tries to
         recover the excellent 
-        <a href="http://forum.dominionstrategy.com/index.php?topic=1451.0">
+        <a href="http://forum.dominionstrategy.com/index.php?topic=1134.0">
         community card rankings</a> using only the statistics about the 
         cards and information about the cards themselves.  Currently
-        the function recovers almost 90% of the community ordered pairs, 
+        <a href="https://github.com/rrenaud/dominionstats/blob/master/card_ranker/optimize_ranks.py">the ranking function</a> 
+        recovers almost 90% of the community ordered pairs, 
         using only the following signals:
         <ul>
           <li>the win rate given any gain
@@ -90,7 +93,7 @@ $def with (cardFilterBlurb)
       thread on the DominionStrategy forum</a>.
     </div>
 
-    <div style="float:left;width:45%;margin:10px">
+    <div style="float:left;width:40%;margin:10px">
       $:cardFilterBlurb
     </div>
     <div style="clear:both;"></div>
