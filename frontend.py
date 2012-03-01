@@ -539,8 +539,7 @@ class SupplyWinApi(object):
     def interaction_card_index_tuples(self, query_dict):
         cards = query_dict.get('interaction', '').split(',')
         cards = [c for c in cards if c]  # remove empty strings
-        indexes = sorted(map(self.str_card_index, cards), 
-                         key=lambda x: -int(x))
+        indexes = sorted(map(self.str_card_index, cards), reverse=True)
 
         # Singleton tuples are weird, but they make the fetching logic simpler.
         card_tuples = list(itertools.combinations(indexes, 1))
