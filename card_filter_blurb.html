@@ -1,31 +1,31 @@
 
-    <h3>Tips on using the card filters</h3>
-    <ul> 
-      <p>
-      List different card names or card filters separated by a comma.
+<h3>Tips on using the card filters</h3>
+<ul> 
+  <p>
+    List different card names or card filters separated by a comma.
 
-      Each filter is a JavaScript expression that is matched
-      against every card.  The expression is evaluated with attributes
-      of the card filled as local variables.  If this sounds confusing,
-      don't worry.  Here are some examples:
+    Each filter is a JavaScript expression that is matched
+    against every card.  The expression is evaluated with attributes
+    of the card filled as local variables.  If this sounds confusing,
+    don't worry.  Here are some examples:
 
-<li><i>Expansion=="Dominion" || Expansion=="Intrigue"</li>
-<BR>
-<li><i>Cost==7</i> returns Bank, Expand, Forge, and King's Court</li> 
-<li><i>Cost == "P2"</i> returns Apothecary, Scrying Pool, and University</li>
-<li><i>(""+Cost).indexOf("P")&gt;=0</i> returns all cards with Potion in cost</li>
-<BR>
-<li><i>Actions &gt;= 2</i> returns all cards that provide 2 or more Actions</li> 
-<li><i>Cards &lt; 2</i> returns all cards that draw either 0 or 1 Card when played</li> 
-<li><i>Coins == "?"</i> returns Bank, Philosopher's Stone, Pirate Ship, Salvager, Secret Chamber, Trade Route, Tribute, and Vault</li>
-<li><i>Buys == 1</i> returns all cards that provide +1 Buy</li>
-<li><i>VP &gt;= 6</i> returns Province and Colony</li>
-<li><i>Trash == 4</i> returns Chapel</li>
-<BR>
-<li><i>Action && Victory</i> returns Great Hall, Islands, and Nobles</li> 
-<li><i>Treasure && Victory</i> returns Harem</li> 
-<BR>
-<li><i>Attack</i> returns all Attack cards</li>
-<li><i>Duration</i> returns all Duration cards</li>
-<li><i>Reaction</i> returns all reaction cards</li>
-    </ul>
+    <li><i>Expansion=="Dominion" || Expansion=="Intrigue"</i></li>
+    <BR>
+    <li><i>Cost==7</i> returns Bank, Expand, Forge, and King's Court</li> 
+    <li><i>Cost == "P2"</i> returns Apothecary, Scrying Pool, and University</li>
+    <li><i>(""+Cost).indexOf("P")&gt;=0</i> returns all cards with Potion in cost</li>
+    <BR>
+    <li><i>Actions &gt;= 2</i> returns all cards that provide 2 or more Actions</li> 
+    <li><i>Cards &lt; 2</i> returns all cards that draw either 0 or 1 Card when played</li> 
+    <li><i>Coins == "?"</i> returns Bank, Philosopher's Stone, Pirate Ship, Salvager, Secret Chamber, Trade Route, Tribute, and Vault</li>
+    <li><i>Buys == 1</i> returns all cards that provide +1 Buy</li>
+    <li><i>VP &gt;= 6</i> returns Province and Colony</li>
+    <li><i>Trash == 4</i> returns Chapel</li>
+    <BR>
+    <li><i>Action && Victory</i> returns Great Hall, Islands, and Nobles</li> 
+    <li><i>Treasure && Victory</i> returns Harem</li> 
+    <BR>
+    <li><i>Attack</i> returns all Attack cards</li>
+    <li><i>Duration</i> returns all Duration cards</li>
+    <li><i>Reaction</i> returns all reaction cards</li>
+</ul>
