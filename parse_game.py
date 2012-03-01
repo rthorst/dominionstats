@@ -856,11 +856,7 @@ def check_game_sanity(game_val, output):
     return True
 
 def main():
-    #print AnnotateGame(codecs.open(fn, 'r', encoding='utf-8').read()).encode(
-    #    'utf-8')
-    #return
     args = utils.incremental_date_range_cmd_line_parser().parse_args()
-    print args
     days = os.listdir('static/scrape_data')
     days.sort()
     for year_month_day in days:
@@ -878,16 +874,6 @@ def main():
         except ParseTurnHeaderError, e:
             print e
             return
-    
-# def profilemain():
-#     import hotshot, hotshot.stats
-#     prof = hotshot.Profile("parse_game.prof")
-#     prof.runcall(t)
-#     prof.close()
-#     stats = hotshot.stats.load("parse_game.prof")
-#     stats.strip_dirs()
-#     stats.sort_stats('time', 'calls')
-#     stats.print_stats(20)
 
 if __name__ == '__main__':
     utils.ensure_exists('parsed_out')
