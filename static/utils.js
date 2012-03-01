@@ -48,6 +48,9 @@ function ExpandSubglob(glob) {
 
         for (var i = 0; i < card_list.length; ++i) {
             var per_card_attrs = card_list[i];
+            if (per_card_attrs.Singular == "Archivist") {
+                continue;
+            }
             for (k in per_card_attrs) {
                 var val = per_card_attrs[k];
                 if (isNaN(parseInt(val))) {
