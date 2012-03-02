@@ -10,12 +10,12 @@ import pprint
 from primitive_util import ConvertibleDefaultDict
 import card_info
 import itertools
-
+from keys import *
 WIN, LOSS, TIE = range(3)
 
 class PlayerDeckChange(object):
     " This represents a change to a players deck in response to a game event."
-    CATEGORIES = ['buys', 'gains', 'returns', 'trashes']
+    CATEGORIES = [BUYS, GAINS, RETURNS, TRASHES]
 
     def __init__(self, name):
         self.name = name
@@ -37,9 +37,9 @@ class Turn(object):
     def __init__(self, turn_dict, game, player, turn_no, poss_no):
         self.game = game
         self.player = player
-        self.plays = turn_dict.get('plays', [])
-        self.gains = turn_dict.get('gains', [])
-        self.buys = turn_dict.get('buys', [])
+        self.plays = turn_dict.get(PLAYS, [])
+        self.gains = turn_dict.get(GAINS, [])
+        self.buys = turn_dict.get(BUYS, [])
         self.turn_no = turn_no
         self.poss_no = poss_no
         self.turn_dict = turn_dict
@@ -86,7 +86,7 @@ class Turn(object):
         return ret
 
     def money(self):
-        return self.turn_dict.get('money', 0)
+        return self.turn_dict.get(MONEY, 0)
 
     def deck_changes(self):
         ret = []
@@ -94,17 +94,17 @@ class Turn(object):
         ret.append(my_change)
         my_change.gains = self.gains
         my_change.buys = self.buys
-        my_change.trashes = self.turn_dict.get('trashes', [])
-        my_change.returns = self.turn_dict.get('returns', [])
-        my_change.vp_tokens += self.turn_dict.get('vp_tokens', 0)
+        my_change.trashes = self.turn_dict.get(TRASHES, [])
+        my_change.returns = self.turn_dict.get(RETURNS, [])
+        my_change.vp_tokens += self.turn_dict.get(VP_TOKENS, 0)
 
-        opp_info = self.turn_dict.get('opp', {})
+        opp_info = self.turn_dict.get(OPP, {})
         for opp_name, info_dict in opp_info.iteritems():
             change = PlayerDeckChange(opp_name)
-            change.gains.extend(info_dict.get('gains', []))
-            change.trashes.extend(info_dict.get('trashes', []))
-            change.returns.extend(info_dict.get('returns', []))
-            change.vp_tokens += info_dict.get('vp_tokens', 0)
+            change.gains.extend(info_dict.get(GAINS, []))
+            change.trashes.extend(info_dict.get(TRASHES, []))
+            change.returns.extend(info_dict.get(RETURNS, []))
+            change.vp_tokens += info_dict.get(VP_TOKENS, 0)
             ret.append(change)
 
         return ret
@@ -113,11 +113,11 @@ class PlayerDeck(object):
     def __init__(self, player_deck_dict, game):
         self.raw_player = player_deck_dict
         self.game = game
-        self.player_name = player_deck_dict['name']
-        self.win_points = player_deck_dict['win_points']
-        self.points = player_deck_dict['points']
-        self.deck = player_deck_dict['deck']
-        self.turn_order = player_deck_dict['order']
+        self.player_name = player_deck_dict[NAME]
+        self.win_points = player_deck_dict[WIN_POINTS]
+        self.points = player_deck_dict[POINTS]
+        self.deck = player_deck_dict[DECK]
+        self.turn_order = player_deck_dict[ORDER]
         self.num_real_turns = 0
 
     def name(self):
@@ -136,7 +136,7 @@ class PlayerDeck(object):
         return self.turn_order
 
     def Resigned(self):
-        return self.raw_player['resigned']
+        return self.raw_player[RESIGNED]
 
     def Deck(self):
         return self.deck
@@ -167,17 +167,17 @@ class PlayerDeck(object):
 class Game(object):
     def __init__(self, game_dict):
         self.turns = []
-        self.supply = game_dict['supply']
+        self.supply = game_dict[SUPPLY]
         # pprint.pprint(game_dict)
 
-        self.player_decks = [PlayerDeck(pd, self) for pd in game_dict['decks']]
+        self.player_decks = [PlayerDeck(pd, self) for pd in game_dict[DECKS]]
         self.id = game_dict.get('_id', '')
 
-        for raw_pd, pd in zip(game_dict['decks'], self.player_decks):
+        for raw_pd, pd in zip(game_dict[DECKS], self.player_decks):
             turn_ct = 0
             poss_ct = 0
             out_ct = 0
-            for turn in raw_pd['turns']:
+            for turn in raw_pd[TURNS]:
                 if 'poss' in turn:
                     poss_ct += 1
                 elif 'outpost' in turn:
@@ -420,13 +420,13 @@ class GameState(object):
             scores[name] = self.player_score(name)
 
         ret = {
-            'supply': self.supply.to_primitive_object(),
+            SUPPLY: self.supply.to_primitive_object(),
             'player_decks': self.player_decks.to_primitive_object(),
             'scores': scores,
             'label': self.turn_label(),
             'display_label': self.turn_label(for_display=True),
             'player': self.cur_turn.player.name() if self.cur_turn else '',
-            'money': self.cur_turn.money() if self.cur_turn else 0,
+            MONEY: self.cur_turn.money() if self.cur_turn else 0,
             'turn_no': self.cur_turn.turn_no if self.cur_turn else
               self.game.get_turns()[-1].turn_no + 1
             }

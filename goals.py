@@ -8,6 +8,7 @@ import incremental_scanner
 import name_merger
 import utils
 import operator
+from keys import TRASHES
 
 def GroupFuncs(funcs, group_name):
     """Attach group and priority to functions in funcs so they are sortable."""
@@ -578,7 +579,8 @@ def CheckMatchOscarTheGrouch(g):
     """Trash more than 7 cards in one turn"""
     ret = []
     for turn in g.get_turns():
-        trashes = len(turn.turn_dict.get('trashes',[]))
+	#FIXME: Update Turn Object to have Trashes Member
+        trashes = len(turn.turn_dict.get(TRASHES,[]))
         if trashes >= 7:
             ret.append(achievement(turn.player.name(), 
                                    "Trashed %d cards in one turn" % trashes, 

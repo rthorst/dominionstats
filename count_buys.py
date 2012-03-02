@@ -18,6 +18,7 @@ import incremental_scanner
 import mergeable
 import primitive_util
 import utils
+from keys import *
 
 NO_INFO = MVS().mean_diff(MVS())
 
@@ -88,7 +89,7 @@ def accum_buy_stats(games_stream, accum_stats,
                     getattr(accum_stats[card], category).add_outcome(
                         win_points)
                         
-                    if category in ['gains', 'buys']:
+                    if category in [GAINS, BUYS]:
                         any_gained.add(card)
 
             for card in any_gained:
@@ -154,8 +155,8 @@ def main():
 
     overall_stats = DeckBuyStats()
 
-    scanner = incremental_scanner.IncrementalScanner('buys', output_db)
-    buy_collection = output_db['buys']
+    scanner = incremental_scanner.IncrementalScanner(BUYS, output_db)
+    buy_collection = output_db[BUYS]
 
     if not args.incremental:
         print 'resetting scanner and db'

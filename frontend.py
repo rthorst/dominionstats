@@ -25,6 +25,7 @@ import goals
 import parse_game
 import query_matcher
 import utils
+from keys import *
 
 urls = (
   '/', 'IndexPage',
@@ -63,7 +64,7 @@ class PopularBuyPage(object):
 
         if 'player' in query_dict:
             targ_name = norm_name(query_dict['player'])
-            games = map(game.Game, list(db.games.find({'players': targ_name})))
+            games = map(game.Game, list(db.games.find({PLAYERS: targ_name})))
             player_buy_summary = count_buys.DeckBuyStats()
             match_name = lambda g, name: norm_name(name) == targ_name
             count_buys.accum_buy_stats(games, player_buy_summary, match_name)
@@ -148,11 +149,11 @@ class PlayerJsonPage(object):
         db = utils.get_mongo_database()
         games = db.games
         norm_target_player = norm_name(target_player)
-        games_coll = games.find({'players': norm_target_player})
+        games_coll = games.find({PLAYERS: norm_target_player})
 
         from pymongo import json_util
 
-        games_arr = [{'game': g['decks'], 'id': g['_id']} for g in games_coll]
+        games_arr = [{'game': g[DECKS], 'id': g['_id']} for g in games_coll]
 
         return json.dumps(games_arr, default=json_util.default)
 
@@ -201,7 +202,7 @@ class PlayerPage(object):
         db = utils.get_mongo_database()
         games = db.games
         norm_target_player = norm_name(target_player)
-        games_coll = games.find({'players': norm_target_player})
+        games_coll = games.find({PLAYERS: norm_target_player})
 
         leaderboard_history_result = db.leaderboard_history.find_one(
             {'_id': norm_target_player})
@@ -358,7 +359,7 @@ class GamesByOpponentPage(object):
         db = utils.get_mongo_database()
         games = db.games
         norm_target_player = norm_name(target_player)
-        games_coll = games.find({'players': norm_target_player})
+        games_coll = games.find({PLAYERS: norm_target_player})
 
         keyed_by_opp = collections.defaultdict(list)
         game_list = []

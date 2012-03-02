@@ -5,6 +5,7 @@ import pymongo
 import card_info
 import game
 import name_merger
+from keys import *
 
 def _render_card(card, freq, kingdom_restrict):
     def font_size(freq):
@@ -160,10 +161,10 @@ class QueryMatcher(object):
 
         self.db_query = {}
         if self.players_restrict:
-            self.db_query['players'] = {'$all': self.players_restrict}
+            self.db_query[PLAYERS] = {'$all': self.players_restrict}
 
         if self.kingdom_restrict:
-            self.db_query['supply'] = {'$all': self.kingdom_restrict}
+            self.db_query[SUPPLY] = {'$all': self.kingdom_restrict}
 
     def _add_name(self, name):
         if type(name) is not unicode:

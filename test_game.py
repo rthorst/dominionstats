@@ -30,16 +30,16 @@ class ScoreDeckTest(unittest.TestCase):
                                            'Fishing Village': 3}), 4)
 
 def make_deck(name, points, win_points, order):
-    return {'name': name, 'points': points, 'win_points': win_points, 
-            'deck': [], 'order': order, 'turns': [],}
+    return {NAME: name, POINTS: points, WIN_POINTS: win_points, 
+            DECK: [], ORDER: order, TURNS: [],}
 
 class WinLossTieTest(unittest.TestCase):
     def test_win_loss_tie_3p(self):
         g = game.Game(
-            {'decks': [make_deck('p1', 1, 1.5, 1),
-                       make_deck('p2', 1, 1.5, 2),
-                       make_deck('p3', 0, 0, 3),],
-             'supply': [], '_id': ''})
+            {DECKS: [make_deck('p1', 1, 1.5, 1),
+                     make_deck('p2', 1, 1.5, 2),
+                     make_deck('p3', 0, 0, 3),],
+             SUPPLY: [], '_id': ''})
         self.assertEquals(game.TIE, g.win_loss_tie('p1', 'p2'))
         self.assertEquals(game.TIE, g.win_loss_tie('p2', 'p1'))
         self.assertEquals(game.WIN, g.win_loss_tie('p1', 'p3'))

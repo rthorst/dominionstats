@@ -6,6 +6,7 @@ import trueskill.trueskill as ts
 import incremental_scanner
 import primitive_util
 import utils
+from keys import *
 
 def results_to_ranks(results):
     sorted_results = sorted(results)
@@ -58,22 +59,23 @@ def update_skills_for_game(game, opening_skill_table,
     results = []
     openings = []
     dups = False
-    for deck in game['decks']:
-        opening = deck['turns'][0].get('buys', []) + \
-            deck['turns'][1].get('buys', [])
+    # FIXME: Use Game Object
+    for deck in game[DECKS]:
+        opening = deck[TURNS][0].get(BUYS, []) + \
+            deck[TURNS][1].get(BUYS, [])
             
         opening.sort()
         open_name = 'open:' + '+'.join(opening)
         if open_name in openings:
             dups = True
         openings.append(open_name)
-        nturns = len(deck['turns'])
-        if deck['resigned']:
+        nturns = len(deck[TURNS])
+        if deck[RESIGNED]:
             vp = -1000
         else:
-            vp = deck['points']
+            vp = deck[POINTS]
         results.append((-vp, nturns))
-        player_name = deck['name']
+        player_name = deck[NAME]
 
         teams.append([open_name, player_name])
         ranks = results_to_ranks(results)
@@ -113,7 +115,7 @@ def run_trueskill_openings():
 
     for ind, game in enumerate(
         progress_meter(scanner.scan(db.games, {}), 100)):
-        if len(game['decks']) >= 2 and len(game['decks'][1]['turns']) >= 5:
+        if len(game[DECKS]) >= 2 and len(game[DECKS][1][TURNS]) >= 5:
             update_skills_for_game(game, opening_skill_table)
                                    
         if ind == args.max_games:

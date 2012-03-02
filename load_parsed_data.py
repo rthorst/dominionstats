@@ -8,6 +8,8 @@ import sys
 import argparse
 import utils
 
+from keys import *
+
 parser = utils.incremental_date_range_cmd_line_parser()
 find_id = re.compile('game-.*.html')
 
@@ -46,8 +48,8 @@ def process_file(filename, incremental, games_table):
 def main():
     args = parser.parse_args()
     games_table = pymongo.Connection().test.games
-    games_table.ensure_index('players')
-    games_table.ensure_index('supply')
+    games_table.ensure_index(PLAYERS)
+    games_table.ensure_index(SUPPLY)
     data_files_to_load = os.listdir('parsed_out')
     data_files_to_load.sort()
 

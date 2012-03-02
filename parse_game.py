@@ -16,6 +16,7 @@ import card_info
 import game
 import utils
 import name_merger
+from keys import *
 from game import Game
 
 import simplejson as json
@@ -128,26 +129,26 @@ def assign_win_points(game_dict):
         """ Return tuple ordered by increasing final standing. """
         # negate turns so that max() behaves; points good, turns bad.
         num_normal_turns = sum(not ('poss' in t or 'outpost' in t) 
-                               for t in deck_dict['turns'])
-        return (deck_dict['points'], -num_normal_turns)
+                               for t in deck_dict[TURNS])
+        return (deck_dict[POINTS], -num_normal_turns)
 
-    decks = game_dict['decks']
+    decks = game_dict[DECKS]
     winner_tuple = max(win_tuple(p) for p in decks)
     winners = [p for p in decks if win_tuple(p) == winner_tuple]
 
     win_points = float(len(decks)) / len(winners)
     for player in decks:
-        player['win_points'] = win_points if player in winners else 0.0
+        player[WIN_POINTS] = win_points if player in winners else 0.0
 
 def _player_label(ind):
     return 'player' + str(ind)
 
 def associate_game_with_norm_names(game_dict):
     """ Fill players field in game_dict with list of normed player names."""
-    game_dict['players'] = []
-    for player_deck in game_dict['decks']:
-        normed_name = name_merger.norm_name(player_deck['name'])
-        game_dict['players'].append(normed_name)
+    game_dict[PLAYERS] = []
+    for player_deck in game_dict[DECKS]:
+        normed_name = name_merger.norm_name(player_deck[NAME])
+        game_dict[PLAYERS].append(normed_name)
 
 def associate_turns_with_owner(game_dict, turns):
     """ Move each turn in turns to be a member of the corresponding player
@@ -156,21 +157,21 @@ def associate_turns_with_owner(game_dict, turns):
     Remove the names from the turn, since it is redundant with the name
     on the player level dict."""
     name_to_owner = {}
-    for idx, deck in enumerate(game_dict['decks']):
-        name_to_owner[deck['name']] = deck
-        deck['turns'] = []
+    for idx, deck in enumerate(game_dict[DECKS]):
+        name_to_owner[deck[NAME]] = deck
+        deck[TURNS] = []
 
     order_ct = 0
 
     for idx, turn in enumerate(turns):
-        owner = name_to_owner[turn['name']]
-        owner['turns'].append(turn)
-        if not 'order' in owner:
-            owner['order'] = idx + 1
+        owner = name_to_owner[turn[NAME]]
+        owner[TURNS].append(turn)
+        if not ORDER in owner:
+            owner[ORDER] = idx + 1
             order_ct += 1
-        del turn['name']
+        del turn[NAME]
 
-    if order_ct != len(game_dict['decks']):
+    if order_ct != len(game_dict[DECKS]):
         raise BogusGameError('Did not find turns for all players')
 
 ONLY_NUMBERS_RE = re.compile('^\d+$')
@@ -181,7 +182,7 @@ def validate_names(decks):
     to punt on annoying inputs that to make sure we get them right."""
     used_names = set()
     for deck in decks:
-        name = deck['name']
+        name = deck[NAME]
         if name in used_names:
             raise BogusGameError('Duplicate name %s' % name)
         used_names.add(name)
@@ -252,10 +253,10 @@ def parse_game(game_str, dubious_check = False):
         raise exception
     game_dict = parse_header(header_str)
     decks = parse_decks(decks_blob)
-    game_dict['decks'] = decks
+    game_dict[DECKS] = decks
     validate_names(decks)
 
-    names_list = [d['name'] for d in game_dict['decks']]
+    names_list = [d[NAME] for d in game_dict[DECKS]]
     turns_str = trash_and_turns.split('Game log')[1]
     turns_str = turns_str[turns_str.find('---'):]
     turns_str = canonicalize_names(turns_str, names_list)
@@ -287,7 +288,7 @@ def parse_header(header_str):
         resigned = True
         gone = []
     supply = capture_cards(supply_str)
-    return {'game_end': gone, 'supply': supply, 'resigned': resigned}
+    return {GAME_END: gone, SUPPLY: supply, RESIGNED: resigned}
 
 PLACEMENT_RE = re.compile('#\d (.*)')
 POINTS_RE = re.compile(': (-*\d+) point(s?)(\s|(' + re.escape('</b>') + '))')
@@ -362,8 +363,8 @@ def parse_deck(deck_str):
             card_quant = int(card_blob.split()[0])
             deck_comp[card_name] = card_quant
     #FIXME: deck_comp is undefined if there's no vp_list
-    return {'name': name, 'points': points, 'resigned': resigned,
-            'deck': deck_comp, 'vp_tokens': vp_tokens}
+    return {NAME: name, POINTS: points, RESIGNED: resigned,
+            DECK: deck_comp, VP_TOKENS: vp_tokens}
 
 def parse_decks(decks_blob):
     """ Parse and return a list of decks"""
@@ -535,15 +536,15 @@ def parse_turn(turn_blob, names_list):
     if 'outpost' in parsed_header:
         outpost = True
 
-    ret = {'gains': [], 'trashes': [], 'buys': []}
+    ret = {GAINS: [], TRASHES: [], BUYS: []}
     plays = []
     returns = []
     turn_money = 0
     vp_tokens = 0
     ps_tokens = 0
-    opp_turn_info = collections.defaultdict(lambda: {'gains': [],
-                                                     'trashes': [],
-                                                     'buys': []})
+    opp_turn_info = collections.defaultdict(lambda: {GAINS: [],
+                                                     TRASHES: [],
+                                                     BUYS: []})
     tracker = PlayerTracker()
     
     for line_idx, line in enumerate(lines):
@@ -556,8 +557,8 @@ def parse_turn(turn_blob, names_list):
         has_trashing = KW_TRASHING in line
         has_trashes = KW_TRASHES in line
         has_gaining = KW_GAINING in line
-        orig_buys_len = len(targ_obj.get('buys', []))
-        orig_gains_len = len(targ_obj.get('gains', []))
+        orig_buys_len = len(targ_obj.get(BUYS, []))
+        orig_gains_len = len(targ_obj.get(GAINS, []))
 
         did_trading_post_gain = False
 
@@ -565,52 +566,52 @@ def parse_turn(turn_blob, names_list):
             if has_gaining:
                 # Trading post turn, first trashes, then gaining
                 gain_start = line.find(KW_GAINING)
-                targ_obj['trashes'].extend(capture_cards(line[:gain_start]))
-                targ_obj['gains'].extend(capture_cards(line[gain_start:]))
+                targ_obj[TRASHES].extend(capture_cards(line[:gain_start]))
+                targ_obj[GAINS].extend(capture_cards(line[gain_start:]))
                 did_trading_post_gain = True                
             else:
-                targ_obj['trashes'].extend(capture_cards(line))
+                targ_obj[TRASHES].extend(capture_cards(line))
         if KW_WITH_A in line:
             if KW_REPLACING in line:
                 new_gained_portion = line[line.find(KW_WITH_A):]
-                targ_obj['gains'].extend(capture_cards(new_gained_portion))
+                targ_obj[GAINS].extend(capture_cards(new_gained_portion))
         if KW_PLAYS in line or KW_PLAYING in line: 
             plays.extend(capture_cards(line))
         if has_gaining and not did_trading_post_gain:
             if KW_ANOTHER_ONE in line: # mints a gold gaining another one
-                targ_obj['gains'].extend(capture_cards(line))
+                targ_obj[GAINS].extend(capture_cards(line))
             else:
                 # gaining always associated with current player?
-                targ_obj['gains'].extend( 
+                targ_obj[GAINS].extend( 
                     capture_cards(line[line.find(KW_GAINING):])) 
         if KW_BUYS in line: 
-            targ_obj['buys'].extend(capture_cards(line))
+            targ_obj[BUYS].extend(capture_cards(line))
         if KW_GAINS_THE in line:
-            targ_obj['gains'].extend(capture_cards(line))
+            targ_obj[GAINS].extend(capture_cards(line))
         if has_trashing: 
             if KW_REVEALS in lines[line_idx - 1] and not KW_DRAWS in line:
-                targ_obj['trashes'].extend(capture_cards(lines[line_idx - 1]))
+                targ_obj[TRASHES].extend(capture_cards(lines[line_idx - 1]))
             if KW_REVEALING in line or KW_REVEALS in line:  
                 # reveals watchtower trashing ...
                 # noble brigand reveals xx, yy and treashes yy
                 trashed = capture_cards(line[line.find(KW_TRASHING):])
-                targ_obj['trashes'].extend(trashed)
+                targ_obj[TRASHES].extend(trashed)
             else:
                 rest = line
                 if KW_GAINING in line:
                     rest = line[:line.find(KW_GAINING)]
-                targ_obj['trashes'].extend(capture_cards(rest))
+                targ_obj[TRASHES].extend(capture_cards(rest))
         if KW_GAINS_A in line or KW_GAMES_A in line:
             if KW_TOKEN in line:
                 assert 'Pirate Ship' in capture_cards(line)
                 ps_tokens += 1
             else:
                 rest = line[max(line.find(KW_GAINS_A), line.find(KW_GAMES_A)):]
-                targ_obj['gains'].extend(capture_cards(rest))
+                targ_obj[GAINS].extend(capture_cards(rest))
         if KW_IS_TRASHED in line:
             # Saboteur after revealing cards, name not mentioned on this line.
             cards = capture_cards(line)
-            targ_obj['trashes'].extend(cards)
+            targ_obj[TRASHES].extend(cards)
         if KW_REVEALS in line:
             card_revealed = capture_cards(line)
 
@@ -659,12 +660,12 @@ def parse_turn(turn_blob, names_list):
                         line, str(targ_obj), 
                         '\n'.join(lines[line_idx - 2: line_idx + 2])))
 
-        now_buys_len = len(targ_obj.get('buys', []))
-        now_gains_len = len(targ_obj.get('gains', []))
+        now_buys_len = len(targ_obj.get(BUYS, []))
+        now_gains_len = len(targ_obj.get(GAINS, []))
         if now_buys_len > orig_buys_len:
-            targ_obj['buy_or_gain'] = 'buys'
+            targ_obj['buy_or_gain'] = BUYS
         if now_gains_len > orig_gains_len:
-            targ_obj['buy_or_gain'] = 'gains'
+            targ_obj['buy_or_gain'] = GAINS
 
         assert not (now_buys_len > orig_buys_len and
                     now_gains_len > orig_gains_len)
@@ -677,22 +678,22 @@ def parse_turn(turn_blob, names_list):
 
     if poss:
         possessee_info = opp_turn_info[possessee_name]
-        for k in ['gains', 'trashes']:
+        for k in [GAINS, TRASHES]:
             _delete_if_exists(possessee_info, k)
 
-        possessee_info['vp_tokens'], vp_tokens = vp_tokens, 0
-        possessee_info['returns'], returns = returns, []
-        ret['buys'] = []  # buys handled by possesion gain line.
+        possessee_info[VP_TOKENS], vp_tokens = vp_tokens, 0
+        possessee_info[RETURNS], returns = returns, []
+        ret[BUYS] = []  # buys handled by possesion gain line.
 
     for opp in opp_turn_info.keys():
         _delete_if_exists(opp_turn_info[opp], 'buy_or_gain')
         delete_keys_with_empty_vals(opp_turn_info[opp])
-    ret.update({'name': names_list[tracker.current_player()], 
-                'plays': plays , 'returns': returns,
-                'money': count_money(plays) + turn_money,
-                'vp_tokens': vp_tokens, 'ps_tokens': ps_tokens,
+    ret.update({NAME: names_list[tracker.current_player()], 
+                PLAYS: plays , RETURNS: returns,
+                MONEY: count_money(plays) + turn_money,
+                VP_TOKENS: vp_tokens, 'ps_tokens': ps_tokens,
                 'poss': poss, 'outpost': outpost, 
-                'opp': dict(opp_turn_info)})
+                OPP: dict(opp_turn_info)})
 
     delete_keys_with_empty_vals(ret)
     return ret
@@ -795,7 +796,7 @@ def track_brokenness(parsed_games):
         accurately_parsed = check_game_sanity(game.Game(raw_game), sys.stdout)
         #if not accurately_parsed:
         #    print raw_game['_id']
-        for card in raw_game['supply']:
+        for card in raw_game[SUPPLY]:
             if not accurately_parsed:
                 wrongness[card] += 1
             overall[card] += 1
