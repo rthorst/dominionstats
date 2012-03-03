@@ -617,7 +617,7 @@ class OptimalCardRatios(object):
                            set(card_info.TOURNAMENT_WINNINGS))
 
         card_x = query_dict.get('card_x', 'Minion')
-        card_y = query_dct.get('card_y', 'Gold')
+        card_y = query_dict.get('card_y', 'Gold')
 
         if card_x < card_y:
             db_id = card_x + ':' + card_y
