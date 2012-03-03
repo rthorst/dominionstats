@@ -92,18 +92,18 @@ class Turn(object):
         ret = []
         my_change = PlayerDeckChange(self.player.name())
         ret.append(my_change)
-        my_change.gains = self.gains
-        my_change.buys = self.buys
-        my_change.trashes = self.turn_dict.get(TRASHES, [])
-        my_change.returns = self.turn_dict.get(RETURNS, [])
+        setattr(my_change, GAINS, self.gains)
+        setattr(my_change, BUYS, self.buys)
+        setattr(my_change, TRASHES, self.turn_dict.get(TRASHES, []))
+        setattr(my_change, RETURNS, self.turn_dict.get(RETURNS, []))
         my_change.vp_tokens += self.turn_dict.get(VP_TOKENS, 0)
 
         opp_info = self.turn_dict.get(OPP, {})
         for opp_name, info_dict in opp_info.iteritems():
             change = PlayerDeckChange(opp_name)
-            change.gains.extend(info_dict.get(GAINS, []))
-            change.trashes.extend(info_dict.get(TRASHES, []))
-            change.returns.extend(info_dict.get(RETURNS, []))
+            getattr(change, GAINS).extend(info_dict.get(GAINS, []))
+            getattr(change, TRASHES).extend(info_dict.get(TRASHES, []))
+            getattr(change, RETURNS).extend(info_dict.get(RETURNS, []))
             change.vp_tokens += info_dict.get(VP_TOKENS, 0)
             ret.append(change)
 
@@ -453,10 +453,10 @@ class GameState(object):
                 self.player_decks[name][card] += deck_dir
 
         for deck_change in turn.deck_changes():
-            apply_diff(deck_change.buys + deck_change.gains,
+            apply_diff(getattr(deck_change, BUYS) + getattr(deck_change, GAINS),
                       deck_change.name, -1, 1)
-            apply_diff(deck_change.trashes, deck_change.name, 0, -1)
-            apply_diff(deck_change.returns, deck_change.name, 1, -1)
+            apply_diff(getattr(deck_change, TRASHES), deck_change.name, 0, -1)
+            apply_diff(getattr(deck_change, RETURNS), deck_change.name, 1, -1)
             self.player_vp_tokens[deck_change.name] += deck_change.vp_tokens
 
     def turn_label(self, for_anchor=False, for_display=False):
