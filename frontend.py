@@ -312,9 +312,12 @@ class PlayerPage(object):
             average = overall_record.average_win_points()
 
             ret += '<tr><th>%s</th>'%ex
-            ret += '<td>%.2f'% (weight * 10. / len(game_list))
-            ret += '<td>%.2f' % wp
-            ret += '<td>%.2f%%'% ( (wp - average) * 100. / average )
+            ret += '<td>%.2f</td>'% (weight * 10. / len(game_list))
+            ret += '<td>%.2f<td>' % wp
+            if average > 0:
+                ret += '<td>%.2f%%</td>'% ( (wp - average) * 100. / average )
+            else:
+                ret += '<td>0</td>' 
         ret += '</table></div>'
 
         ret += '<div style="clear: both;">&nbsp;</div>'
