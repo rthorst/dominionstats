@@ -11,6 +11,7 @@ from primitive_util import ConvertibleDefaultDict
 import card_info
 import itertools
 from keys import *
+from card import index_to_card
 WIN, LOSS, TIE = range(3)
 
 class PlayerDeckChange(object):
@@ -33,23 +34,36 @@ class PlayerDeckChange(object):
             getattr(self, cat).extend(getattr(other_changes, cat))
         self.vp_tokens += other_changes.vp_tokens
 
+def turn_decode(turn_dict, field):
+    return [index_to_card(i) for i in turn_dict.get(field, [])]
+
 class Turn(object):
     def __init__(self, turn_dict, game, player, turn_no, poss_no):
         self.game = game
         self.player = player
-        self.plays = turn_dict.get(PLAYS, [])
-        self.gains = turn_dict.get(GAINS, [])
-        self.buys = turn_dict.get(BUYS, [])
+        self.plays   = turn_decode(turn_dict, PLAYS)
+        self.gains   = turn_decode(turn_dict, GAINS)
+        self.buys    = turn_decode(turn_dict, BUYS)
+        self.returns = turn_decode(turn_dict, RETURNS)
+        self.trashes = turn_decode(turn_dict, TRASHES)
         self.turn_no = turn_no
         self.poss_no = poss_no
         self.turn_dict = turn_dict
 
     def __repr__(self):
-        encoded = dict(self.turn_dict)
-        encoded['player'] = self.player.name()
-        encoded['turn_no'] = self.turn_no
-        encoded['poss_no'] = self.poss_no
-        return pprint.pformat(encoded)
+        s = '%d %d | '%(self.turn_no, self.poss_no)
+        # s += self.player.name()
+        if self.plays:
+            s += 'Plays: %s ' % self.plays
+        if self.buys:
+            s += 'Buys: %s ' % self.buys
+        if self.gains:
+            s += 'Gains: %s '% self.gains
+        if self.trashes:
+            s += 'Trashes: %s ' % self.trashes
+        if self.returns:
+            s += 'Returns: %s ' % self.returns
+        return s
 
     def get_player(self):
         return self.player
@@ -94,8 +108,8 @@ class Turn(object):
         ret.append(my_change)
         setattr(my_change, GAINS, self.gains)
         setattr(my_change, BUYS, self.buys)
-        setattr(my_change, TRASHES, self.turn_dict.get(TRASHES, []))
-        setattr(my_change, RETURNS, self.turn_dict.get(RETURNS, []))
+        setattr(my_change, TRASHES, self.trashes)
+        setattr(my_change, RETURNS, self.returns)
         my_change.vp_tokens += self.turn_dict.get(VP_TOKENS, 0)
 
         opp_info = self.turn_dict.get(OPP, {})
@@ -116,7 +130,9 @@ class PlayerDeck(object):
         self.player_name = player_deck_dict[NAME]
         self.win_points = player_deck_dict[WIN_POINTS]
         self.points = player_deck_dict[POINTS]
-        self.deck = player_deck_dict[DECK]
+        self.deck = {}
+        for (index, count) in player_deck_dict[DECK].iteritems():
+            self.deck[ index_to_card(int(index)) ] = count
         self.turn_order = player_deck_dict[ORDER]
         self.num_real_turns = 0
 
@@ -163,11 +179,16 @@ class PlayerDeck(object):
             return '#555555'
         return 'red'
 
+    def __repr__(self):
+        s = '\t%s %f %d %d\n\t\t'%("",self.win_points, self.points, self.turn_order)
+        s += str(self.deck)
+        return s
+
 
 class Game(object):
     def __init__(self, game_dict):
         self.turns = []
-        self.supply = game_dict[SUPPLY]
+        self.supply = [index_to_card(i) for i in game_dict[SUPPLY]]
         # pprint.pprint(game_dict)
 
         self.player_decks = [PlayerDeck(pd, self) for pd in game_dict[DECKS]]
@@ -344,6 +365,13 @@ class Game(object):
             weights[expansion] /= float(total)
 
         return weights
+
+
+    def __repr__(self):
+        s = '== %s ==\n\tSupply: %s\n'%(self.id, self.supply)
+        for pd in self.player_decks:
+            s += '%s\n'%str(pd)
+        return s
 
 def score_deck(deck_comp):
     """ Given a dict of card, frequency, return the score. """

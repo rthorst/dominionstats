@@ -5,6 +5,7 @@ _cardlist_reader = csv.DictReader(open(
         os.path.join(
             os.path.dirname(os.path.abspath(__file__)), 'card_info/card_list.csv')))
 _CARDS = {}
+_INDEXED = {}
 
 # Returns value of string if the value is unambiguous, otherwise the default
 def int_or_no_int(string, default):
@@ -80,11 +81,15 @@ def _init():
         c = Card(cardlist_row)
         _CARDS[singular] = c
         _CARDS[plural] = c
+        _INDEXED[ int(c.index) ] = c
 
 _init()
 
 def get_card(name):
     return _CARDS[name]
+
+def index_to_card(index):
+    return _INDEXED[index]
 
 TOURNAMENT_WINNINGS = ['Princess', 'Diadem', 'Followers', 
                        'Trusty Steed', 'Bag of Gold']
