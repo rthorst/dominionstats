@@ -312,9 +312,12 @@ class PlayerPage(object):
             average = overall_record.average_win_points()
 
             ret += '<tr><th>%s</th>'%ex
-            ret += '<td>%.2f'% (weight * 10. / len(game_list))
-            ret += '<td>%.2f' % wp
-            ret += '<td>%.2f%%'% ( (wp - average) * 100. / average )
+            ret += '<td>%.2f</td>'% (weight * 10. / len(game_list))
+            ret += '<td>%.2f<td>' % wp
+            if average > 0:
+                ret += '<td>%.2f%%</td>'% ( (wp - average) * 100. / average )
+            else:
+                ret += '<td>0</td>' 
         ret += '</table></div>'
 
         ret += '<div style="clear: both;">&nbsp;</div>'
@@ -538,9 +541,8 @@ class SupplyWinApi(object):
 
     def interaction_card_index_tuples(self, query_dict):
         cards = query_dict.get('interaction', '').split(',')
-        cards = [c for c in cards if c]  # remove empty strings
-        indexes = sorted(map(self.str_card_index, cards), 
-                         key=lambda x: -int(x))
+        cards = [c.strip() for c in cards if c]  # remove empty strings
+        indexes = sorted(map(self.str_card_index, cards), reverse=True)
 
         # Singleton tuples are weird, but they make the fetching logic simpler.
         card_tuples = list(itertools.combinations(indexes, 1))
@@ -618,7 +620,7 @@ class OptimalCardRatios(object):
                            set(card_info.TOURNAMENT_WINNINGS))
 
         card_x = query_dict.get('card_x', 'Minion')
-        card_y = query_dct.get('card_y', 'Gold')
+        card_y = query_dict.get('card_y', 'Gold')
 
         if card_x < card_y:
             db_id = card_x + ':' + card_y

@@ -33,53 +33,50 @@ function NumActions(card_name) {
   return parseInt(keyed_cards[card_name]['Actions']) || 1;
 };
 
-function ExpandCardGlob(glob) {
-  // Glob is either something like "Worker's Village,Smithy" or
-  // "actions==2&&cards>=1".
-  var ret = [];
-
-  var chunks = glob.split(',');
-
-  var i = 0;
-  var matched_chunk_inds = {};
-
-  try {
-    for (i = 0; i < card_list.length; ++i) {
-      var per_card_attrs = card_list[i];
-      var lower_name = per_card_attrs.Singular.toLowerCase();
-      for (var j = 0; j < chunks.length; ++j) {
-        if (chunks[j].toLowerCase() == lower_name) {
-          ret.push(per_card_attrs.Singular);
-          matched_chunk_inds[j] = true;
+function ExpandSubglob(glob) {
+    var ret = [];
+    try {
+        // This should probably be an object to avoid the linear search.
+        for (var i = 0; i < card_list.length; ++i) {
+            var per_card_attrs = card_list[i];
+            if (glob.trim().toLowerCase() == 
+                per_card_attrs.Singular.toLowerCase()) {
+                ret.push(per_card_attrs.Singular);
+                return ret;
+            }
         }
-      }
+
+        for (var i = 0; i < card_list.length; ++i) {
+            var per_card_attrs = card_list[i];
+            if (per_card_attrs.Singular == "Archivist") {
+                continue;
+            }
+            for (k in per_card_attrs) {
+                var val = per_card_attrs[k];
+                if (isNaN(parseInt(val))) {
+                    eval(k + '= "' + val + '"');
+                } else {
+                    eval(k + '=' + val);
+                }
+            }
+            if (eval(glob)) {
+                ret.push(per_card_attrs.Singular);
+            }
+        }
+    } catch (err) {
+        console.log(err);
     }
-    var remaining_glob = [];
-    for (var i = 0; i < chunks.length; ++i) {
-      if (!matched_chunk_inds[i]) {
-        remaining_glob.push(chunks[i]);
-      }
-    }
-    glob = remaining_glob.join(',');
-    for (var i = 0; i < card_list.length; ++i) {
-      var per_card_attrs = card_list[i];
-      for (k in per_card_attrs) {
-	var val = per_card_attrs[k];
-	if (isNaN(parseInt(val))) {
-	  eval(k + '= "' + val + '"');
-	} else {
-	  eval(k + '=' + val);
-	}
-      }
-      if (eval(glob)) {
-	ret.push(per_card_attrs.Singular);
-      }
-    }
-  } catch (err) {
-    console.log(i);
-    console.log(card_list[i]);
-    console.log(glob);
-    console.log(err);
-  }
-  return ret;
+    return ret;    
 };
+
+function ExpandCardGlob(glob) {
+    // Glob is either something like "Worker's Village, Smithy" or
+    // "actions==2&&cards>=1".
+    var ret = [];
+    var subglobs = glob.split(',');
+    for (var i = 0; i < subglobs.length; ++i) {
+        ret = ret.concat(ExpandSubglob(subglobs[i].trim()));
+    }
+    return ret;
+};
+
