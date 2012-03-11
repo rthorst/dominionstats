@@ -855,7 +855,7 @@ def check_game_sanity(game_val, output):
             if found_something_wrong:
                 try:
                     output.write('%s %s\n' % (player_deck.name(), game_val.get_id()))
-                    output.write(' '.join(game_val.get_supply()))
+                    output.write(' '.join(map(str, game_val.get_supply())))
                     output.write('\n')
                 except UnicodeEncodeError, e:
                     None
