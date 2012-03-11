@@ -12,12 +12,12 @@ import pprint
 import re
 import sys
 
-import card_info
 import game
 import utils
 import name_merger
 from keys import *
 from game import Game
+from card import get_card, CardEncoder
 
 import simplejson as json
 
@@ -116,7 +116,7 @@ def capture_cards(line):
             if maybe_plural == '&diams;':
                 continue
             try:
-                card = card_info.singular_of(maybe_plural)
+                card = get_card(maybe_plural)
             except KeyError, exception:
                 print line
                 raise exception
@@ -356,12 +356,12 @@ def parse_deck(deck_str):
             right_bracket_index = card_blob.find('>')
             card_name = card_blob[right_bracket_index + 1:]
             try:
-                card_name = card_info.singular_of(card_name)
+                card = get_card(card_name)
             except KeyError, exception:
                 print chunk, card_name, card_blob[right_bracket_index - 10:]
                 raise exception
             card_quant = int(card_blob.split()[0])
-            deck_comp[card_name] = card_quant
+            deck_comp[card] = card_quant
     #FIXME: deck_comp is undefined if there's no vp_list
     return {NAME: name, POINTS: points, RESIGNED: resigned,
             DECK: deck_comp, VP_TOKENS: vp_tokens}
@@ -411,8 +411,8 @@ def count_money(plays):
             coppersmith_ct += 1
         elif card == 'Copper':
             money += 1 + coppersmith_ct
-        elif card_info.is_treasure(card):
-            money += card_info.money_value(card)
+        elif card.is_treasure():
+            money += card.money_value()
     return money
 
 PLAYER_IND_RE = re.compile('player(?P<num>\d+)')
@@ -750,7 +750,7 @@ def dump_segment(arg_tuple):
     """
     idx, year_month_day, segment = arg_tuple
     out_name = 'parsed_out/%s-%d.json' % (year_month_day, idx)
-    json.dump(segment, open(out_name, 'w'), indent=2, sort_keys=True)
+    json.dump(segment, open(out_name, 'w'), indent=2, sort_keys=True, cls=CardEncoder, skipkeys=True)
 
 def convert_to_json(year_month_day, games_to_parse = None):
     """ Parse the games in for given year_month_day and output them
