@@ -115,3 +115,8 @@ class CardEncoder(json.JSONEncoder):
         if isinstance(obj, Card):
             return int(obj.index)
         return obj
+
+    def encode(self, obj):
+        if isinstance(obj, Card):
+            return json.JSONEncoder.encode(self, str(obj.index))
+        return json.JSONEncoder.encode(self, obj)

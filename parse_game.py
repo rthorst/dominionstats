@@ -361,7 +361,7 @@ def parse_deck(deck_str):
                 print chunk, card_name, card_blob[right_bracket_index - 10:]
                 raise exception
             card_quant = int(card_blob.split()[0])
-            deck_comp[card] = card_quant
+            deck_comp[str(card.index)] = card_quant
     #FIXME: deck_comp is undefined if there's no vp_list
     return {NAME: name, POINTS: points, RESIGNED: resigned,
             DECK: deck_comp, VP_TOKENS: vp_tokens}
