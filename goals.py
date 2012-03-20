@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import pymongo
-import card_info
 import collections
 import game
 import incremental_scanner
@@ -33,10 +32,10 @@ def CheckMatchBOM(g):
         if g.get_player_deck(player).Resigned():
             continue
         for card in card_list:
-            if card_info.is_action(card):
+            if card.is_action():
                 bad = True
                 break
-            if card_info.is_treasure(card):
+            if card.is_treasure():
                 treasures.append(card)
         if not bad:
             reason = 'Bought only money and vp : %s' % (', '.join(treasures))
@@ -77,7 +76,7 @@ def CollectedAllCopies(g):
 
     for player, card_dict in accumed_per_player.iteritems():
         for card, quant in card_dict.iteritems():
-            if quant >= card_info.num_copies_per_game(card, game_size):
+            if quant >= card.num_copies_per_game(game_size):
                 gain_map[player].append(card)
     return gain_map
 
@@ -146,7 +145,7 @@ def CheckMatchOneTrickPony(g):
     for player, card_dict in accumed_per_player.iteritems():
         if g.get_player_deck(player).WinPoints() > 1.0:
             actions_quants = [(c, q) for c, q in card_dict.iteritems() if
-                              card_info.is_action(c)]
+                              c.is_action()]
             if len(actions_quants) != 1:
                 continue
             if actions_quants[0][1] < 7:
@@ -155,7 +154,7 @@ def CheckMatchOneTrickPony(g):
             ret.append(
                 achievement(player, 
                             'Bought no action other than %d %s' % (
-                        quant, card_info.pluralize(action, quant)),
+                        quant, action.pluralize(quant)),
                             action))
     return ret
 
@@ -165,7 +164,7 @@ def CheckMatchMrGreenGenes(g):
     ret = []
     for player, card_dict in accumed_per_player.iteritems():
         victory_quants = [(c, q) for c, q in card_dict.iteritems() if
-                          card_info.is_victory(c)]
+                          c.is_victory()]
         if len(victory_quants) >= 6:
             ret.append(achievement(player,
                     'Bought %d differently named Victory cards' %
@@ -365,7 +364,7 @@ def CheckMatchBully(g):
             continue
         attack = False
         for play in turn.plays:
-            if card_info.is_attack(play):
+            if play.is_attack():
                 attack = True
                 break
         if not attack:

@@ -8,7 +8,6 @@ players in the game or other games in the collection belongs here.
 import collections
 import pprint
 from primitive_util import ConvertibleDefaultDict
-import card_info
 import itertools
 from keys import *
 from card import index_to_card
@@ -355,7 +354,7 @@ class Game(object):
         total = 0
 
         for c in self.supply:
-            expansion = card_info.expansion(c)
+            expansion = c.get_expansion()
             if expansion == 'Common':
                 continue
             weights[expansion] += 1.0
@@ -388,7 +387,7 @@ def score_deck(deck_comp):
         ret += score_silk_road(deck_comp)
 
     for card in deck_comp:
-        ret += card_info.vp_per_card(card) * deck_comp[card]
+        ret += card.vp_per_card() * deck_comp[card]
 
     return ret
 
@@ -403,11 +402,11 @@ def score_fairgrounds(deck_comp):
     return 2 * (len(deck_comp.keys()) / 5) * deck_comp['Fairgrounds']
 
 def score_vineyard(deck_comp):
-    return sum(deck_comp[card] if card_info.is_action(card) else 0
+    return sum(deck_comp[card] if card.is_action() else 0
                for card in deck_comp) / 3 * deck_comp['Vineyard']
 
 def score_silk_road(deck_comp):
-    return sum(deck_comp[card] if card_info.is_victory(card) else 0
+    return sum(deck_comp[card] if card.is_victory() else 0
                for card in deck_comp) / 4 * deck_comp['Silk Road']
 
 class GameState(object):
@@ -419,8 +418,7 @@ class GameState(object):
         num_players = len(game.get_player_decks())
         for card in itertools.chain(card_info.EVERY_SET_CARDS,
                                     game.get_supply()):
-            self.supply[card] = card_info.num_copies_per_game(card,
-                                                              num_players)
+            self.supply[card] = card.num_copies_per_game(num_players)
 
         self.player_decks = ConvertibleDefaultDict(
             value_type=lambda: ConvertibleDefaultDict(int))

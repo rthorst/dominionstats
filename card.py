@@ -50,6 +50,9 @@ class Card:
     def num_plus_actions(self):
         return int_or_no_int(self.actions, 1)
 
+    def get_expansion(self):
+        return self.expansion
+
     def __repr__(self):
         return self.singular
 
