@@ -3,6 +3,7 @@ PLAYERS = 'P'
 DECKS = 'D'
 GAME_END = 'G'
 RESIGNED = 'R'
+VETO = 'X'
 
 VP_TOKENS = 'V'
 WIN_POINTS = 'W'

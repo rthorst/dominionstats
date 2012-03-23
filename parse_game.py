@@ -258,11 +258,14 @@ def parse_game(game_str, dubious_check = False):
 
     names_list = [d[NAME] for d in game_dict[DECKS]]
     turns_str = trash_and_turns.split('Game log')[1]
-    turns_str = turns_str[turns_str.find('---'):]
+    first_index = turns_str.find('---')
+    veto_str = turns_str[:first_index]
+    turns_str = turns_str[first_index:]
     turns_str = canonicalize_names(turns_str, names_list)
     
     turns = parse_turns(turns_str, names_list)
-    
+
+    game_dict[VETO] = parse_vetoes(veto_str)    
     associate_game_with_norm_names(game_dict)
     associate_turns_with_owner(game_dict, turns)
     assign_win_points(game_dict)
@@ -370,6 +373,16 @@ def parse_decks(decks_blob):
     """ Parse and return a list of decks"""
     deck_blobs = [s for s in decks_blob.split('\n\n') if s]
     return [parse_deck(deck_blob) for deck_blob in deck_blobs]
+
+VETO_RE = re.compile('(.*) vetoes (.*)\.')
+def parse_vetoes(veto_str):
+    matches = VETO_RE.findall(veto_str)
+    v_dict = {}
+    if matches:
+        for (player, card) in matches:
+            v_dict[player] = int(capture_cards(card)[0].index)
+    
+    return v_dict
 
 def name_and_rest(line, term):
     """ Split line about term, return (before, after including term). """

@@ -188,6 +188,7 @@ class Game(object):
     def __init__(self, game_dict):
         self.turns = []
         self.supply = [index_to_card(i) for i in game_dict[SUPPLY]]
+        self.vetoes = game_dict.get(VETO, {})
         # pprint.pprint(game_dict)
 
         self.player_decks = [PlayerDeck(pd, self) for pd in game_dict[DECKS]]
