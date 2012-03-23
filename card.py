@@ -14,6 +14,9 @@ def int_or_no_int(string, default):
     except ValueError, e:
         return default
 
+def PythonifyName(name):
+    return ''.join([n for n in name if n not in [' ', "'", '-']])
+
 class Card: 
     def __init__(self, cardlist_row):
         for key, value in cardlist_row.iteritems():
@@ -22,6 +25,9 @@ class Card:
 
     def pluralize(self, freq):
         return self.singular if freq == 1 else self.plural
+
+    def sane_title(self):
+        return self.singular.replace("'S", "'s").replace(' Of ', ' of ').strip()
 
     def is_treasure(self):
         return self.treasure == '1'
@@ -88,20 +94,23 @@ def _init():
 
 _init()
 
+def all_cards():
+    return _INDEXED.values()
+
+for c in all_cards():
+    pname = PythonifyName(c.singular)
+    vars()[ pname ] = c
+
 def get_card(name):
     return _CARDS[name]
 
 def index_to_card(index):
     return _INDEXED[index]
 
-TOURNAMENT_WINNINGS = [get_card(name) for name in 
-                        ['Princess', 'Diadem', 'Followers', 'Trusty Steed', 'Bag of Gold']]
+TOURNAMENT_WINNINGS = [Princess, Diadem, Followers, TrustySteed, BagofGold]
 
-EVERY_SET_CARDS = [get_card(name) for name in 
-                        ['Estate', 'Duchy', 'Province', 'Copper', 'Silver', 'Gold', 'Curse']]
+EVERY_SET_CARDS = [Estate, Duchy, Province, Copper, Silver, Gold, Curse]
 
-def all_cards():
-    return _INDEXED.values()
 
 def opening_cards():
     return [card for card in all_cards()
@@ -109,19 +118,6 @@ def opening_cards():
 
 def indexes(cards):
     return [int(card.index) for card in cards]
-
-#def sane_title(card):
-#    return card.title().replace("'S", "'s").replace(' Of ', ' of ').strip()
-
-#def card_index(singular):
-#    return _card_index[singular]
-
-#def card_names():
-#    return _card_names
-
-#def card_var_names():
-#    return _card_var_names
-
 
 import simplejson as json
 class CardEncoder(json.JSONEncoder):

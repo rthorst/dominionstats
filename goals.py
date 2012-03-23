@@ -557,10 +557,10 @@ def CheckMatchMegaTurn(g):
     """Bought all the Provinces or Colonies in a single turn."""
     ret = []
     scores = []
-    if get_card('Colony') in g.get_supply():
-        biggest_victory = get_card('Colony')
+    if card.Colony in g.get_supply():
+        biggest_victory = card.Colony
     else:
-        biggest_victory = get_card('Province')
+        biggest_victory = card.Province
 
     victory_copies = biggest_victory.num_copies_per_game(len(g.get_player_decks()))
     for turn in g.get_turns():
