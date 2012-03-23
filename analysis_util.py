@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import card_info
+import card
 import game
 import utils
 
@@ -12,9 +12,9 @@ def games_stream(scanner, games_col):
 def available_cards(game_obj, gained_list):
     ret = set()
     ret.update(game_obj.get_supply())
-    ret.update(card_info.EVERY_SET_CARDS)
+    ret.update(card.EVERY_SET_CARDS)
     ret.update(gained_list)
     if 'Tournament' in ret:
-        ret.update(card_info.TOURNAMENT_WINNINGS)
+        ret.update(card.TOURNAMENT_WINNINGS)
     return ret
     

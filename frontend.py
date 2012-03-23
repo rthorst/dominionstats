@@ -18,7 +18,7 @@ from optimal_card_ratios import DBCardRatioTracker
 from record_summary import RecordSummary
 from small_gain_stat import SmallGainStat
 import annotate_game
-import card_info
+import card
 import datetime
 import game
 import goals
@@ -104,7 +104,7 @@ class OpeningPage(object):
 
         results = db.trueskill_openings.find({'_id': {'$regex': '^open:'}})
         openings = list(results)
-        card_list = card_info.OPENING_CARDS
+        card_list = card.opening_cards()
         def split_opening(o):
             ret = o['_id'][len('open:'):].split('+')
             if ret == ['']: return []
@@ -123,9 +123,9 @@ class OpeningPage(object):
             opening['skill_str'] = skill_str(opening['mu'], opening['sigma'])
             opening['cards'] = split_opening(opening)
             opening['cards'].sort()
-            opening['cards'].sort(key=lambda card: (card_info.cost(card)),
+            opening['cards'].sort(key=lambda card: (card.cost),
                 reverse=True)
-            costs = [str(card_info.cost(card)) for card in opening['cards']]
+            costs = [str(card.cost) for card in opening['cards']]
             while len(costs) < 2:
                 costs.append('-')
             opening['cost'] = '/'.join(costs)
@@ -532,10 +532,7 @@ class GoalsPage(object):
 
 class SupplyWinApi(object):
     def str_card_index(self, card_name):
-        title = card_info.sane_title(card_name)
-        if title:
-            return str(card_info.card_index(title))
-        return ''
+        return str(card.index)
 
     def interaction_card_index_tuples(self, query_dict):
         cards = query_dict.get('interaction', '').split(',')
@@ -597,7 +594,7 @@ class SupplyWinApi(object):
         # unconditional: opt param, if present, also get unconditional stats.
         targets = query_dict.get('targets', '').split(',')
         if sum(len(t) for t in targets) == 0:
-            targets = card_info.card_names()
+            targets = card.all_cards()
             
         target_inds = map(self.str_card_index, targets)
         interaction_tuples = self.interaction_card_index_tuples(query_dict)
@@ -615,8 +612,8 @@ class OptimalCardRatios(object):
         web.header("Content-Type", "text/html; charset=utf-8")
         query_dict = dict(urlparse.parse_qsl(web.ctx.env['QUERY_STRING']))
 
-        card_list = sorted(set(card_info.card_names()) - 
-                           set(card_info.TOURNAMENT_WINNINGS))
+        card_list = sorted(set(card.all_cards()) - 
+                           set(card.TOURNAMENT_WINNINGS))
 
         card_x = query_dict.get('card_x', 'Minion')
         card_y = query_dct.get('card_y', 'Gold')

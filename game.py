@@ -77,7 +77,7 @@ class Turn(object):
         return self.poss_no
 
     def turn_label(self, for_anchor=False, for_display=False):
-        if 'outpost' in self.turn_dict:
+        if OUTPOST in self.turn_dict:
             fmt = u'%(pname)s-%(show)soutpost-turn-%(turn_no)d'
         elif self.poss_no:
             fmt = u'%(pname)s-%(show)sposs-turn-%(turn_no)d-%(poss_no)d'
@@ -198,9 +198,9 @@ class Game(object):
             poss_ct = 0
             out_ct = 0
             for turn in raw_pd[TURNS]:
-                if 'poss' in turn:
+                if POSSESSION in turn:
                     poss_ct += 1
-                elif 'outpost' in turn:
+                elif OUTPOST in turn:
                     out_ct = 1
                 else:
                     turn_ct += 1
@@ -416,7 +416,7 @@ class GameState(object):
             sort_by_turn_order=True)
         self.supply = ConvertibleDefaultDict(value_type=int)
         num_players = len(game.get_player_decks())
-        for card in itertools.chain(card_info.EVERY_SET_CARDS,
+        for card in itertools.chain(card.EVERY_SET_CARDS,
                                     game.get_supply()):
             self.supply[card] = card.num_copies_per_game(num_players)
 

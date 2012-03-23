@@ -5,7 +5,7 @@ from __future__ import division
 import os
 
 import analysis_util
-import card_info
+import card
 from game import Game
 import incremental_scanner
 import pymongo
@@ -19,10 +19,10 @@ import utils
 def card_supply_events(game_obj):
     yield ''
     for card1 in game_obj.get_supply():
-        c1_index = str(card_info.card_index(card1))
+        c1_index = str(card1.index)
         yield c1_index
         for card2 in game_obj.get_supply():
-            c2_index = str(card_info.card_index(card2))
+            c2_index = str(card2.index)
             if c1_index > c2_index:
                 yield c1_index + ',' + c2_index
 
@@ -92,7 +92,7 @@ def accumulate_card_stats(games_stream, stats_accumulator, max_games=-1):
                     small_gain_stat.win_given_no_gain.add_outcome(win_points)
                 small_gain_stat.win_weighted_gain.add_many_outcomes(
                     win_points, count)
-                card_index = str(card_info.card_index(card))
+                card_index = str(card.index)
                 stats_accumulator.merge_stats(detected_events, card_index,
                                               small_gain_stat)
         max_games -= 1

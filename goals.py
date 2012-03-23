@@ -3,6 +3,7 @@
 import pymongo
 import collections
 import game
+import card
 import incremental_scanner
 import name_merger
 import utils
@@ -402,11 +403,11 @@ def prize_check(g):
     for pdeck in g.get_player_decks():
         (player, deck) = (pdeck.player_name, pdeck.deck)
         n_prizes = 0
-        for prize in card_info.TOURNAMENT_WINNINGS:
+        for prize in card.TOURNAMENT_WINNINGS:
             if prize in deck:
                 n_prizes += 1
-        if n_prizes == len(card_info.TOURNAMENT_WINNINGS):
-            return (player, one_turn(g, player, card_info.TOURNAMENT_WINNINGS))
+        if n_prizes == len(card.TOURNAMENT_WINNINGS):
+            return (player, one_turn(g, player, card.TOURNAMENT_WINNINGS))
     return (False, False)
 
 def CheckMatchPrizeFighter(g):
@@ -471,7 +472,7 @@ def CheckMatchBanker(g):
     for turn in g.get_turns():
         treasure_count = 0
         for card in turn.plays:
-            if card_info.is_treasure(card):
+            if card.is_treasure():
                 treasure_count += 1
                 if card == 'Bank':
                     if treasure_count >= 10:
@@ -484,7 +485,7 @@ def CheckActionsPerTurn(g, low, high=None):
     for turn in g.get_turns():
         action_count = 0
         for card in turn.plays:
-            if card_info.is_action(card):
+            if card.is_action():
                 action_count += 1
 
         if action_count >= low and (high is None or action_count < high):
@@ -556,13 +557,12 @@ def CheckMatchMegaTurn(g):
     """Bought all the Provinces or Colonies in a single turn."""
     ret = []
     scores = []
-    if 'Colony' in g.get_supply():
-        biggest_victory = 'Colony'
+    if get_card('Colony') in g.get_supply():
+        biggest_victory = get_card('Colony')
     else:
-        biggest_victory = 'Province'
+        biggest_victory = get_card('Province')
 
-    victory_copies = card_info.num_copies_per_game(biggest_victory,
-                                                   len(g.get_player_decks()))
+    victory_copies = biggest_victory.num_copies_per_game(len(g.get_player_decks()))
     for turn in g.get_turns():
         new_cards = turn.buys + turn.gains
         if len(new_cards) < victory_copies:

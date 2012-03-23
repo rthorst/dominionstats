@@ -17,7 +17,7 @@ import utils
 import name_merger
 from keys import *
 from game import Game
-from card import get_card, CardEncoder
+from card import get_card, CardEncoder, indexes
 
 import simplejson as json
 
@@ -80,10 +80,10 @@ class BogusGameError(Exception):
         self.reason = reason
 
 def capture_cards(line):
-    """ Given a line of text from isotropic, extract the card names.
+    """ Given a line of text from isotropic, extract the cards.
 
     line: string like 'Rob plays a <span class=card-none>Minion</span>.'
-    returns: list of string of card names, eg, ['Minion']
+    returns: list of the card objects, eg, [Minion]
     """
     def _as_int_or_1(string_val):
         try:
@@ -128,7 +128,7 @@ def assign_win_points(game_dict):
     def win_tuple(deck_dict):        
         """ Return tuple ordered by increasing final standing. """
         # negate turns so that max() behaves; points good, turns bad.
-        num_normal_turns = sum(not ('poss' in t or 'outpost' in t) 
+        num_normal_turns = sum(not (POSSESSION in t or OUTPOST in t) 
                                for t in deck_dict[TURNS])
         return (deck_dict[POINTS], -num_normal_turns)
 
@@ -287,8 +287,8 @@ def parse_header(header_str):
     else:
         resigned = True
         gone = []
-    supply = capture_cards(supply_str)
-    return {GAME_END: gone, SUPPLY: supply, RESIGNED: resigned}
+    supply = indexes(capture_cards(supply_str))
+    return {GAME_END: indexes(gone), SUPPLY: supply, RESIGNED: resigned}
 
 PLACEMENT_RE = re.compile('#\d (.*)')
 POINTS_RE = re.compile(': (-*\d+) point(s?)(\s|(' + re.escape('</b>') + '))')
@@ -688,11 +688,20 @@ def parse_turn(turn_blob, names_list):
     for opp in opp_turn_info.keys():
         _delete_if_exists(opp_turn_info[opp], 'buy_or_gain')
         delete_keys_with_empty_vals(opp_turn_info[opp])
+
+        d = opp_turn_info[opp]
+        for k, v in d.iteritems():
+            d[k] = indexes(v)
+
+    ret[BUYS] = indexes(ret[BUYS])
+    ret[GAINS] = indexes(ret[GAINS])
+    ret[TRASHES] = indexes(ret[TRASHES])
+
     ret.update({NAME: names_list[tracker.current_player()], 
-                PLAYS: plays , RETURNS: returns,
+                PLAYS: indexes(plays) , RETURNS: indexes(returns),
                 MONEY: count_money(plays) + turn_money,
-                VP_TOKENS: vp_tokens, 'ps_tokens': ps_tokens,
-                'poss': poss, 'outpost': outpost, 
+                VP_TOKENS: vp_tokens, PIRATE_TOKENS: ps_tokens,
+                POSSESSION: poss, OUTPOST: outpost, 
                 OPP: dict(opp_turn_info)})
 
     delete_keys_with_empty_vals(ret)

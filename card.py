@@ -94,27 +94,33 @@ def get_card(name):
 def index_to_card(index):
     return _INDEXED[index]
 
-TOURNAMENT_WINNINGS = ['Princess', 'Diadem', 'Followers', 
-                       'Trusty Steed', 'Bag of Gold']
+TOURNAMENT_WINNINGS = [get_card(name) for name in 
+                        ['Princess', 'Diadem', 'Followers', 'Trusty Steed', 'Bag of Gold']]
 
-EVERY_SET_CARDS = ['Estate', 'Duchy', 'Province',
-                   'Copper', 'Silver', 'Gold', 'Curse']
+EVERY_SET_CARDS = [get_card(name) for name in 
+                        ['Estate', 'Duchy', 'Province', 'Copper', 'Silver', 'Gold', 'Curse']]
 
-#OPENING_CARDS = [card for card in _card_info_rows
-#                 if cost(card) in ('0', '2', '3', '4', '5')]
-#OPENING_CARDS.sort()
+def all_cards():
+    return _INDEXED.values()
 
-def sane_title(card):
-    return card.title().replace("'S", "'s").replace(' Of ', ' of ').strip()
+def opening_cards():
+    return [card for card in all_cards()
+            if card.cost in ('0', '2', '3', '4', '5')].sort()
 
-def card_index(singular):
-    return _card_index[singular]
+def indexes(cards):
+    return [int(card.index) for card in cards]
 
-def card_names():
-    return _card_names
+#def sane_title(card):
+#    return card.title().replace("'S", "'s").replace(' Of ', ' of ').strip()
 
-def card_var_names():
-    return _card_var_names
+#def card_index(singular):
+#    return _card_index[singular]
+
+#def card_names():
+#    return _card_names
+
+#def card_var_names():
+#    return _card_var_names
 
 
 import simplejson as json

@@ -2,7 +2,7 @@ import urllib
 
 import pymongo
 
-import card_info
+import card
 import game
 import name_merger
 from keys import *
@@ -17,7 +17,7 @@ def _render_card(card, freq, kingdom_restrict):
             return "+0"
 
     font_size = font_size(freq)
-    plural = card_info.pluralize(card, freq)
+    plural = card.pluralize(freq)
 
     rendered = '<font size="%s">%d %s</font>' % (font_size, freq, plural)
     if card in kingdom_restrict:
