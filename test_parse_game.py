@@ -1170,6 +1170,8 @@ Alenia wins!
                            "Throne Room",
                            "Worker's Village"])
 
+        self.assertEquals(parsed_game[VETO], {})
+
     EVIL_GAME_CONTENTS = u"""<html><head><link rel="stylesheet" href="/client.css"><title>Dominion Game #40068</title></head><body><pre>dcg wins!
 All but one player has resigned.
 
@@ -1282,6 +1284,68 @@ Leeko wins!
         self.assertEquals(len(michiel_deck[TURNS]), 3)
         self.assertTrue(michiel_deck[TURNS][2][POSSESSION])
         # pprint.pprint(parsed_game)
+
+    def test_parse_game_with_vetos(self):
+        game_contents = u"""<html><head><link rel="stylesheet" href="/client.css"><title>Dominion Game #412275</title></head><body><pre>Arsenic03 wins!
+<span class=card-victory-treasure>Harems</span>, <span class=card-none>Wishing Wells</span>, and <span class=card-victory>Duchies</span> are all gone.
+
+cards in supply: <span cardname="Counting House" class=card-none>Counting House</span>, <span cardname="Duchess" class=card-none>Duchess</span>, <span cardname="Harem" class=card-victory-treasure>Harem</span>, <span cardname="Haven" class=card-duration>Haven</span>, <span cardname="Horn of Plenty" class=card-treasure>Horn of Plenty</span>, <span cardname="Merchant Ship" class=card-duration>Merchant Ship</span>, <span cardname="Noble Brigand" class=card-none>Noble Brigand</span>, <span cardname="Scout" class=card-none>Scout</span>, <span cardname="Trade Route" class=card-none>Trade Route</span>, and <span cardname="Wishing Well" class=card-none>Wishing Well</span>
+
+----------------------
+
+<b>#1 Arsenic03</b>: 40 points (3 <span class=card-victory>Provinces</span>, 4 <span class=card-victory>Duchies</span>, and 5 <span class=card-victory-treasure>Harems</span>); 18 turns
+           opening: <span class=card-none>Trade Route</span> / <span class=card-none>Wishing Well</span>
+           [34 cards] 8 <span class=card-none>Wishing Wells</span>, 5 <span class=card-victory-treasure>Harems</span>, 4 <span class=card-duration>Havens</span>, 4 <span class=card-none>Scouts</span>, 1 <span class=card-duration>Merchant Ship</span>, 1 <span class=card-none>Trade Route</span>, 3 <span class=card-treasure>Coppers</span>, 1 <span class=card-treasure>Gold</span>, 4 <span class=card-victory>Duchies</span>, 3 <span class=card-victory>Provinces</span>
+
+<b>#2 Trikillall</b>: 30 points (2 <span class=card-victory>Provinces</span>, 4 <span class=card-victory>Duchies</span>, and 3 <span class=card-victory-treasure>Harems</span>); 18 turns
+            opening: <span class=card-none>Trade Route</span> / <span class=card-treasure>Silver</span>
+            [27 cards] 3 <span class=card-victory-treasure>Harems</span>, 2 <span class=card-none>Wishing Wells</span>, 1 <span class=card-duration>Haven</span>, 1 <span class=card-treasure>Horn of Plenty</span>, 1 <span class=card-none>Noble Brigand</span>, 1 <span class=card-none>Scout</span>, 1 <span class=card-none>Trade Route</span>, 4 <span class=card-treasure>Coppers</span>, 3 <span class=card-treasure>Silvers</span>, 4 <span class=card-treasure>Golds</span>, 4 <span class=card-victory>Duchies</span>, 2 <span class=card-victory>Provinces</span>
+
+----------------------
+
+trash: 7 <span class=card-treasure>Coppers</span>, 7 <span class=card-treasure>Horns of Plenty</span>, and 6 <span class=card-victory>Estates</span>
+
+<hr/><b>Game log</b>
+
+Turn order is Arsenic03 and then Trikillall.
+
+The 12 chosen cards are <span cardname="Counting House" class=card-none>Counting House</span>, <span cardname="Duchess" class=card-none>Duchess</span>, <span cardname="Fool's Gold" class=card-treasure-reaction>Fool's Gold</span>, <span cardname="Harem" class=card-victory-treasure>Harem</span>, <span cardname="Haven" class=card-duration>Haven</span>, <span cardname="Horn of Plenty" class=card-treasure>Horn of Plenty</span>, <span cardname="Merchant Ship" class=card-duration>Merchant Ship</span>, <span cardname="Noble Brigand" class=card-none>Noble Brigand</span>, <span cardname="Scout" class=card-none>Scout</span>, <span cardname="Tactician" class=card-duration>Tactician</span>, <span cardname="Trade Route" class=card-none>Trade Route</span>, and <span cardname="Wishing Well" class=card-none>Wishing Well</span>.
+Arsenic03 vetoes <span class=card-treasure-reaction>Fool's Gold</span>.
+Trikillall vetoes <span class=card-duration>Tactician</span>.
+
+
+<span class=logonly>(Arsenic03's first hand: 4 <span class=card-treasure>Coppers</span> and an <span class=card-victory>Estate</span>.)</span>
+<span class=logonly>(Trikillall's first hand: 3 <span class=card-treasure>Coppers</span> and 2 <span class=card-victory>Estates</span>.)</span>
+<br>
+&mdash; Arsenic03's turn 1 &mdash;
+Arsenic03 plays 4 <span class=card-treasure>Coppers</span>.
+Arsenic03 buys a <span class=card-none>Trade Route</span>.
+<span class=logonly>(Arsenic03 draws: 3 <span class=card-treasure>Coppers</span> and 2 <span class=card-victory>Estates</span>.)</span>
+   <br>
+   &mdash; Trikillall's turn 1 &mdash;
+   Trikillall plays 3 <span class=card-treasure>Coppers</span>.
+   Trikillall buys a <span class=card-none>Trade Route</span>.
+   <span class=logonly>(Trikillall draws: 4 <span class=card-treasure>Coppers</span> and an <span class=card-victory>Estate</span>.)</span>
+<br>
+&mdash; Arsenic03's turn 2 &mdash;
+Arsenic03 plays 3 <span class=card-treasure>Coppers</span>.
+Arsenic03 buys a <span class=card-none>Wishing Well</span>.
+(Arsenic03 reshuffles.)
+<span class=logonly>(Arsenic03 draws: 4 <span class=card-treasure>Coppers</span> and a <span class=card-none>Wishing Well</span>.)</span>
+   <br>
+   &mdash; Trikillall's turn 2 &mdash;
+   Trikillall plays 4 <span class=card-treasure>Coppers</span>.
+   Trikillall buys a <span class=card-treasure>Silver</span>.
+   (Trikillall reshuffles.)
+   <span class=logonly>(Trikillall draws: 4 <span class=card-treasure>Coppers</span> and a <span class=card-treasure>Silver</span>.)</span>
+
+<span class=card-victory-treasure>Harems</span>, <span class=card-none>Wishing Wells</span>, and <span class=card-victory>Duchies</span> are all gone.
+Arsenic03 wins!
+</pre></body></html>"""
+        parsed_game = parse_game.parse_game(game_contents)
+        veto_dict = parsed_game[VETO]
+        assert_equal_card_lists([veto_dict[u'Trikillall']], ["Tactician"])
+        assert_equal_card_lists([veto_dict[u'Arsenic03']], ["Fool's Gold"])
 
 
 if __name__ == '__main__':
