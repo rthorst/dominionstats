@@ -1,10 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import bz2
 import codecs
 import collections
 import itertools
 import math
 import operator
+import os
 import pprint
 import urllib
 import urlparse
@@ -429,8 +431,15 @@ class GamePage(object):
         if game_id.endswith('.gz'):
             game_id = game_id[:-len('.gz')]
         yyyymmdd = game.Game.get_date_from_id(game_id)
-        contents = codecs.open('static/scrape_data/%s/%s' % (
-                yyyymmdd, game_id), 'r', encoding='utf-8').read()
+        uncompressed_fn = 'static/scrape_data/%s/%s' % (yyyymmdd, game_id)
+        compressed_fn = uncompressed_fn + '.bz2'
+        if os.path.exists(uncompressed_fn):
+            contents = codecs.open(uncompressed_fn, 'r', 
+                                   encoding='utf-8').read()
+        elif os.path.exists(compressed_fn):
+            contents = bz2.BZ2File(compressed_fn).read().decode('utf-8')
+        else:
+            return 'could not find game ' + game_id
         body_err_msg = ('<body><b>Error annotating game, tell ' 
                         'rrenaud@gmail.com!</b>')
         try:
