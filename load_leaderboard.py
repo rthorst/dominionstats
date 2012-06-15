@@ -35,7 +35,8 @@ def main():
 
         date = match.group('date')
 
-        if '2011-11-24' <= date and date <= '2011-12-04':
+        if ('2011-11-24' <= date and date <= '2011-12-04' or
+            '2012-06-08' == date):
             # don't load data from when the leaderboard was messed up
             continue
 
