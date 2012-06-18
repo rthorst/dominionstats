@@ -10,10 +10,17 @@ import numpy as np
 import simplejson as json
 from stats import MeanVarStat
 from collections import defaultdict
+import scipy.spatial.distance as distance
 
 def main():
+    ARCH = 'Archivist'
     card_data = json.load(open('card_conditional_data.json'))
-    N = len(card_info.card_names())
+    card_names = card_info.card_names()
+    card_names.remove(ARCH)
+    card_inds = {}
+    for ind, card_name in enumerate(card_names):
+        card_inds[card_name] = ind
+    N = len(card_inds)
     
     # cluster based on gain prob, win rate given any gained, 
     # avg gained per game, and win rate per gain
@@ -22,11 +29,13 @@ def main():
     for card_row in card_data:
         card_name = card_row['card_name']
         condition = card_row['condition'][0]
+        if card_name == ARCH or condition == ARCH:
+            continue
         assert len(card_row['condition']) == 1
         if card_name == condition:
             continue
-        i = card_info.card_index(card_name)
-        j = card_info.card_index(condition)
+        i = card_inds[card_name]
+        j = card_inds[condition]
         stats = card_row['stats']
         def parse(key):
             ret = MeanVarStat()
@@ -57,9 +66,18 @@ def main():
         assert len(flattened) == N * M, '%d != %d' % (len(flattened), N * M)
         flattened_normed_data[i] = flattened
     
-    z = scipy.cluster.hierarchy.ward(flattened_normed_data)
-    scipy.cluster.hierarchy.dendrogram(z, labels=card_info.card_names())
-    
+    #z = scipy.cluster.hierarchy.ward(flattened_normed_data)
+    #scipy.cluster.hierarchy.dendrogram(z, labels=card_names)
+
+    for i in range(N):
+        dists_for_i = []
+        for j in range(N):
+            if i != j:
+                dist = distance.cosine(
+                    flattened_normed_data[i], flattened_normed_data[j])
+                dists_for_i.append((dist, card_names[j]))
+        dists_for_i.sort()
+        print card_names[i], ':', ', '.join([n for (d, n) in dists_for_i][:10])
     
 
 if __name__ == '__main__':
