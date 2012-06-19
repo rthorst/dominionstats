@@ -11,6 +11,21 @@ import simplejson as json
 from stats import MeanVarStat
 from collections import defaultdict
 import scipy.spatial.distance as distance
+import pylab
+
+def trim(acceptable_func, existing_matrix, existing_card_names):
+    num_rows = 0
+    for card in existing_card_names:
+        if acceptable_func(card):
+            num_rows += 1
+    new_cards = []
+    new_mat = np.zeros((num_rows, existing_matrix.shape[1]))
+    for card, row in zip(existing_card_names, existing_matrix):
+        if acceptable_func(card):            
+            new_mat[len(new_cards)] = row
+            new_cards.append(card)
+    return new_mat, new_cards
+
 
 def main():
     ARCH = 'Archivist'
@@ -65,19 +80,31 @@ def main():
         flattened = grouped_data[i].flatten()
         assert len(flattened) == N * M, '%d != %d' % (len(flattened), N * M)
         flattened_normed_data[i] = flattened
-    
-    #z = scipy.cluster.hierarchy.ward(flattened_normed_data)
-    #scipy.cluster.hierarchy.dendrogram(z, labels=card_names)
 
-    for i in range(N):
-        dists_for_i = []
-        for j in range(N):
-            if i != j:
-                dist = distance.cosine(
-                    flattened_normed_data[i], flattened_normed_data[j])
-                dists_for_i.append((dist, card_names[j]))
-        dists_for_i.sort()
-        print card_names[i], ':', ', '.join([n for (d, n) in dists_for_i][:10])
+    flattened_normed_data, card_names = trim(
+        lambda x: (card_info.cost(x)[0] >= '5' or 
+                   card_info.cost(x)[0] == '1' or 
+                   card_info.cost(x)[0] == 'P') and not (
+            x in card_info.EVERY_SET_CARDS or 
+            card_info.cost(x)[0:2] == '*0'),
+        flattened_normed_data, card_names)
+    
+    z = scipy.cluster.hierarchy.ward(flattened_normed_data)
+    scipy.cluster.hierarchy.dendrogram(z, labels=card_names,
+                                       orientation='left', leaf_font_size=4.5)
+    pylab.savefig('expensive_group_win_prob.png', 
+                  dpi=len(card_names) * 2.5, bbox_inches='tight')
+                  
+
+    # for i in range(N):
+    #     dists_for_i = []
+    #     for j in range(N):
+    #         if i != j:
+    #             dist = distance.cosine(
+    #                 flattened_normed_data[i], flattened_normed_data[j])
+    #             dists_for_i.append((dist, card_names[j]))
+    #     dists_for_i.sort()
+    #     print card_names[i], ':', ', '.join([n for (d, n) in dists_for_i][:10])
     
 
 if __name__ == '__main__':

@@ -10,7 +10,7 @@ import time
 def main():
     all_cards = ','.join(card_info.card_names())
     all_data = []
-    for card in card_info.card_names()[1:]:
+    for card in card_info.card_names():
         url = ('http://councilroom.com/supply_win_api?'
                'targets=%s&interaction=%s' % (card, all_cards))
         time.sleep(.1)
