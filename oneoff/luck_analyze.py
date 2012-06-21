@@ -9,7 +9,7 @@ import stats
 
 def main():
     confusion_stats = collections.defaultdict(stats.MeanVarStat)
-    for idx, line in enumerate(open('card_luck2.txt')):
+    for idx, line in enumerate(open('card_luck1.txt')):
         try:
             contents = line.split(':')
             prob = float(contents[4])
