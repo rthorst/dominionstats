@@ -53,6 +53,9 @@ def is_treasure(singular_card_name):
 def is_reaction(singular_card_name):
     return _card_info_rows[singular_card_name]['Reaction'] == '1'
 
+def is_duration(singular_card_name):
+    return _card_info_rows[singular_card_name]['Duration'] == '1'
+
 def cost(singular_card_name):
     return _card_info_rows[singular_card_name]['Cost']
 
@@ -62,6 +65,13 @@ def money_value(card_name):
         return int(_card_info_rows[card_name]['Coins'])
     except ValueError, e:
         return 0
+
+def coin_cost(singular_card_name):
+    cost_str = _card_info_rows[singular_card_name]['Cost']
+    cost_str = cost_str.replace('P', '').replace('*', '')
+    if cost_str == '':
+        return 0
+    return int(cost_str)
 
 def is_victory(singular_card_name):
     return _card_info_rows[singular_card_name]['Victory'] == '1'
@@ -81,6 +91,14 @@ def trashes(singular_card_name):
         trash_str = 1
     return int(trash_str)
 
+def num_plus_buys(singular_card_name):
+    buys_str = _card_info_rows[singular_card_name]['Buys']
+    if buys_str == '?':
+        return 1
+    if buys_str == '':
+        return 0
+    return int(buys_str)
+
 def num_plus_actions(singular_card_name):
     r = _card_info_rows[singular_card_name]['Actions']
     try:
@@ -88,6 +106,15 @@ def num_plus_actions(singular_card_name):
     except ValueError:
         # variable number of plus actions, just say 1
         return 1
+
+def num_plus_cards(singular_card_name):
+    r = _card_info_rows[singular_card_name]['Cards']
+    try:
+        return int(r)
+    except ValueError:
+        # variable number of plus actions, just say 1
+        return 1
+    
 
 def num_copies_per_game(card_name, num_players):
     if is_victory(card_name):
