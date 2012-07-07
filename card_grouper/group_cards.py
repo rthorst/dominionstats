@@ -2,16 +2,20 @@
 
 import sys
 sys.path.append('..')
-import card_info
-import scipy.cluster
-from sklearn import preprocessing
-import scipy.cluster.hierarchy 
-import numpy as np
-import simplejson as json
-from stats import MeanVarStat
+
 from collections import defaultdict
-import scipy.spatial.distance as distance
+from sklearn import manifold, decomposition
+from sklearn import preprocessing
+from sklearn.metrics import euclidean_distances
+from stats import MeanVarStat
+import card_info
+import itertools
+import numpy as np
 import pylab
+import scipy.cluster
+import scipy.cluster.hierarchy 
+import scipy.spatial.distance as distance
+import simplejson as json
 
 def trim(acceptable_func, existing_matrix, existing_card_names):
     num_rows = 0
@@ -29,17 +33,19 @@ def trim(acceptable_func, existing_matrix, existing_card_names):
 # http://forum.dominionstrategy.com/index.php?topic=647.msg8951#msg8951
 bonus_feature_funcs = [
     lambda x: 2 * card_info.coin_cost(x),
+    lambda x: 3 * card_info.potion_cost(x),
     lambda x: 3 * card_info.num_plus_actions(x),
     lambda x: 4 * card_info.num_plus_cards(x),
     lambda x: 4 * card_info.is_action(x),
     lambda x: 4 * card_info.is_victory(x),
+    lambda x: 4 * card_info.is_treasure(x),
     lambda x: 5 * card_info.is_attack(x),
     lambda x: 1 * card_info.is_reaction(x),
     lambda x: 2 * card_info.vp_per_card(x),
     lambda x: 1 * card_info.money_value(x),
     lambda x: 1 * card_info.num_plus_buys(x),
     # 1 * gains (remodel, upgrade, workshop, ...)
-    lambda x: 0 * max(card_info.trashes(x), 5)
+    lambda x: 1 * max(card_info.trashes(x), 5)
     # 6 * pollute (can add to other deck)
     # 3 * combo (conspirator, peddler, ...
     # 3 * special (goons, gardens, uniqueness in general)
@@ -52,8 +58,62 @@ def get_bonus_vec(card_name):
     bonus_vec = np.zeros(len(bonus_feature_funcs))
     for j, feature_func in enumerate(bonus_feature_funcs):
         bonus_vec[j] = feature_func(card_name)
-    bonus_vec = bonus_vec * 0.00001
+    bonus_vec = bonus_vec * 0.1
     return bonus_vec
+
+def dendro_plot(normed_data, card_names):
+    z = scipy.cluster.hierarchy.ward(normed_data)
+    scipy.cluster.hierarchy.dendrogram(z, labels=card_names,
+                                       orientation='left', leaf_font_size=4.5,
+                                       )
+    pylab.savefig('expensive_group_win_prob.png', 
+                  dpi=len(card_names) * 2.5, bbox_inches='tight')
+
+def nearest_neighbor_table():
+    all_dists = []
+    dists_per_card = []
+    for i in range(N):
+        dists_for_i = []
+        for j in range(N):
+            if i != j:
+                dist = distance.cosine(
+                    flattened_normed_data[i], flattened_normed_data[j])
+                dists_for_i.append((dist, card_names[j]))
+                all_dists.append(dist)
+        dists_for_i.sort()
+        dists_per_card.append(dists_for_i)
+        # print card_names[i], ':', ', '.join([n for (d, n) in dists_for_i][:10])
+    all_dists.sort()
+    VERY_CLOSE_IND = int(len(all_dists) * .005)
+    CLOSE_IND = int(len(all_dists) * .01)
+    MAYBE_CLOSE_IND = int(len(all_dists) * .02)
+    
+    VERY_CLOSE_DIST = all_dists[VERY_CLOSE_IND]
+    CLOSE_DIST = all_dists[CLOSE_IND]
+    MAYBE_CLOSE_DIST = all_dists[MAYBE_CLOSE_IND]
+    for card_name, dists_list in zip(card_names, dists_per_card):
+        prev_dist = 0
+        print card_name, ';',
+        for dist, other_card in dists_list:
+            if prev_dist <= VERY_CLOSE_DIST < dist:
+                print '|',
+            if prev_dist <= CLOSE_DIST < dist:
+                print '||',
+            if prev_dist <= MAYBE_CLOSE_DIST < dist:
+                print '|||',
+            if dist <= MAYBE_CLOSE_DIST or prev_dist == 0:
+                print other_card,
+            prev_dist = dist
+        print
+
+def plot_points(X, names):
+    x_min, x_max = np.min(X, 0), np.max(X, 0)
+    X = (X - x_min) / (x_max - x_min)
+    pylab.figure()
+    for coords, name in itertools.izip(X, names):
+        pylab.text(coords[0], coords[1], name)
+    pylab.savefig('projected_cards.png')
+    pylab.show()
 
 def main():
     ARCH = 'Archivist'
@@ -113,7 +173,7 @@ def main():
                 v1.append(grouped_data[i][j][k])
                 v2.append(grouped_data[k][j][i])
         v1, v2 = np.array(v1), np.array(v2)
-        catted = np.concatenate((v1, v1, bonus_vec))
+        catted = np.concatenate((v1 * 1 , v2 * 0 , 0 *bonus_vec))
         flattened_normed_data[i] = catted
 
     flattened_normed_data, card_names = trim(
@@ -123,23 +183,22 @@ def main():
             x in card_info.EVERY_SET_CARDS or 
             card_info.cost(x)[0:2] == '*0'),
         flattened_normed_data, card_names)
+        
+    n_neighbors = 15
+    n_components = 2
+    iso_data = manifold.Isomap(10, 2).fit_transform(flattened_normed_data)
+    plot_points(iso_data, card_names)
+
+    # clf = manifold.LocallyLinearEmbedding(n_neighbors=n_neighbors, 
+    #                                       n_components=n_components,
+    #                                       method='hessian')
+    # lle_data = clf.fit_transform(flattened_normed_data)
+    # plot_points(lle_data, card_names)
     
-    z = scipy.cluster.hierarchy.ward(flattened_normed_data)
-    scipy.cluster.hierarchy.dendrogram(z, labels=card_names,
-                                       orientation='left', leaf_font_size=4.5,
-                                       )
-    pylab.savefig('expensive_group_win_prob.png', 
-                  dpi=len(card_names) * 2.5, bbox_inches='tight')
-                  
-    # for i in range(N):
-    #     dists_for_i = []
-    #     for j in range(N):
-    #         if i != j:
-    #             dist = distance.cosine(
-    #                 flattened_normed_data[i], flattened_normed_data[j])
-    #             dists_for_i.append((dist, card_names[j]))
-    #     dists_for_i.sort()
-    #     print card_names[i], ':', ', '.join([n for (d, n) in dists_for_i][:10])
+    # pca_data = decomposition.RandomizedPCA(
+    #     n_components=2).fit_transform(flattened_normed_data)
+                                           
+    # plot_points(pca_data, card_names)
     
 
 if __name__ == '__main__':
