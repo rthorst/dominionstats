@@ -7,31 +7,36 @@ import copy
 import pprint
 
 def table_avg(table, level):
-     return sum(level[player] for player in table) / len(table)
+     levels = [level[player] for player in table]
+     if len(levels) == 3:
+          levels.append(-20)
+     return sum(levels) / len(levels)
 
 def imbalance(tables, level, avg):
-    badness = 0
-    for table in tables:
-        avg_in_table = table_avg(table, level)
-        badness += (avg_in_table - avg) ** 2
-    return badness
+     badness = 0
+     for table in tables:
+          real_players = len(tables)
+          avg_in_table = table_avg(table, level)
+          badness += (avg_in_table - avg) ** 2
+     return badness
 
 def neighbors(tables):
-    for ind1, ind2 in itertools.combinations(range(len(tables)), r = 2):
-        for p1, p2 in itertools.product(tables[ind1][1:], 
+     yield tables
+     for ind1, ind2 in itertools.combinations(range(len(tables)), r = 2):
+          for p1, p2 in itertools.product(tables[ind1][1:], 
                                         tables[ind2][1:]):
-            new = copy.deepcopy(tables)
-            new[ind1].remove(p1)
-            new[ind2].remove(p2)
-            new[ind1].append(p2)
-            new[ind2].append(p1)
-            yield new
+               new = copy.deepcopy(tables)
+               new[ind1].remove(p1)
+               new[ind2].remove(p2)
+               new[ind1].append(p2)
+               new[ind2].append(p1)
+               yield new
 
 def greedy_hillclimb(tables, level):
     avg = sum(level.values()) / float(len(level))
     cur_score = imbalance(tables, level, avg)
     last_score = 1e9
-    while last_score != cur_score > 0:
+    while last_score != cur_score:
         tables = min(neighbors(tables), key=lambda t: imbalance(t, level, avg))
         last_score = cur_score
         cur_score = imbalance(tables, level, avg)
@@ -40,14 +45,15 @@ def greedy_hillclimb(tables, level):
 
 
 if __name__ == '__main__':
-    fn = 'DS_entrants.csv'
+    fn = 'DS_entrants3.csv'
     names = []
     skip_first = True
     for record in csv.reader(open(fn)):
         if skip_first:
             skip_first = False
             continue
-        names.append(record[1])
+        if len(record) <= 3 or record[3] != '1':
+             names.append(record[1])
     level = {}
     c = pymongo.Connection()
     level_history_collection = c.test.leaderboard_history
@@ -59,13 +65,14 @@ if __name__ == '__main__':
             if level[name] < 0:
                 level[name] = 0
         else:
-            level[name] = 0
+             print 'missing level for', name
+             level[name] = 0
     name_level_pairs = level.items()
     name_level_pairs.sort(key = lambda x: -x[1])
     top_seeds, others = [], []
-    cut_off = len(name_level_pairs) / 4
+    cut_off = (len(name_level_pairs)) / 4
     for ind, (name, _) in enumerate(name_level_pairs):
-        if ind <= cut_off:
+        if ind < cut_off:
             top_seeds.append(name)
         else:
             others.append(name)
