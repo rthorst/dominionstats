@@ -69,51 +69,81 @@ def dendro_plot(normed_data, card_names):
     pylab.savefig('expensive_group_win_prob.png', 
                   dpi=len(card_names) * 2.5, bbox_inches='tight')
 
-def nearest_neighbor_table():
-    all_dists = []
-    dists_per_card = []
-    for i in range(N):
-        dists_for_i = []
-        for j in range(N):
-            if i != j:
-                dist = distance.cosine(
-                    flattened_normed_data[i], flattened_normed_data[j])
-                dists_for_i.append((dist, card_names[j]))
-                all_dists.append(dist)
+class NearestNeighborTable:
+    def __init__(self, data, card_names):
+        all_dists = []
+        dists_per_card = []
+        N = len(data)
+        for i in range(N):
+            dists_for_i = []
+            for j in range(N):
+                if i != j:
+                    dist = distance.cosine(
+                        data[i], data[j])
+                    dists_for_i.append((dist, card_names[j]))
+                    all_dists.append(dist)
         dists_for_i.sort()
         dists_per_card.append(dists_for_i)
-        # print card_names[i], ':', ', '.join([n for (d, n) in dists_for_i][:10])
-    all_dists.sort()
-    VERY_CLOSE_IND = int(len(all_dists) * .005)
-    CLOSE_IND = int(len(all_dists) * .01)
-    MAYBE_CLOSE_IND = int(len(all_dists) * .02)
-    
-    VERY_CLOSE_DIST = all_dists[VERY_CLOSE_IND]
-    CLOSE_DIST = all_dists[CLOSE_IND]
-    MAYBE_CLOSE_DIST = all_dists[MAYBE_CLOSE_IND]
-    for card_name, dists_list in zip(card_names, dists_per_card):
-        prev_dist = 0
-        print card_name, ';',
-        for dist, other_card in dists_list:
-            if prev_dist <= VERY_CLOSE_DIST < dist:
-                print '|',
-            if prev_dist <= CLOSE_DIST < dist:
-                print '||',
-            if prev_dist <= MAYBE_CLOSE_DIST < dist:
-                print '|||',
-            if dist <= MAYBE_CLOSE_DIST or prev_dist == 0:
-                print other_card,
-            prev_dist = dist
-        print
+        # print card_names[i], ':', ', '.join(
+        # [n for (d, n) in dists_for_i][:10])
+        all_dists.sort()
+        self.interesting_quantiles = [.005, .01, .02, 1.0]
+        self.interesting_dist_cutoffs = [
+            all_dists[int(q * N)] for q in self.interesting_quantiles]
+        self.dists_per_card = dists_per_card
+        self.card_names = card_names
+        self.partitions_by_card = {}
+        for card_name, dists_list in zip(self.card_names, 
+                                          self.dists_per_card):
+            card_partitions = [list() for i in xrange(len(
+                    self.interesting_quantiles))]
+            for dist, ocard in dists_list:
+                for idx, quant in enumerate(self.interesting_quantiles):
+                    if dist < quant:
+                        card_partitions[idx].append(ocard)
+            self.partitions_by_card[card_name] = card_partitions            
+
+    def RenderAsHtml(self):
+        ret = '<table>'
+        for card_name, partitions in zip(self.card_names, 
+                                         self.dists_per_card):
+            ret += '<tr><td>' + card_name, '</td>',
+            printed_any = False
+            for partition in enumerate(partitions[:-1]):
+                ret += '<td>'
+                for other_card in partition:
+                    printed_any = True
+                    ret += other_card + ' '
+                ret += '</td>'
+            ret += '<td>'
+            if not printed_any:
+                ret += partitions[-1][0]
+            ret += '</td></tr>'
+        return ret
+
 
 def plot_points(X, names):
     x_min, x_max = np.min(X, 0), np.max(X, 0)
     X = (X - x_min) / (x_max - x_min)
+    #if spread_min:
+        #X = spread_points(X, spread_min):
     pylab.figure()
     for coords, name in itertools.izip(X, names):
         pylab.text(coords[0], coords[1], name)
     pylab.savefig('projected_cards.png')
     pylab.show()
+
+def dump_json(coords, names, abbrevs, fn):
+    output_contents = []
+    for coord, name, abbrev in itertools.izip(coords, names, abbrevs):
+        row = {}
+        row['x'] = coord[0]
+        row['y'] = coord[1]
+        row['name'] = name
+        row['abbrev'] = abbrev
+        output_contents.append(row)
+    import simplejson as json
+    json.dump(output_contents, open(fn, 'w'))
 
 def main():
     ARCH = 'Archivist'
@@ -176,18 +206,22 @@ def main():
         catted = np.concatenate((v1 * 1 , v2 * 0 , 0 *bonus_vec))
         flattened_normed_data[i] = catted
 
-    flattened_normed_data, card_names = trim(
-        lambda x: not (card_info.cost(x)[0] >= '5' or 
-                   card_info.cost(x)[0] == '1' or 
-                   card_info.cost(x)[0] == 'P') and not (
-            x in card_info.EVERY_SET_CARDS or 
-            card_info.cost(x)[0:2] == '*0'),
-        flattened_normed_data, card_names)
+    nn_table = NearestNeighborTable(flattened_normed_data, card_names)
+
+    # flattened_normed_data, card_names = trim(
+    #     lambda x: not (card_info.cost(x)[0] >= '5' or 
+    #                card_info.cost(x)[0] == '1' or 
+    #                card_info.cost(x)[0] == 'P') and not (
+    #         x in card_info.EVERY_SET_CARDS or 
+    #         card_info.cost(x)[0:2] == '*0'),
+    #     flattened_normed_data, card_names)
         
-    n_neighbors = 15
-    n_components = 2
-    iso_data = manifold.Isomap(10, 2).fit_transform(flattened_normed_data)
-    plot_points(iso_data, card_names)
+    #n_neighbors = 15
+    #n_components = 2
+    #iso_data = manifold.Isomap(15, 2).fit_transform(flattened_normed_data)
+    abbrevs = map(card_info.abbrev, card_names)
+    #plot_points(iso_data, abbrevs)
+    # dump_json(iso_data, card_names, abbrevs, 'iso_card_coords.json')
 
     # clf = manifold.LocallyLinearEmbedding(n_neighbors=n_neighbors, 
     #                                       n_components=n_components,
