@@ -285,7 +285,7 @@ def CheckMatchSilkTrader(g):
     return ret    
 
 GroupFuncs([CheckMatchCarny, CheckMatchGardener, CheckMatchDukeOfEarl,
-            CheckMatchSilkTrader], 'vvp')
+            CheckMatchSilkTrader, CheckMatchVintner], 'vvp')
 
 # == Use of one card in a turn
 #("Puppet Master") Play more than 4 Possession in one turn.
