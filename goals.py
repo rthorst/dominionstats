@@ -221,7 +221,7 @@ def CheckMatchVintner(g):
         vy_pts = game.score_vineyard(deck)
         if vy_pts >= 30:
             ret.append(achievement(player, 
-                                   '%d VP from Fairgrounds' % vy_pts, vy_pts))
+                                   '%d VP from Vineyards' % vy_pts, vy_pts))
     return ret
 
 def CheckMatchCarny(g):
