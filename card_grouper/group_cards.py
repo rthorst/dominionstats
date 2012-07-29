@@ -70,55 +70,102 @@ def dendro_plot(normed_data, card_names):
                   dpi=len(card_names) * 2.5, bbox_inches='tight')
 
 class NearestNeighborTable:
-    def __init__(self, data, card_names):
-        all_dists = []
+    def __init__(self, data, card_names, order_only):
+        self.card_names = card_names
+        self.dists_per_card = self.compute_pairwise_distances(data, order_only)
+        thresholds = self.compute_group_thresholds()
+        self.partitions_by_card = self.partition_according_to_thresholds(
+            thresholds)
+
+    def compute_pairwise_distances(self, data, order_only):
         dists_per_card = []
         N = len(data)
         for i in range(N):
             dists_for_i = []
             for j in range(N):
                 if i != j:
-                    dist = distance.cosine(
-                        data[i], data[j])
-                    dists_for_i.append((dist, card_names[j]))
-                    all_dists.append(dist)
-        dists_for_i.sort()
-        dists_per_card.append(dists_for_i)
-        # print card_names[i], ':', ', '.join(
-        # [n for (d, n) in dists_for_i][:10])
-        all_dists.sort()
-        self.interesting_quantiles = [.005, .01, .02, 1.0]
-        self.interesting_dist_cutoffs = [
-            all_dists[int(q * N)] for q in self.interesting_quantiles]
-        self.dists_per_card = dists_per_card
-        self.card_names = card_names
-        self.partitions_by_card = {}
-        for card_name, dists_list in zip(self.card_names, 
-                                          self.dists_per_card):
-            card_partitions = [list() for i in xrange(len(
-                    self.interesting_quantiles))]
-            for dist, ocard in dists_list:
-                for idx, quant in enumerate(self.interesting_quantiles):
-                    if dist < quant:
-                        card_partitions[idx].append(ocard)
-            self.partitions_by_card[card_name] = card_partitions            
+                    dist = distance.cosine(data[i], data[j])
+                    dists_for_i.append((dist, self.card_names[j]))
+            dists_for_i.sort()
+            if order_only:
+                for j, (dist, other_card) in enumerate(dists_for_i):
+                    dists_for_i[j] = (dist / 10000 + j, other_card)
+            dists_per_card.append(dists_for_i)
+        return dists_per_card
 
-    def RenderAsHtml(self):
-        ret = '<table>'
-        for card_name, partitions in zip(self.card_names, 
+    def compute_group_thresholds(self):
+        all_dists = []
+        for dist in self.dists_per_card:
+            all_dists.extend(d for d, c in dist)
+        all_dists.sort()
+        NUM_DISTS = len(all_dists)
+
+        interesting_quantiles = [.005, .01, .02, .04]
+
+        interesting_dist_thresholds = [
+            all_dists[int(q * NUM_DISTS)] for q in 
+            interesting_quantiles]
+        interesting_dist_thresholds.append(all_dists[-1])
+        return interesting_dist_thresholds
+
+    def partition_according_to_thresholds(self, interesting_dist_thresholds):
+        partitions_by_card = {} # dict[card] -> list_#parts(list(card))
+        for card_name, dists_list in zip(self.card_names, 
                                          self.dists_per_card):
-            ret += '<tr><td>' + card_name, '</td>',
+            card_partitions = [list() for i in xrange(len(
+                        interesting_dist_thresholds))]
+            for dist, ocard in dists_list:
+                for idx, threshold in enumerate(interesting_dist_thresholds):
+                    if dist < threshold:
+                        card_partitions[idx].append(ocard)
+                        break
+            partitions_by_card[card_name] = card_partitions            
+        return partitions_by_card
+
+    def is_singleton(self, card):
+        return not any(len(p) for p in self.partitions_by_card[card][:-1])
+
+    def compute_card_order(self):
+        unused, card_order = self.card_names[:], []
+        card_order.append('Hunting Party')
+        unused.remove('Hunting Party')
+
+        card_inds = {}
+        for idx, card in enumerate(self.card_names):
+            card_inds[card] = idx
+        
+        while unused:
+            last_card = card_order[-1]
+            for dist, card in self.dists_per_card[card_inds[last_card]]:
+                if card in unused:
+                    unused.remove(card)
+                    card_order.append(card)
+                    break
+        return card_order
+
+    def render_as_html(self):
+        def linkable_name(name):
+            return name.replace(' ', '').replace("'", '')
+        def link_card(name):
+             return '<a href="#%s">%s</a> ' % (linkable_name(name), name)
+        ret = '<table border=1>'
+                    
+        for card_name in self.compute_card_order():
+            partitions = self.partitions_by_card[card_name]
+            ret += '<tr><td><a name=%s>%s</a></td>' % (
+                linkable_name(card_name), link_card(card_name))
             printed_any = False
-            for partition in enumerate(partitions[:-1]):
+            for partition in partitions[:-1]:
                 ret += '<td>'
                 for other_card in partition:
                     printed_any = True
-                    ret += other_card + ' '
+                    ret += link_card(other_card)
                 ret += '</td>'
             ret += '<td>'
             if not printed_any:
-                ret += partitions[-1][0]
+                ret += link_card(partitions[-1][0])
             ret += '</td></tr>'
+        ret += '</table>'
         return ret
 
 
@@ -206,7 +253,13 @@ def main():
         catted = np.concatenate((v1 * 1 , v2 * 0 , 0 *bonus_vec))
         flattened_normed_data[i] = catted
 
-    nn_table = NearestNeighborTable(flattened_normed_data, card_names)
+    fixed_radius_nn_table = NearestNeighborTable(
+        flattened_normed_data, card_names, False)
+    open('fixed_radius_nn_table.html', 'w').write(
+        fixed_radius_nn_table.render_as_html())
+    knn_table = NearestNeighborTable(
+        flattened_normed_data, card_names, True)
+    open('knn_table.html', 'w').write(knn_table.render_as_html())
 
     # flattened_normed_data, card_names = trim(
     #     lambda x: not (card_info.cost(x)[0] >= '5' or 
