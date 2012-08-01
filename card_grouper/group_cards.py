@@ -127,6 +127,7 @@ class NearestNeighborTable:
 
     def compute_card_order(self):
         unused, card_order = self.card_names[:], []
+        # Arbitrarily pick hunting party as the first card.
         card_order.append('Hunting Party')
         unused.remove('Hunting Party')
 
