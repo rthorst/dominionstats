@@ -19,7 +19,7 @@ import simplejson as json
 
 CARD_GROUPING_METHOD_BLURB = """
 <p>The cards are grouped together using data from the 
-<a href="../supply_win?targets=Hunting%20Party%2C%20Laboratory&interaction=Throne%20Room%2C%20King's%20Court&nested=false&unconditional=true">supply based win stats</a> page.  
+<a href="../supply_win?targets=Laboratory,Minion&interaction=Steward,Remake&nested=false&unconditional=true">supply based win stats</a> page.  
 These groupings
 are based exlusively from observed play data, the grouping algorithm
 doesn't know anything about the text on the card.  
