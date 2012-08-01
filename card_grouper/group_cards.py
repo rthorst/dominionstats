@@ -1,4 +1,4 @@
-#!/usr/bin/python
+ #!/usr/bin/python
 
 import sys
 sys.path.append('..')
@@ -16,6 +16,69 @@ import scipy.cluster
 import scipy.cluster.hierarchy 
 import scipy.spatial.distance as distance
 import simplejson as json
+
+CARD_GROUPING_METHOD_BLURB = """
+<p>The cards are grouped together using data from the 
+<a href="../supply_win?targets=Hunting%20Party%2C%20Laboratory&interaction=Throne%20Room%2C%20King's%20Court&nested=false&unconditional=true">supply based win stats</a> page.  
+These groupings
+are based exlusively from observed play data, the grouping algorithm
+doesn't know anything about the text on the card.  
+
+<p>Each card is characterized by information about how often it
+ is purchased and how often it wins conditioned on being purchased
+with when each other card is in the supply.  Assuming there
+are 170 Dominion cards, each card is described by a vector of 
+length 170 * 2.  These vectors are normalized so that the numbers 
+represent how much better or worse the a card performs
+conditioned on the availability of every other card compared to its 
+average.  Then the cosine distance between each cards performance 
+vector is computed,  giving a 170x170 symettric card distance matrix.  
+This matrix forms the basis of the dendrogram and nearest neighbor tables.
+"""
+
+KNN_BLURB = """
+The association between each card ignores the absolute distance between
+each card, displaying only a relative ordering per card.  Hence there
+are many spurious connections between cards that are not strongly
+related.
+"""
+
+FIXED_RADIUS_NN_BLURB = """
+Cards are partitioned according to their distance in the above
+metric.  Hence, some cards (like villages) have many near neighbors,
+where as others have none selected.  In the case that none would
+otherwise be shown, the nearest neighbor is displayed in the far right
+column.
+"""
+
+MAIN_GROUPING_CARD_PAGE_TEMPLATE = """<html><head><title>%s</title></head>
+<body>""" + CARD_GROUPING_METHOD_BLURB + """
+<p>
+This is a <a href="knn_table.html">K-nearest neighbor table</a>.
+""" + KNN_BLURB + """
+<p>
+This is a <a href="fixed_radius_nn_table.html">fixed radius nearest 
+neighbor table</a>. 
+""" + FIXED_RADIUS_NN_BLURB + """
+<p>
+Below is a dendrogram from the distance matrix.  
+The bottom axis are distance numbers in the 
+projected space, and are not directly interprettable.  Cards with no 
+near neighbors in the fixed radius table are omitted from the graph.
+The following cards are the omitted ones: %s.
+<img src="plot_no_singletons.png">
+</body></html>"""
+
+NEAREST_NEIGHBOR_TABLE_PAGE_TEMPLATE = """
+<html><head><title>%s</title> 
+  <body>""" + CARD_GROUPING_METHOD_BLURB + """ 
+<p>%s<p>%s</body>
+</html>
+"""
+
+def render_knn_page(title, nn_blurb, nn_table):
+    return NEAREST_NEIGHBOR_TABLE_PAGE_TEMPLATE % (
+        title, nn_blurb, nn_table.render_as_html())
 
 def trim(acceptable_func, existing_matrix, existing_card_names):
     num_rows = 0
@@ -61,13 +124,12 @@ def get_bonus_vec(card_name):
     bonus_vec = bonus_vec * 0.1
     return bonus_vec
 
-def dendro_plot(normed_data, card_names):
+def dendro_plot(normed_data, card_names, filename):
     z = scipy.cluster.hierarchy.ward(normed_data)
     scipy.cluster.hierarchy.dendrogram(z, labels=card_names,
-                                       orientation='left', leaf_font_size=4.5,
-                                       )
-    pylab.savefig('expensive_group_win_prob.png', 
-                  dpi=len(card_names) * 2.5, bbox_inches='tight')
+                                       orientation='left', leaf_font_size=4.5)
+                                       
+    pylab.savefig(filename, dpi=len(card_names) * 2.5, bbox_inches='tight')
 
 class NearestNeighborTable:
     def __init__(self, data, card_names, order_only):
@@ -101,6 +163,9 @@ class NearestNeighborTable:
         NUM_DISTS = len(all_dists)
 
         interesting_quantiles = [.005, .01, .02, .04]
+        self.partition_names = ['very close', 'close', 'somewhat close',
+                                'looks like a stretch', 
+                                'consolation closest card of lonliness']
 
         interesting_dist_thresholds = [
             all_dists[int(q * NUM_DISTS)] for q in 
@@ -127,7 +192,6 @@ class NearestNeighborTable:
 
     def compute_card_order(self):
         unused, card_order = self.card_names[:], []
-        # Arbitrarily pick hunting party as the first card.
         card_order.append('Hunting Party')
         unused.remove('Hunting Party')
 
@@ -150,7 +214,11 @@ class NearestNeighborTable:
         def link_card(name):
              return '<a href="#%s">%s</a> ' % (linkable_name(name), name)
         ret = '<table border=1>'
-                    
+
+        ret += '<tr><td>card name</td>'
+        for partition_name in self.partition_names:
+            ret += '<td>%s</td>' % partition_name
+        ret += '</tr>'
         for card_name in self.compute_card_order():
             partitions = self.partitions_by_card[card_name]
             ret += '<tr><td><a name=%s>%s</a></td>' % (
@@ -256,11 +324,16 @@ def main():
 
     fixed_radius_nn_table = NearestNeighborTable(
         flattened_normed_data, card_names, False)
-    open('fixed_radius_nn_table.html', 'w').write(
-        fixed_radius_nn_table.render_as_html())
+    open('../static/fixed_radius_nn_table.html', 'w').write(
+        render_knn_page(
+            'Councilroom.com: fixed radius nearest neighbor card groups', 
+            FIXED_RADIUS_NN_BLURB, fixed_radius_nn_table))
     knn_table = NearestNeighborTable(
         flattened_normed_data, card_names, True)
-    open('knn_table.html', 'w').write(knn_table.render_as_html())
+    open('../static/knn_table.html', 'w').write(
+        render_knn_page(
+            'Councilroom.com: K nearest neighbor card groups',
+            KNN_BLURB, knn_table))
 
     # flattened_normed_data, card_names = trim(
     #     lambda x: not (card_info.cost(x)[0] >= '5' or 
@@ -269,11 +342,25 @@ def main():
     #         x in card_info.EVERY_SET_CARDS or 
     #         card_info.cost(x)[0:2] == '*0'),
     #     flattened_normed_data, card_names)
-        
+
+    deleted_singleton_cards = [c for c in card_names if
+                               fixed_radius_nn_table.is_singleton(c)]
+    flattened_normed_data, card_names = trim(
+        lambda x: x not in deleted_singleton_cards,
+        flattened_normed_data, card_names)
+
+    dendro_plot(flattened_normed_data, card_names, 
+                '../static/plot_no_singletons.png')
+
+    open('../static/card_group_main.html', 'w').write(
+        MAIN_GROUPING_CARD_PAGE_TEMPLATE % (
+            'Councilroom.com: Dominion Card Groupings', 
+            ', '.join(deleted_singleton_cards)))
+
     #n_neighbors = 15
     #n_components = 2
     #iso_data = manifold.Isomap(15, 2).fit_transform(flattened_normed_data)
-    abbrevs = map(card_info.abbrev, card_names)
+    # abbrevs = map(card_info.abbrev, card_names)
     #plot_points(iso_data, abbrevs)
     # dump_json(iso_data, card_names, abbrevs, 'iso_card_coords.json')
 
