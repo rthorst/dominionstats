@@ -99,8 +99,8 @@ function DecorateGame() {
 
   graph_opts.yaxis.position = { max: 1.0 };
 
-  $.plot($('#win-prob-graph'),
-     MakeSeriesForPlayers(WinProbExtractor), graph_opts);
+  //$.plot($('#win-prob-graph'),
+  //   MakeSeriesForPlayers(WinProbExtractor), graph_opts);
 
   $(window).scroll(UpdateDisplay);
 }

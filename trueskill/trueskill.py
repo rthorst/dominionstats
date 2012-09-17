@@ -435,11 +435,11 @@ def update_trueskill_team(team_results, skill_table):
   # This order of evaluation is given by the numbered arrows in Figure
   # 1 of the Herbrich paper.
 
-  #p0v = perf_to_team[0].sum.value
-  #p1v = perf_to_team[1].sum.value
-  #diff_p0p1 = p0v - p1v
+  p0v = perf_to_team[0].sum.value
+  p1v = perf_to_team[1].sum.value
+  diff_p0p1 = p0v - p1v
   #print('team perfs %s %s, diff %s' %  (p0v, p1v, diff_p0p1))
-  #print('%.3f' % diff_p0p1.ProbabilityPositive())
+  prob_p0_win = diff_p0p1.ProbabilityPositive()
 
   for i in range(5):
     for f in team_diff:
@@ -469,6 +469,8 @@ def update_trueskill_team(team_results, skill_table):
     mu, sigma = s.value.MuSigma()
     skill_table.set_mu(pl, mu)
     skill_table.set_sigma(pl, sigma)
+
+  return prob_p0_win
 
 
 def AdjustPlayers(players):
@@ -560,4 +562,4 @@ def AdjustPlayers(players):
   for s, pl in zip(ss, players):
     pl.skill = s.value.MuSigma()
 
-__all__ = ["AdjustPlayers", "SetParameters", "INITIAL_MU", "INITIAL_SIGMA"]
+

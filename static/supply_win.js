@@ -1,13 +1,13 @@
 // Change this if you aren't running a server locally, so you'll
 // make requests to councilroom.com.
-var have_local_server_instance = false;
+var have_local_server_instance = true;
 // If you are changing this script, please change the developer name to
 // something unique, just for logging/server admin purposes.
 var developer_id = "rrenaud";
 var full_path_to_councilroom = "";
 
 if (!have_local_server_instance) {
-  full_path_to_councilroom = "http://councilroom.com:8080/";
+  full_path_to_councilroom = "http://councilroom.com/";
 // Change this if you aren't running a server locally, so you'll
 }
 

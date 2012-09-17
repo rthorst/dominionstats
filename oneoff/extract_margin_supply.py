@@ -25,7 +25,7 @@ def main():
             continue
         try:
             joined_names = ','.join(
-                p.Name().encode('utf-8') for p in 
+                p.name().encode('utf-8') for p in 
                 g.get_player_decks(sort_by_turn_order=True))
             output_fn.write('%f:%s:%s\n' % (
                     first_player_margin(g), 

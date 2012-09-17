@@ -1,10 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import bz2
 import codecs
 import collections
 import itertools
 import math
 import operator
+import os
 import pprint
 import urllib
 import urlparse
@@ -313,9 +315,12 @@ class PlayerPage(object):
             average = overall_record.average_win_points()
 
             ret += '<tr><th>%s</th>'%ex
-            ret += '<td>%.2f'% (weight * 10. / len(game_list))
-            ret += '<td>%.2f' % wp
-            ret += '<td>%.2f%%'% ( (wp - average) * 100. / average )
+            ret += '<td>%.2f</td>'% (weight * 10. / len(game_list))
+            ret += '<td>%.2f<td>' % wp
+            if average > 0:
+                ret += '<td>%.2f%%</td>'% ( (wp - average) * 100. / average )
+            else:
+                ret += '<td>0</td>' 
         ret += '</table></div>'
 
         ret += '<div style="clear: both;">&nbsp;</div>'
@@ -427,8 +432,15 @@ class GamePage(object):
         if game_id.endswith('.gz'):
             game_id = game_id[:-len('.gz')]
         yyyymmdd = game.Game.get_date_from_id(game_id)
-        contents = codecs.open('static/scrape_data/%s/%s' % (
-                yyyymmdd, game_id), 'r', encoding='utf-8').read()
+        uncompressed_fn = 'static/scrape_data/%s/%s' % (yyyymmdd, game_id)
+        compressed_fn = uncompressed_fn + '.bz2'
+        if os.path.exists(uncompressed_fn):
+            contents = codecs.open(uncompressed_fn, 'r', 
+                                   encoding='utf-8').read()
+        elif os.path.exists(compressed_fn):
+            contents = bz2.BZ2File(compressed_fn).read().decode('utf-8')
+        else:
+            return 'could not find game ' + game_id
         body_err_msg = ('<body><b>Error annotating game, tell ' 
                         'rrenaud@gmail.com!</b>')
         try:
@@ -536,9 +548,8 @@ class SupplyWinApi(object):
 
     def interaction_card_index_tuples(self, query_dict):
         cards = query_dict.get('interaction', '').split(',')
-        cards = [c for c in cards if c]  # remove empty strings
-        indexes = sorted(map(self.str_card_index, cards), 
-                         key=lambda x: -int(x))
+        cards = [c.strip() for c in cards if c]  # remove empty strings
+        indexes = sorted(map(self.str_card_index, cards), reverse=True)
 
         # Singleton tuples are weird, but they make the fetching logic simpler.
         card_tuples = list(itertools.combinations(indexes, 1))
@@ -616,7 +627,7 @@ class OptimalCardRatios(object):
                            set(card.TOURNAMENT_WINNINGS))
 
         card_x = query_dict.get('card_x', 'Minion')
-        card_y = query_dct.get('card_y', 'Gold')
+        card_y = query_dict.get('card_y', 'Gold')
 
         if card_x < card_y:
             db_id = card_x + ':' + card_y

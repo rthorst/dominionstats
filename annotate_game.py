@@ -41,7 +41,8 @@ def get_goals(game):
 def annotate_game(contents, game_id, debug=False):
     """ Decorate game contents with some JS that makes a score keeper 
     and provides anchors per turn."""
-    contents = contents.replace('&mdash;', '---')
+    contents = contents.replace('&mdash;', '---').replace(
+        'semistatic/log.css', 'client.css')
     parsed_game = parse_game.parse_game(contents, dubious_check = False)
     states = []
     
