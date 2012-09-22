@@ -43,7 +43,7 @@ def RemoveSmallFileIfExists(fn):
         print 'removing small existing file', fn
         os.unlink(fn)
 
-def download_date(str_date, cur_date):
+def download_date(str_date, cur_date, saved_games_bundle):
     urls_by_priority = [CouncilroomGamesCollectionUrl(cur_date),
                         IsotropicGamesCollectionUrl(cur_date)] 
 
@@ -95,7 +95,7 @@ def scrape_date(str_date, cur_date, passive=False):
         if passive:
             return MISSING
 
-        if download_date(str_date, cur_date):
+        if not download_date(str_date, cur_date, saved_games_bundle):
             return ERROR
 
         time.sleep(5)
