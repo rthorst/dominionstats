@@ -10,7 +10,7 @@ import pprint
 from primitive_util import ConvertibleDefaultDict
 import itertools
 from keys import *
-from card import index_to_card
+from card import index_to_card, EVERY_SET_CARDS
 WIN, LOSS, TIE = range(3)
 
 class PlayerDeckChange(object):
@@ -417,7 +417,7 @@ class GameState(object):
             sort_by_turn_order=True)
         self.supply = ConvertibleDefaultDict(value_type=int)
         num_players = len(game.get_player_decks())
-        for card in itertools.chain(card.EVERY_SET_CARDS,
+        for card in itertools.chain(EVERY_SET_CARDS,
                                     game.get_supply()):
             self.supply[card] = card.num_copies_per_game(num_players)
 

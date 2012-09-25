@@ -73,7 +73,7 @@ class Card:
             if num_players >= 3:
                 return 12
             return 8
-        card_name = str(card)
+        card_name = str(self)
         if card_name == 'Curse':
             return 10 * (num_players - 1)
         return {'Potion': 16,
