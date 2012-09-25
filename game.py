@@ -10,12 +10,12 @@ import pprint
 from primitive_util import ConvertibleDefaultDict
 import itertools
 from keys import *
-from card import index_to_card, EVERY_SET_CARDS
+from card import index_to_card, EVERY_SET_CARDS, get_card
 WIN, LOSS, TIE = range(3)
 
 class PlayerDeckChange(object):
     " This represents a change to a players deck in response to a game event."
-    CATEGORIES = [BUYS, GAINS, RETURNS, TRASHES]
+    CATEGORIES = ['buys', 'gains', 'returns', 'trashes']
 
     def __init__(self, name):
         self.name = name
@@ -32,6 +32,14 @@ class PlayerDeckChange(object):
         for cat in self.CATEGORIES:
             getattr(self, cat).extend(getattr(other_changes, cat))
         self.vp_tokens += other_changes.vp_tokens
+
+    def __repr__(self):
+        s = ''
+        for cat in self.CATEGORIES:
+            j = getattr(self, cat)
+            if len(j) > 0:
+                s += cat + '(' + ','.join(map(str, j)) + ') '
+        return s
 
 def turn_decode(turn_dict, field):
     return [index_to_card(i) for i in turn_dict.get(field, [])]
@@ -105,18 +113,18 @@ class Turn(object):
         ret = []
         my_change = PlayerDeckChange(self.player.name())
         ret.append(my_change)
-        setattr(my_change, GAINS, self.gains)
-        setattr(my_change, BUYS, self.buys)
-        setattr(my_change, TRASHES, self.trashes)
-        setattr(my_change, RETURNS, self.returns)
+        setattr(my_change, 'gains', self.gains)
+        setattr(my_change, 'buys' , self.buys)
+        setattr(my_change, 'trashes', self.trashes)
+        setattr(my_change, 'returns', self.returns)
         my_change.vp_tokens += self.turn_dict.get(VP_TOKENS, 0)
 
         opp_info = self.turn_dict.get(OPP, {})
         for opp_name, info_dict in opp_info.iteritems():
             change = PlayerDeckChange(opp_name)
-            getattr(change, GAINS).extend(info_dict.get(GAINS, []))
-            getattr(change, TRASHES).extend(info_dict.get(TRASHES, []))
-            getattr(change, RETURNS).extend(info_dict.get(RETURNS, []))
+            getattr(change, 'gains' ).extend(turn_decode(info_dict, GAINS))
+            getattr(change, 'trashes').extend(turn_decode(info_dict, TRASHES))
+            getattr(change, 'returns').extend(turn_decode(info_dict, RETURNS))
             change.vp_tokens += info_dict.get(VP_TOKENS, 0)
             ret.append(change)
 
@@ -366,6 +374,20 @@ class Game(object):
 
         return weights
 
+    def get_opening(self, player):
+        opening = []
+        count = 0
+        for turn in self.get_turns():
+            if turn.player != player:
+                continue
+            count += 1
+            opening += turn.buys
+
+            if count >= 2:
+                break
+        return sorted(opening)
+        
+
 
     def __repr__(self):
         s = '== %s ==\n\tSupply: %s\n'%(self.id, self.supply)
@@ -387,8 +409,9 @@ def score_deck(deck_comp):
     if 'Silk Road' in deck_comp:
         ret += score_silk_road(deck_comp)
 
-    for card in deck_comp:
-        ret += card.vp_per_card() * deck_comp[card]
+    for card_name in deck_comp:
+        card = get_card(card_name)
+        ret += card.vp_per_card() * deck_comp[card_name]
 
     return ret
 
@@ -403,11 +426,11 @@ def score_fairgrounds(deck_comp):
     return  2 * (len([count for count in deck_comp.values() if count>0] ) / 5) * deck_comp['Fairgrounds']
 
 def score_vineyard(deck_comp):
-    return sum(deck_comp[card] if card.is_action() else 0
+    return sum(deck_comp[card] if get_card(card).is_action() else 0
                for card in deck_comp) / 3 * deck_comp['Vineyard']
 
 def score_silk_road(deck_comp):
-    return sum(deck_comp[card] if card.is_victory() else 0
+    return sum(deck_comp[card] if get_card(card).is_victory() else 0
                for card in deck_comp) / 4 * deck_comp['Silk Road']
 
 class GameState(object):

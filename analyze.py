@@ -6,7 +6,7 @@ from __future__ import division
 
 import os
 
-import card
+from card import EVERY_SET_CARDS
 from stats import MeanVarStat
 from game import Game
 import incremental_scanner
@@ -54,7 +54,7 @@ class GamesAnalysis(PrimitiveConversion):
         self.num_games += 1
         seen_cards_players = set()
         self.max_game_id = max(self.max_game_id, game.get_id())
-        for card in game.get_supply() + card.EVERY_SET_CARDS:
+        for card in game.get_supply() + EVERY_SET_CARDS:
             self.card_stats[card].available += len(game.get_player_decks())
 
         accumed_by_player = collections.defaultdict(lambda : collections.defaultdict(int))

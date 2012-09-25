@@ -63,7 +63,10 @@ class Card:
         return self.singular
 
     def __eq__(self, other):
-        return self.singular==other
+        if type(self)==type(other):
+            return self.singular==other.singular
+        else:
+            return False
 
     def __hash__(self):
         return self.singular.__hash__()

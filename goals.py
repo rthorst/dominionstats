@@ -20,6 +20,8 @@ def achievement(player, reason, sort_key=None):
     achievement = {'player': player,
                    'reason': reason}
     if sort_key is not None:
+        if type(sort_key) != type(0):
+            sort_key = str(sort_key)
         achievement['sort_key'] = sort_key
     return achievement
 
@@ -37,7 +39,7 @@ def CheckMatchBOM(g):
                 bad = True
                 break
             if card.is_treasure():
-                treasures.append(card)
+                treasures.append(str(card))
         if not bad:
             reason = 'Bought only money and vp : %s' % (', '.join(treasures))
             ret.append(achievement(player, reason))

@@ -7,6 +7,7 @@ import incremental_scanner
 import primitive_util
 import utils
 from keys import *
+from game import Game
 
 def results_to_ranks(results):
     sorted_results = sorted(results)
@@ -52,30 +53,29 @@ class DbBackedSkillTable(ts.SkillTable):
 def setup_openings_collection(coll):
     coll.ensure_index('_id')
 
-def update_skills_for_game(game, opening_skill_table, 
+def update_skills_for_game(game_dict, opening_skill_table, 
                            #player_skill_table
                            ):
     teams = []
     results = []
     openings = []
     dups = False
-    # FIXME: Use Game Object
-    for deck in game[DECKS]:
-        opening = deck[TURNS][0].get(BUYS, []) + \
-            deck[TURNS][1].get(BUYS, [])
-            
-        opening.sort()
-        open_name = 'open:' + '+'.join(opening)
+
+    game = Game(game_dict)
+
+    for deck in game.player_decks:
+        opening = game.get_opening(deck)
+        open_name = 'open:' + '+'.join(map(str, opening))
         if open_name in openings:
             dups = True
         openings.append(open_name)
-        nturns = len(deck[TURNS])
-        if deck[RESIGNED]:
+        nturns = deck.num_turns()
+        if deck.Resigned():
             vp = -1000
         else:
-            vp = deck[POINTS]
+            vp = deck.Points()
         results.append((-vp, nturns))
-        player_name = deck[NAME]
+        player_name = deck.name()
 
         teams.append([open_name, player_name])
         ranks = results_to_ranks(results)
