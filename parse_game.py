@@ -704,7 +704,10 @@ def parse_turn(turn_blob, names_list):
 
         d = opp_turn_info[opp]
         for k, v in d.iteritems():
-            d[k] = indexes(v)
+            if k==VP_TOKENS:
+                d[k] = v
+            else:
+                d[k] = indexes(v)
 
     ret[BUYS] = indexes(ret[BUYS])
     ret[GAINS] = indexes(ret[GAINS])

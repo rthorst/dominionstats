@@ -762,6 +762,22 @@ player0 plays a <span class=card-none>University</span>.
         assert_equal_card_lists(turn_info[OPP]['p0'][RETURNS], [
                 'Duchy', 'Duchy'])
 
+    def test_possession_bishop(self):
+        turn_info = parse_game.parse_turn(u"""
+--- player0's turn (possessed by player1) ---</b>
+   player0 plays a <span class=card-none>Bishop</span>.
+   ... getting +$1 and +1 ▼.
+   ... player0 trashes a <span class=card-none>Possession</span> and gets +3 ▼.
+   ... player1 trashes nothing.
+   player0 plays a <span class=card-treasure>Copper</span> and a <span class=card-treasure>Silver</span>.
+   player0 buys a <span class=card-treasure>Silver</span>.
+   ... player1 gains the <span class=card-treasure>Silver</span>.
+   <span class=logonly>(player0 draws: a <span class=card-treasure>Copper</span>, a <span class=card-treasure>Silver</span>, a <span class=card-none>Native Village</span>, a <span class=card-none>Laboratory</span>, and a <span class=card-none>Wishing Well</span>.)</span>
+   player0 discards the "trashed" card (a <span class=card-none>Possession</span>).
+   <br>""", DEF_NAME_LIST)
+        self.assertEquals(turn_info[OPP]['p0'][VP_TOKENS], 4)
+
+
 class CanonicalizeNamesTest(unittest.TestCase):
     def test_canonicalize_names(self):
         replaced = parse_game.canonicalize_names(
