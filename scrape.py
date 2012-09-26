@@ -4,11 +4,16 @@
 # http://stackoverflow.com/questions/1060279/iterating-through-a-range-of-dates-in-python
 
 import datetime
-import time
+import glob
+import logging
 import os
+import os.path
+import subprocess
+import sys
+import tempfile
+import time
 import urllib
 import utils
-import sys
 
 # if the size of the game log is less than this assume we got an error page
 SMALL_FILE_SIZE = 5000 
@@ -19,6 +24,7 @@ GOOD = 0
 MISSING = 1
 ERROR = 2
 DOWNLOADED = 3
+REPACKAGED = 4
 
 # make I should just adopt the isotropic format for consistency?
 ISOTROPIC_FORMAT =   '%(year)d%(month)02d/%(day)02d/all.tar.bz2'
@@ -44,8 +50,10 @@ def RemoveSmallFileIfExists(fn):
         os.unlink(fn)
 
 def download_date(str_date, cur_date, saved_games_bundle):
-    urls_by_priority = [CouncilroomGamesCollectionUrl(cur_date),
-                        IsotropicGamesCollectionUrl(cur_date)] 
+    urls_by_priority = [
+                        CouncilroomGamesCollectionUrl(cur_date),
+                        IsotropicGamesCollectionUrl(cur_date),
+                        ] 
 
     for url in urls_by_priority:
         if DEBUG:
@@ -76,33 +84,99 @@ def unzip_date(directory, filename):
         code = False
     os.chdir('..')
     return code
+
+
+def repackage_filename(orig_archive_filename):
+    return orig_archive_filename.replace(".all.tar.bz2", ".bz2.tar")
     
 
+def repackage_archive(filename):
+    """ Converts a .tar.bz2 file into a .bz2.tar file in the same directory.
+
+    Game archives are distributed as .tar.bz2 (a bzip2-compressed tar
+    archive). For speed of serving, we repackage them as .bz2.tar (a
+    tar archive of bzip2-compressed HTML files). The .bz2.tar file is
+    a good bit larger, but an individual file can be extracted,
+    decompressed, and served to a client in tenths of a second instead
+    of tens of seconds. At the same time, storage space is still
+    dramatically smaller than a raw folder of uncompressed (or even
+    compressed) HTML files.
+    """
+
+    orig_dir = os.getcwd()
+
+    # Extract the existing file into a temporary folder
+    directory_name = tempfile.mkdtemp()
+    source_filename = os.path.abspath(filename)
+    try:
+        subprocess.check_call(["tar", "--auto-compress", "-C", directory_name,
+                               "-xf", source_filename])
+    except subprocess.CalledProcessError, e:  
+        # Not handling this yet, just re-raise
+        logging.warning("Unexpected return from tar >>{msg}<<".format(msg=e.output))
+        raise
+
+    # Compress all the game*.html files
+    os.chdir(directory_name)
+    game_files = glob.glob("game*.html")
+    if len(game_files) > 0:
+        try:
+            subprocess.check_call(["bzip2"] + game_files)
+        except subprocess.CalledProcessError, e:  #(retcode, cmd, output=output)
+            # Not handling this yet, just re-raise
+            logging.warning("Unexpected return from bzip >>{msg}<<".format(msg=e.output))
+            raise
+    else:
+        os.chdir(orig_dir)
+        os.removedirs(directory_name)
+        return
+
+    # Tar the results back to the directory where the original file
+    # came from
+    dest_filename = repackage_filename(source_filename)
+    game_files = glob.glob("game*.html.bz2")
+    try:
+        subprocess.check_call(["tar", "--remove", "-cf", dest_filename+".part"] + game_files)
+    except subprocess.CalledProcessError, e:  #(retcode, cmd, output=output)
+        # Not handling this yet, just re-raise
+        logging.warning("Unexpected return from tar >>{msg}<<".format(msg=e.output))
+        raise
+
+    os.rename(dest_filename + ".part", dest_filename)
+    os.chdir(orig_dir)
+    os.removedirs(directory_name)
+
+
 def scrape_date(str_date, cur_date, passive=False):
-    directory = str_date
+    #directory = str_date
     games_short_name = str_date + '.all.tar.bz2'
-    saved_games_bundle = directory + '/' + games_short_name
+    saved_games_bundle = games_short_name
+    return_code = ERROR
+
     if utils.at_least_as_big_as(saved_games_bundle, SMALL_FILE_SIZE):
         if DEBUG:
             print 'skipping because exists', str_date, saved_games_bundle, \
                 'and not small (size=', os.stat(saved_games_bundle).st_size, ')'
-        return GOOD
+        return_code = GOOD
     else:
-        if not os.path.exists(directory):
-            os.mkdir(directory)
         RemoveSmallFileIfExists(saved_games_bundle)
 
         if passive:
-            return MISSING
+            return_code = MISSING
 
-        if not download_date(str_date, cur_date, saved_games_bundle):
-            return ERROR
+        elif not download_date(str_date, cur_date, saved_games_bundle):
+            return_code = ERROR
 
-        time.sleep(5)
-        if unzip_date(directory, games_short_name):
-            return DOWNLOADED
-        else:
-            return ERROR
+        return_code = DOWNLOADED
+
+    # Repackage an existing file, if found
+    if utils.at_least_as_big_as(saved_games_bundle, SMALL_FILE_SIZE) and \
+            not os.path.exists(repackage_filename(saved_games_bundle)):
+        repackage_archive(saved_games_bundle)
+        return_code = REPACKAGED
+
+    return return_code
+
 
 def scrape_games():
     parser = utils.incremental_date_range_cmd_line_parser()
@@ -128,6 +202,8 @@ def scrape_games():
         ret = scrape_date(str_date, cur_date, passive=args.passive)
         if ret==DOWNLOADED:
             print 'o',
+        elif ret==REPACKAGED:
+            print 'O',
         elif ret==ERROR:
             print '!',
         elif ret==MISSING:
