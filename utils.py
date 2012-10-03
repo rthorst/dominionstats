@@ -65,6 +65,8 @@ def incremental_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--noincremental', action='store_false', 
                         dest='incremental')
+    parser.add_argument('--debug', dest='debug', action='store_true',
+                        default=False, help='Output debug detail')
     return parser
 
 def incremental_max_parser():
