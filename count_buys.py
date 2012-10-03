@@ -12,7 +12,7 @@ import pymongo
 
 from stats import MeanVarStat as MVS
 import analysis_util
-import card
+from card import EVERY_SET_CARDS
 import game
 import incremental_scanner
 import mergeable
@@ -76,7 +76,7 @@ def accum_buy_stats(games_stream, accum_stats,
     """
     for idx, game_val in enumerate(games_stream):
         counted_game_len = False
-        every_set_cards = card.EVERY_SET_CARDS
+        every_set_cards = EVERY_SET_CARDS
 
         for changes in game_val.deck_changes_per_player():
             if not acceptable_deck_filter(game_val, changes.name):

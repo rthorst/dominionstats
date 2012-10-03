@@ -125,8 +125,7 @@ class OpeningPage(object):
             opening['skill_str'] = skill_str(opening['mu'], opening['sigma'])
             opening['cards'] = split_opening(opening)
             opening['cards'].sort()
-            opening['cards'].sort(key=card.cost),
-                reverse=True)
+            opening['cards'].sort(key=card.cost, reverse=True)
             costs = [str(card.cost) for card in opening['cards']]
             while len(costs) < 2:
                 costs.append('-')

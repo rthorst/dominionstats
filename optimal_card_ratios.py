@@ -70,8 +70,9 @@ class CardRatioTracker:
         ratios = {}
         for card1 in self.card_counts.iterkeys():
             for card2 in self.card_counts.iterkeys():
-                if card1 < card2:
-                    ratios[card1 + ':' + card2] = set([(self.card_counts[card1], self.card_counts[card2])])
+                if str(card1) < str(card2):
+                    key = str(card1) + ':' + str(card2)
+                    ratios[key] = set([(self.card_counts[card1], self.card_counts[card2])])
         return ratios
 
 class FinalCardRatioTracker(CardRatioTracker):
@@ -108,8 +109,13 @@ class ProgressiveCardRatioTracker(CardRatioTracker):
 
         for card2 in self.card_counts.iterkeys():
             if card != card2:
-                c1, c2 = sorted([card, card2])
-                self.ratios[c1 + ':' + c2].add((self.card_counts[c1], self.card_counts[c2]))
+                if str(card) < str(card2):
+                    c1, c2 = card, card2
+                else:
+                    c1, c2 = card2, card
+
+                key = str(c1) + ':' + str(c2)
+                self.ratios[key].add((self.card_counts[c1], self.card_counts[c2]))
 
     def get_ratio_dict(self):
         return self.ratios

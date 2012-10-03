@@ -63,7 +63,10 @@ class Card:
         return self.singular
 
     def __eq__(self, other):
-        return self.singular==other
+        if type(self)==type(other):
+            return self.singular==other.singular
+        else:
+            return False
 
     def __hash__(self):
         return self.singular.__hash__()
@@ -73,7 +76,7 @@ class Card:
             if num_players >= 3:
                 return 12
             return 8
-        card_name = str(card)
+        card_name = str(self)
         if card_name == 'Curse':
             return 10 * (num_players - 1)
         return {'Potion': 16,
