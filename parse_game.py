@@ -621,7 +621,7 @@ def parse_turn(turn_blob, names_list):
                 targ_obj[TRASHES].extend(capture_cards(rest))
         if KW_GAINS_A in line or KW_GAMES_A in line:
             if KW_TOKEN in line:
-                assert 'Pirate Ship' in capture_cards(line)
+                assert get_card('Pirate Ship') in capture_cards(line)
                 ps_tokens += 1
             else:
                 rest = line[max(line.find(KW_GAINS_A), line.find(KW_GAMES_A)):]

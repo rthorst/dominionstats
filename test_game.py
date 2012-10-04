@@ -3,6 +3,7 @@
 import unittest
 import game
 import simplejson as json
+from keys import *
 
 class ScoreDeckTest(unittest.TestCase):
     def test_gardens(self):
@@ -31,7 +32,7 @@ class ScoreDeckTest(unittest.TestCase):
 
 def make_deck(name, points, win_points, order):
     return {NAME: name, POINTS: points, WIN_POINTS: win_points, 
-            DECK: [], ORDER: order, TURNS: [],}
+            DECK: {}, ORDER: order, TURNS: [],}
 
 class WinLossTieTest(unittest.TestCase):
     def test_win_loss_tie_3p(self):
