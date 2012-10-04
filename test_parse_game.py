@@ -13,10 +13,13 @@ DEF_NAME_LIST = ['p' + str(x) for x in range(15)]
 
 def assert_equal_card_lists(indexes, names, msg=None):
     list1 = [card.index_to_card(i) for i in indexes]
+    assert_equal_indexed_lists(list1, names, msg)
+
+def assert_equal_indexed_lists(list1, names, msg=None):
     list2 = [card.get_card(n) for n in names]
     if list1==list2:
         return
-    elif msg is None:       
+    elif msg is None: 
         raise AssertionError(repr(list1)+' != '+repr(list2))
     else:
         raise AssertionError(msg)
@@ -39,48 +42,48 @@ class CaptureCardsTest(unittest.TestCase):
     def test_capture_cards(self):
         captured = parse_game.capture_cards(
             'player0 plays 3 <span class=card-treasure>Coppers</span>.')
-        self.assertEquals(captured, ['Copper'] * 3)
+        assert_equal_indexed_lists(captured, ['Copper'] * 3)
         
         captured = parse_game.capture_cards(
             '... ... and plays the <span class=card-none>Throne Room</span> '
             'again.')
-        self.assertEquals(captured, ['Throne Room'])
+        assert_equal_indexed_lists(captured, ['Throne Room'])
 
         captured = parse_game.capture_cards(
             '... player0 gains the '
             '<span class=card-reaction>Watchtower</span>.')
-        self.assertEquals(captured, ['Watchtower'])
+        assert_equal_indexed_lists(captured, ['Watchtower'])
 
         captured = parse_game.capture_cards(
             '... player1 gains a <span class=card-treasure>Copper</span> '
             'and a <span class=card-curse>Curse</span>')
-        self.assertEquals(captured, ['Copper', 'Curse'])
+        assert_equal_indexed_lists(captured, ['Copper', 'Curse'])
 
         captured = parse_game.capture_cards(
             'player1 plays a <span class=card-treasure>Platinum</span>, '
             '3 <span class=card-treasure>Golds</span>, and a '
             '<span class=card-treasure>Copper</span>.')
-        self.assertEquals(captured, ['Platinum', 'Gold', 'Gold', 'Gold',
+        assert_equal_indexed_lists(captured, ['Platinum', 'Gold', 'Gold', 'Gold',
                                      'Copper'])
 
         captured = parse_game.capture_cards(
             'cards in supply: <span cardname="Black Market" '
             'class=card-none>Black Market</span>, '
             '<span cardname="Caravan" class=card-duration>Caravan</span>')
-        self.assertEquals(captured, ['Black Market', 'Caravan'])
+        assert_equal_indexed_lists(captured, ['Black Market', 'Caravan'])
 
         captured = parse_game.capture_cards(
             'player0 plays a <span class=card-none>Coppersmith</span>.')
-        self.assertEquals(captured, ['Coppersmith'])
+        assert_equal_indexed_lists(captured, ['Coppersmith'])
         
         captured = parse_game.capture_cards(
             'player4 buys an <span class=card-none>Expand</span>')
-        self.assertEquals(captured, ['Expand'])
+        assert_equal_indexed_lists(captured, ['Expand'])
 
     def test_bane(self):
         captured = parse_game.capture_cards(
             '<span cardname="Chapel" class=card-none>Chapel</span>, <span cardname="Moat" class=card-reaction>Moat</span><span class=bane-star>&diams;</span>,')
-        self.assertEquals(captured, ['Chapel', 'Moat'])
+        assert_equal_indexed_lists(captured, ['Chapel', 'Moat'])
 
 class DeleteKeysTest(unittest.TestCase):
     def test_delete_keys_with_empty_vals(self):
