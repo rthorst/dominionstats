@@ -23,7 +23,7 @@ class ScoreDeckTest(unittest.TestCase):
 
     def test_simple(self):
         self.assertEquals(game.score_deck({
-                    'Curse': 1, 'Estate': 1, 'Duchy': 1, 
+                    'Curse': 1, 'Estate': 1, 'Duchy': 1,
                     'Province': 1, 'Colony': 1}), 19)
 
     def test_vineyards(self):
@@ -31,7 +31,7 @@ class ScoreDeckTest(unittest.TestCase):
                                            'Fishing Village': 3}), 4)
 
 def make_deck(name, points, win_points, order):
-    return {NAME: name, POINTS: points, WIN_POINTS: win_points, 
+    return {NAME: name, POINTS: points, WIN_POINTS: win_points,
             DECK: {}, ORDER: order, TURNS: [],}
 
 class WinLossTieTest(unittest.TestCase):
@@ -57,6 +57,25 @@ class GameStateTest(unittest.TestCase):
         turn_labels = self._get_turn_labels(outpost_game.game_state_iterator())
         for game_state in outpost_game.game_state_iterator():
             pass
+
+class PlayerDeckTest(unittest.TestCase):
+    def test_deck_composition(self):
+        outpost_game = game.Game(parse_game.parse_game( \
+                open('testing/testdata/game-20101015-094051-95e0a59e.html', 'r').read()))
+        last_state = None
+        game_state_iterator = outpost_game.game_state_iterator()
+        for game_state in game_state_iterator:
+            last_state = game_state
+        for player_deck in outpost_game.get_player_decks():
+
+            parsed_deck_comp = player_deck.Deck()
+            computed_deck_comp = last_state.get_deck_composition(
+                player_deck.name())
+
+            for card in set(parsed_deck_comp.keys() +
+                            computed_deck_comp.keys()):
+                self.longMessage = True
+                self.assertEqual(parsed_deck_comp.get(card, 0), computed_deck_comp.get(card, 0), card)
 
 if __name__ == '__main__':
     unittest.main()

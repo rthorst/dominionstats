@@ -452,8 +452,8 @@ class GameState(object):
             len(self.turn_ordered_players) * 7)
 
         for player in self.turn_ordered_players:
-            self.player_decks[player.name()]['Copper'] = 7
-            self.player_decks[player.name()]['Estate'] = 3
+            self.player_decks[player.name()][get_card('Copper')] = 7
+            self.player_decks[player.name()][get_card('Estate')] = 3
 
         self.turn_ind = 0
 
