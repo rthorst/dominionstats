@@ -70,6 +70,8 @@ class Turn(object):
             s += 'Trashes: %s ' % self.trashes
         if self.returns:
             s += 'Returns: %s ' % self.returns
+        if OPP in self.turn_dict:
+            s += str(self.turn_dict.get(OPP, {}))
         return s
 
     def get_player(self):
@@ -187,7 +189,7 @@ class PlayerDeck(object):
         return 'red'
 
     def __repr__(self):
-        s = '\t%s %f %d %d\n\t\t'%("",self.win_points, self.points, self.turn_order)
+        s = '\t%s %f %d %2d %s\n\t\t'%("",self.win_points, self.points, self.turn_order, self.player_name)
         s += str(self.deck)
         return s
 
@@ -389,10 +391,13 @@ class Game(object):
         
 
 
-    def __repr__(self):
+    def __repr__(self, print_turns=False):
         s = '== %s ==\n\tSupply: %s\n'%(self.id, self.supply)
         for pd in self.player_decks:
             s += '%s\n'%str(pd)
+        if print_turns:
+            for turn in self.turns:
+                s += '%s\n'%str(turn)
         return s
 
 def score_deck(deck_comp):
@@ -448,12 +453,14 @@ class GameState(object):
             value_type=lambda: ConvertibleDefaultDict(int))
         self.player_vp_tokens = collections.defaultdict(int)
 
-        self.supply['Copper'] = self.supply['Copper'] - (
+        copper = get_card('Copper')
+        estate = get_card('Estate')
+        self.supply[copper] = self.supply[copper] - (
             len(self.turn_ordered_players) * 7)
 
         for player in self.turn_ordered_players:
-            self.player_decks[player.name()]['Copper'] = 7
-            self.player_decks[player.name()]['Estate'] = 3
+            self.player_decks[player.name()][copper] = 7
+            self.player_decks[player.name()][estate] = 3
 
         self.turn_ind = 0
 

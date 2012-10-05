@@ -606,7 +606,7 @@ def parse_turn(turn_blob, names_list):
                 targ_obj[TRASHES].extend(capture_cards(lines[line_idx - 1]))
             if KW_REVEALING in line or KW_REVEALS in line:  
                 # reveals watchtower trashing ...
-                # noble brigand reveals xx, yy and treashes yy
+                # noble brigand reveals xx, yy and trashes yy
                 trashed = capture_cards(line[line.find(KW_TRASHING):])
                 targ_obj[TRASHES].extend(trashed)
             else:
@@ -848,7 +848,7 @@ def check_game_sanity(game_val, output):
 
     supply = game_val.get_supply()
     # ignore known bugs.
-    if set(supply).intersection(['Masquerade', 'Black Market', 'Trader']):
+    if set(supply).intersection([get_card('Masquerade'), get_card('Black Market'), get_card('Trader')]):
         return True
 
     # TODO: add score sanity checking here
@@ -872,8 +872,8 @@ def check_game_sanity(game_val, output):
                 if parsed_deck_comp.get(card, 0) != computed_deck_comp.get(
                     card, 0):
                     if not found_something_wrong:
-                        output.write('card from-data from-sim\n')
-                    output.write('%s %d %d\n' % (
+                        output.write('%10s %10s %10s\n'%('card','from-data','from-sim'))
+                    output.write('%10s %10d %10d\n' % (
                             card, parsed_deck_comp.get(card, 0), 
                                 computed_deck_comp.get(card, 0)))
                     found_something_wrong = True
