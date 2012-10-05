@@ -288,7 +288,7 @@ def parse_header(header_str):
     """
     sections = [s for s in header_str.replace(' \n', '\n').split('\n\n') if s]
     end_str, supply_str = sections
-    assert 'gone' in end_str or 'resigned' in end_str
+    assert 'gone' in end_str or 'resigned' in end_str, "Not gone or resigned"
     if 'gone' in end_str:
         resigned = False
         gone = capture_cards(end_str.split('\n')[1])
@@ -392,7 +392,7 @@ def parse_vetoes(veto_str):
 def name_and_rest(line, term):
     """ Split line about term, return (before, after including term). """
     start_of_term = line.find(term)
-    assert start_of_term != -1
+    assert start_of_term != -1, "start_of_term is -1"
 
     def _strip_leading(val, dead_chars):
         for idx, char in enumerate(val):
@@ -621,7 +621,7 @@ def parse_turn(turn_blob, names_list):
                 targ_obj[TRASHES].extend(capture_cards(rest))
         if KW_GAINS_A in line or KW_GAMES_A in line:
             if KW_TOKEN in line:
-                assert get_card('Pirate Ship') in capture_cards(line)
+                assert get_card('Pirate Ship') in capture_cards(line), 'Pirate ship not in line'
                 ps_tokens += 1
             else:
                 rest = line[max(line.find(KW_GAINS_A), line.find(KW_GAMES_A)):]
@@ -686,7 +686,7 @@ def parse_turn(turn_blob, names_list):
             targ_obj['buy_or_gain'] = GAINS
 
         assert not (now_buys_len > orig_buys_len and
-                    now_gains_len > orig_gains_len)
+                    now_gains_len > orig_gains_len), 'buys or gains mismatch'
 
     def _delete_if_exists(d, n):
         if n in d:
@@ -759,14 +759,14 @@ def parse_game_from_dict(log, game):
         parsed['_id'] = game['_id']
         return parsed
     except BogusGameError, bogus_game_exception:
-        log.warning('%s got BogusGameError: %s', game['_id'], bogus_game_exception.reason)
+        log.debug('%s got BogusGameError: %s', game['_id'], bogus_game_exception.reason)
         return None
     except ParseTurnHeaderError, p:
         log.warning('%s got ParseTurnHeaderError: %s', game['_id'], p)
         return None
     except AssertionError, e:
         log.warning('%s got AssertionError: %s', game['_id'], e)
-        raise e
+        return None
 
 def outer_parse_game(filename):
     """ Parse game from filename. """
@@ -882,7 +882,7 @@ def check_game_sanity(game_val, output):
 
     supply = game_val.get_supply()
     # ignore known bugs.
-    if set(supply).intersection(['Masquerade', 'Black Market', 'Trader']):
+    if set(supply).intersection([get_card('Masquerade'), get_card('Black Market'), get_card('Trader')]):
         return True
 
     # TODO: add score sanity checking here

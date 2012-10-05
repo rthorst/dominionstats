@@ -503,10 +503,10 @@ class GameState(object):
                 self.player_decks[name][card] += deck_dir
 
         for deck_change in turn.deck_changes():
-            apply_diff(getattr(deck_change, BUYS) + getattr(deck_change, GAINS),
+            apply_diff(getattr(deck_change, 'buys') + getattr(deck_change, 'gains'),
                       deck_change.name, -1, 1)
-            apply_diff(getattr(deck_change, TRASHES), deck_change.name, 0, -1)
-            apply_diff(getattr(deck_change, RETURNS), deck_change.name, 1, -1)
+            apply_diff(getattr(deck_change, 'trashes'), deck_change.name, 0, -1)
+            apply_diff(getattr(deck_change, 'returns'), deck_change.name, 1, -1)
             self.player_vp_tokens[deck_change.name] += deck_change.vp_tokens
 
     def turn_label(self, for_anchor=False, for_display=False):
