@@ -22,7 +22,7 @@ import utils
 import name_merger
 from keys import *
 from game import Game
-from card import get_card, CardEncoder, indexes
+from card import get_card, CardEncoder, indexes, index_to_card
 
 import simplejson as json
 
@@ -834,7 +834,7 @@ def convert_to_json(log, raw_games, year_month_day, game_list=None):
     log.debug('%s before filtering %s', year_month_day, len(parsed_games))
     parsed_games = [x for x in parsed_games if x]
 
-    track_brokenness(parsed_games)
+    track_brokenness(log, parsed_games)
 
     log.debug('%s after filtering %s', year_month_day, len(parsed_games))
 
@@ -847,14 +847,16 @@ def convert_to_json(log, raw_games, year_month_day, game_list=None):
     map(dump_segment, labelled_segments)
     #pool.close()
 
-def track_brokenness(parsed_games):
+def track_brokenness(log, parsed_games):
     """Print some summary statistics about cards that cause bad parses."""
+    failures = 0
     wrongness = collections.defaultdict(int)
     overall = collections.defaultdict(int)
     for raw_game in parsed_games:
-        accurately_parsed = check_game_sanity(game.Game(raw_game), sys.stdout)
-        #if not accurately_parsed:
-        #    print raw_game['_id']
+        accurately_parsed = check_game_sanity(game.Game(raw_game), log)
+        if not accurately_parsed:
+            log.debug('Failed to accurately parse game %s', raw_game['_id'])
+            failures += 1
         for card in raw_game[SUPPLY]:
             if not accurately_parsed:
                 wrongness[card] += 1
@@ -862,23 +864,27 @@ def track_brokenness(parsed_games):
 
     ratios = []
     for card in overall:
-        ratios.append(((float(wrongness[card]) / overall[card]), card))
+        ratios.append(((float(wrongness[card]) / overall[card]), index_to_card(card)))
     ratios.sort()
     if ratios[-1][0] > 0:
-        print ratios[-10:]
+        log.debug("Ratios for problem cards %s, %d failures out of %d games", ratios[-10:],
+                  failures, len(parsed_games))
     else:
-        print 'perfect parsing!'
+        log.debug('Perfect parsing, %d games!', len(parsed_games))
 
 def parse_game_from_file(filename):
     """ Return a parsed version of a given filename. """
     contents = codecs.open(filename, 'r', encoding='utf-8').read()
     return parse_game(contents, dubious_check = True)
 
-def check_game_sanity(game_val, output):
+__problem_deck_index__ = 0
+def check_game_sanity(game_val, log):
     """ Check if if game_val is self consistent. 
 
     In particular, check that the end game player decks match the result of 
     simulating deck interactions saved in game val."""
+
+    global __problem_deck_index__
 
     supply = game_val.get_supply()
     # ignore known bugs.
@@ -906,16 +912,15 @@ def check_game_sanity(game_val, output):
                 if parsed_deck_comp.get(card, 0) != computed_deck_comp.get(
                     card, 0):
                     if not found_something_wrong:
-                        output.write('card from-data from-sim\n')
-                    output.write('%s %d %d\n' % (
-                            card, parsed_deck_comp.get(card, 0), 
-                                computed_deck_comp.get(card, 0)))
+                        __problem_deck_index__ += 1
+                        log.debug('[%d] card\tfrom-data\tfrom-sim', __problem_deck_index__)
+                    log.debug('[%d] %s\t%d\t%d', __problem_deck_index__, card, parsed_deck_comp.get(card, 0), 
+                              computed_deck_comp.get(card, 0))
                     found_something_wrong = True
             if found_something_wrong:
                 try:
-                    output.write('%s %s\n' % (player_deck.name(), game_val.get_id()))
-                    output.write(' '.join(map(str, game_val.get_supply())))
-                    output.write('\n')
+                    log.debug('[%d] insane game for %s %s: %s', __problem_deck_index__, player_deck.name(), game_val.get_id(),
+                              ' '.join(map(str, game_val.get_supply())))
                 except UnicodeEncodeError, e:
                     None
                 return False
