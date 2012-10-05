@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
-import unittest
 import game
-import simplejson as json
+import parse_game
+import unittest
 from keys import *
 
 class ScoreDeckTest(unittest.TestCase):
@@ -51,9 +51,9 @@ class GameStateTest(unittest.TestCase):
         return [game_state_it.turn_label() for t in game_state_it]
 
     def test_turn_labels(self):
-        raw_outpost_game = json.loads(open(
-                'testing/testdata/sample_outpost_game.json', 'r').read())
-        outpost_game = game.Game(raw_outpost_game)
+        # 'game-20101015-094051-95e0a59e.html' contains Outpost card
+        outpost_game = game.Game(parse_game.parse_game( \
+                open('testing/testdata/game-20101015-094051-95e0a59e.html', 'r').read()))
         turn_labels = self._get_turn_labels(outpost_game.game_state_iterator())
         for game_state in outpost_game.game_state_iterator():
             pass
