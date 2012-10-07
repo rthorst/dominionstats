@@ -804,12 +804,12 @@ def dump_segment(arg_tuple):
     """
     idx, year_month_day, segment = arg_tuple
     out_name = 'parsed_out/%s-%d.json' % (year_month_day, idx)
-    json.dump(segment, open(out_name, 'w'), indent=2, sort_keys=True, cls=CardEncoder, skipkeys=True)
+    json.dump(segment, open(out_name, 'w'), sort_keys=True, cls=CardEncoder, skipkeys=True)
 
 def convert_to_json(log, raw_games, year_month_day, game_list=None):
     """ Parse the games in for given year_month_day and output them
-    into split local files.  Each local file should contain 100 games or
-    less, and be smaller than 4 MB, for easy import into mongodb.
+    into split local files.  Each local file should contain 4000 games or
+    less, and be smaller than 16 MB, for easy import into mongodb.
 
     year_month_day: string in yyyymmdd format encoding date
     games_to_parse: if given, use these games rather than all files in dir.
@@ -838,9 +838,7 @@ def convert_to_json(log, raw_games, year_month_day, game_list=None):
 
     log.debug('%s after filtering %s', year_month_day, len(parsed_games))
 
-    return
-
-    game_segments = list(segments(parsed_games, 100))
+    game_segments = list(segments(parsed_games, 4000))
     labelled_segments = [(i, year_month_day, c) for i, c in
                          enumerate(game_segments)]
     #pool.map(dump_segment, labelled_segments)
@@ -938,6 +936,8 @@ def main(args, log):
     db = connection.test
     raw_games = db.raw_games
     raw_games.ensure_index('game_date')
+
+    utils.ensure_exists('parsed_out')
 
     day_status_col = db.day_status
     days = day_status_col.find({'raw_games_loaded': True})
