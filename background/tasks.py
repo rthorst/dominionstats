@@ -16,3 +16,9 @@ def mul(x, y):
 @celery.task
 def xsum(numbers):
     return sum(numbers)
+
+
+@celery.task
+def power(x, y):
+    return x ** y
+
