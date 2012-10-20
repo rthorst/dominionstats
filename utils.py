@@ -8,6 +8,12 @@ import ConfigParser
 import primitive_util
 import pymongo
 
+# http://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks-in-python
+def segments(lis, chunk_size):
+    """ Return an iterator over sublists whose size matches chunk_size. """
+    for i in xrange(0, len(lis), chunk_size):
+        yield lis[i:i + chunk_size]
+
 def get_mongo_connection():
    mongo_connection = 'localhost'
 

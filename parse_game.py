@@ -17,14 +17,14 @@ import pymongo
 import re
 import sys
 
-import game
-import utils
-import name_merger
-from keys import *
-from game import Game
 from card import get_card, CardEncoder, indexes, index_to_card
-
+from game import Game
+from keys import *
+from utils import segments
+import game
+import name_merger
 import simplejson as json
+import utils
 
 SECTION_SEP = re.compile('^----------------------$', re.MULTILINE)
 
@@ -791,12 +791,6 @@ def outer_parse_game(filename):
         print filename
         raise e
 
-# http://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks-in-python
-def segments(lis, chunk_size):
-    """ Return an iterator over sublists whose size matches chunk_size. """
-    for i in xrange(0, len(lis), chunk_size):
-        yield lis[i:i + chunk_size]
-
 def dump_segment(arg_tuple):
     """ Write a json serialized version of games to to name determined by 
     arg tuple.  arg_tuple is in this annoying format for compatibility with 
@@ -805,6 +799,42 @@ def dump_segment(arg_tuple):
     idx, year_month_day, segment = arg_tuple
     out_name = 'parsed_out/%s-%d.json' % (year_month_day, idx)
     json.dump(segment, open(out_name, 'w'), sort_keys=True, cls=CardEncoder, skipkeys=True)
+
+
+def parse_and_insert(log, raw_games, year_month_day):
+    """ Parse the given list of given year_month_day and insert them
+    into the mongo db.
+
+    log: Logging object
+    raw_games: List of games to parse, each in dict format
+    year_month_day: string in yyyymmdd format encoding date
+    """
+    log.debug('Beginnng to parse %d games for %s', len(raw_games), year_month_day)
+    parsed_games = map(lambda x: parse_game_from_dict(log, x), raw_games)
+
+    log.debug('Beginning to filter %d games for %s', len(parsed_games), year_month_day)
+    parsed_games = [x for x in parsed_games if x]
+    track_brokenness(log, parsed_games)
+
+    log.debug('Beginning to insert %d games for %s', len(parsed_games), year_month_day)
+    connection = pymongo.Connection('councilroom.mccllstr.com')
+    db = connection.test
+    games_col = db.games
+
+    for game in parsed_games:
+        # if game['_id'] == 'game-20101015-233429-dc9030d7.html':
+        #     pp = pprint.PrettyPrinter(indent=4)
+        #     pp.pprint(game)
+
+        try:
+            games_col.save(game, safe=True, check_keys=True)
+        except Exception, e:
+            log.exception("Got exception on trying to insert %s", game['_id'])
+
+#    games_col.insert(parsed_games, safe=True, continue_on_error=True, check_keys=True)
+
+    return len(parsed_games)
+
 
 def convert_to_json(log, raw_games, year_month_day, game_list=None):
     """ Parse the games in for given year_month_day and output them
