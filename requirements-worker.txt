@@ -1,0 +1,9 @@
+anyjson>=0.3.3
+argparse>=1.2.1
+billiard>=2.7.3.17
+celery>=3.0.11
+distribute>=0.6.24
+kombu>=2.4.7
+wsgiref>=0.1.2
+redis
+simplejson
