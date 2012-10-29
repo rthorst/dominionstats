@@ -4,6 +4,7 @@
 """Parse raw game data from isotropic into JSON list of game documents."""
 
 import bz2
+import tarfile
 import codecs
 import collections
 import itertools
@@ -23,6 +24,7 @@ import name_merger
 from keys import *
 from game import Game
 from card import get_card, CardEncoder, indexes, index_to_card
+from database_status import *
 
 import simplejson as json
 
@@ -744,28 +746,31 @@ def parse_turns(turns_blob, names_list):
     """ Return a list of turn objects, as documented by parse_turn(). """
     return [parse_turn(text, names_list) for text in split_turns(turns_blob)]
 
-def parse_game_from_dict(log, game):
+def parse_game_from_zip(log, tar, game):
     """ Parse game from raw_game collection dict object. """
-    contents = bz2.decompress(game['text']).decode('utf-8')
+    f=tar.extractfile(game)
+    contents=bz2.decompress(f.read()).decode('utf-8')
+    game_id = game.name[: game.name.index('.') ]
 
     if not contents:
-        log.debug('%s is empty game', game['_id'])
+        log.debug('%s is empty game', game.name)
         return None
     if '<b>game aborted' in contents:
-        log.debug('%s is aborted game', game['_id'])
+        log.debug('%s is aborted game', game.name)
         return None
+
     try:
         parsed = parse_game(contents, dubious_check = True)
-        parsed['_id'] = game['_id']
+        parsed['_id'] = game_id
         return parsed
     except BogusGameError, bogus_game_exception:
-        log.debug('%s got BogusGameError: %s', game['_id'], bogus_game_exception.reason)
+        log.debug('%s got BogusGameError: %s', game_id, bogus_game_exception.reason)
         return None
     except ParseTurnHeaderError, p:
-        log.warning('%s got ParseTurnHeaderError: %s', game['_id'], p)
+        log.warning('%s got ParseTurnHeaderError: %s', game_id, p)
         return None
     except AssertionError, e:
-        log.warning('%s got AssertionError: %s', game['_id'], e)
+        log.warning('%s got AssertionError: %s', game_id, e)
         return None
 
 def outer_parse_game(filename):
@@ -806,7 +811,7 @@ def dump_segment(arg_tuple):
     out_name = 'parsed_out/%s-%d.json' % (year_month_day, idx)
     json.dump(segment, open(out_name, 'w'), sort_keys=True, cls=CardEncoder, skipkeys=True)
 
-def convert_to_json(log, raw_games, year_month_day, game_list=None):
+def convert_to_json(log, year_month_day):
     """ Parse the games in for given year_month_day and output them
     into split local files.  Each local file should contain 4000 games or
     less, and be smaller than 16 MB, for easy import into mongodb.
@@ -814,23 +819,22 @@ def convert_to_json(log, raw_games, year_month_day, game_list=None):
     year_month_day: string in yyyymmdd format encoding date
     games_to_parse: if given, use these games rather than all files in dir.
     """
-    if game_list is None:
-        games_to_parse = raw_games.find({'game_date': year_month_day})
-    else:
-        # TODO: Enhance this to accept a list of games
-        log.warning("covert_to_json not able to parse subset of games, parsing the full day")
-        games_to_parse = raw_games.find({'game_date': year_month_day})
+    zip_file = 'static/scrape_data/%s.bz2.tar'%year_month_day
+    if not os.path.exists(zip_file):
+        log.info('Zip file not found in %s', year_month_day)
+    tar = tarfile.open(zip_file)
+    games_to_parse = tar.getmembers()
 
-    if games_to_parse.count() < 1:
+    if len(games_to_parse) < 1:
         log.info('no games to parse in %s', year_month_day)
-        return
+        return False
     else:
-        log.info('%s games to parse in %s', games_to_parse.count(), year_month_day)
+        log.info('%s games to parse in %s', len(games_to_parse), year_month_day)
 
     # TODO: Temporarily commented out the Pool-based implementation
     #pool = multiprocessing.Pool()
     #parsed_games = pool.map(outer_parse_game, games_to_parse, chunksize=50)
-    parsed_games = map(lambda x: parse_game_from_dict(log, x), games_to_parse)
+    parsed_games = map(lambda x: parse_game_from_zip(log, tar, x), games_to_parse)
     log.debug('%s before filtering %s', year_month_day, len(parsed_games))
     parsed_games = [x for x in parsed_games if x]
 
@@ -844,6 +848,8 @@ def convert_to_json(log, raw_games, year_month_day, game_list=None):
     #pool.map(dump_segment, labelled_segments)
     map(dump_segment, labelled_segments)
     #pool.close()
+
+    return True
 
 def track_brokenness(log, parsed_games):
     """Print some summary statistics about cards that cause bad parses."""
@@ -925,8 +931,6 @@ def check_game_sanity(game_val, log):
     return True
 
 def main(args, log):
-    BEEN_PARSED_KEY = 'day_analyzed'
-
     if args.incremental:
         log.info("Performing incremental parsing from %s to %s", args.startdate, args.enddate)
     else:
@@ -934,13 +938,11 @@ def main(args, log):
 
     connection = pymongo.Connection()
     db = connection.test
-    raw_games = db.raw_games
-    raw_games.ensure_index('game_date')
 
     utils.ensure_exists('parsed_out')
 
     day_status_col = db.day_status
-    days = day_status_col.find({'raw_games_loaded': True})
+    days = day_status_col.find({'data_status': DataStatus.PARSED})
     
     for day in days:
         year_month_day = day['_id']
@@ -949,27 +951,17 @@ def main(args, log):
             log.debug("Raw games for %s available in the database but not in date range, skipping", year_month_day)
             continue
 
-        if BEEN_PARSED_KEY not in day:
-            day[BEEN_PARSED_KEY] = False
-            day_status_col.save(day)
-
-        if day[BEEN_PARSED_KEY] and args.incremental:
-            log.debug("Raw games for %s have been parsed, and we're running incrementally, skipping", year_month_day)
-            continue
-
         try:
             log.info("Parsing %s", year_month_day)
-            convert_to_json(log, raw_games, year_month_day)
-            continue
-            day[BEEN_PARSED_KEY] = True
-            day_status_col.save(day)
+            if convert_to_json(log, year_month_day):
+                day['data_status'] = DataStatus.PARSED
+                day_status_col.save(day)
         except ParseTurnHeaderError, e:
             log.error("ParseTurnHeaderError occurred while parsing %s: %s", year_month_day, e)
             return
         except Exception, e:
             log.error("Exception occurred while parsing %s: %s", year_month_day, e)
             return
-
 
 if __name__ == '__main__':
     args = utils.incremental_date_range_cmd_line_parser().parse_args()

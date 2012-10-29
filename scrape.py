@@ -14,17 +14,13 @@ import tempfile
 import time
 import urllib
 import utils
+from database_status import DataStatus
+import pymongo
 
 # if the size of the game log is less than this assume we got an error page
 SMALL_FILE_SIZE = 5000 
 
 DEBUG = False
-
-GOOD = 0
-MISSING = 1
-ERROR = 2
-DOWNLOADED = 3
-REPACKAGED = 4
 
 # make I should just adopt the isotropic format for consistency?
 ISOTROPIC_FORMAT =   '%(year)d%(month)02d/%(day)02d/all.tar.bz2'
@@ -103,11 +99,17 @@ def repackage_archive(filename):
     compressed) HTML files.
     """
 
-    orig_dir = os.getcwd()
-
-    # Extract the existing file into a temporary folder
-    directory_name = tempfile.mkdtemp()
     source_filename = os.path.abspath(filename)
+    dest_filename = repackage_filename(source_filename)
+    if os.path.exists(dest_filename):
+        if os.path.exists(source_filename):
+            os.remove(source_filename)
+        return DataStatus.REPACKAGED
+
+    print "Repackaging", source_filename, 'into', dest_filename
+    # Extract the existing file into a temporary folder
+    orig_dir = os.getcwd()
+    directory_name = tempfile.mkdtemp()
     try:
         subprocess.check_call(["tar", "--auto-compress", "-C", directory_name,
                                "-xf", source_filename])
@@ -129,11 +131,10 @@ def repackage_archive(filename):
     else:
         os.chdir(orig_dir)
         os.removedirs(directory_name)
-        return
+        return ERROR
 
     # Tar the results back to the directory where the original file
     # came from
-    dest_filename = repackage_filename(source_filename)
     game_files = glob.glob("game*.html.bz2")
     try:
         subprocess.check_call(["tar", "--remove", "-cf", dest_filename+".part"] + game_files)
@@ -145,46 +146,41 @@ def repackage_archive(filename):
     os.rename(dest_filename + ".part", dest_filename)
     os.chdir(orig_dir)
     os.removedirs(directory_name)
+    os.remove(source_filename)
+    return DataStatus.REPACKAGED
 
 
 def scrape_date(str_date, cur_date, passive=False):
     #directory = str_date
     games_short_name = str_date + '.all.tar.bz2'
     saved_games_bundle = games_short_name
-    return_code = ERROR
 
     if utils.at_least_as_big_as(saved_games_bundle, SMALL_FILE_SIZE):
         if DEBUG:
             print 'skipping because exists', str_date, saved_games_bundle, \
                 'and not small (size=', os.stat(saved_games_bundle).st_size, ')'
-        return_code = GOOD
+        return DataStatus.DOWNLOADED
     else:
         RemoveSmallFileIfExists(saved_games_bundle)
 
         if passive:
-            return_code = MISSING
-
-        elif not download_date(str_date, cur_date, saved_games_bundle):
-            return_code = ERROR
-
-        return_code = DOWNLOADED
-
-    # Repackage an existing file, if found
-    if utils.at_least_as_big_as(saved_games_bundle, SMALL_FILE_SIZE) and \
-            not os.path.exists(repackage_filename(saved_games_bundle)):
-        repackage_archive(saved_games_bundle)
-        return_code = REPACKAGED
-
-    return return_code
-
+            return DataStatus.NO_DATA
+        print "Downloading", saved_games_bundle
+        if not download_date(str_date, cur_date, saved_games_bundle):
+            return DataStatus.ERROR
+        else:
+            return DataStatus.DOWNLOADED
 
 def scrape_games():
     parser = utils.incremental_date_range_cmd_line_parser()
     utils.ensure_exists('static/scrape_data')
     os.chdir('static/scrape_data')
 
+    connection = pymongo.Connection()
+    db = connection.test
+    day_status_col = db.day_status
+
     args = parser.parse_args()
-    last_month = ''
 
     for cur_date in utils.daterange(datetime.date(2010, 10, 15), 
                                     datetime.date.today()):
@@ -193,24 +189,21 @@ def scrape_games():
             if DEBUG:
                 print 'skipping', str_date, 'because not in cmd line arg daterange'
             continue
-        mon = time.strftime("%b%y", cur_date.timetuple())
-        if mon != last_month:
-            print
-            print mon, cur_date.day*"  ",
-            sys.stdout.flush()
-            last_month = mon
-        ret = scrape_date(str_date, cur_date, passive=args.passive)
-        if ret==DOWNLOADED:
-            print 'o',
-        elif ret==REPACKAGED:
-            print 'O',
-        elif ret==ERROR:
-            print '!',
-        elif ret==MISSING:
-            print '_',
-        else:
-            print '.',
-        sys.stdout.flush()
+
+        day = day_status_col.find_one({'_id': str_date})
+        if not day:
+            day = {'_id': str_date, 'data_status': DataStatus.NO_DATA}
+        data_status = day['data_status']
+        if data_status==DataStatus.NO_DATA:                   
+            data_status = scrape_date(str_date, cur_date, passive=args.passive)
+
+        if data_status==DataStatus.DOWNLOADED:
+            saved_games_bundle = str_date + '.all.tar.bz2'
+            # Repackage an existing file, if found
+            data_status = repackage_archive(saved_games_bundle)
+
+        day['data_status'] = data_status
+        day_status_col.save(day)
     print
     os.chdir('../..')
 
