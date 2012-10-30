@@ -105,9 +105,11 @@ for c in all_cards():
     vars()[ pname ] = c
 
 def get_card(name):
+    """ Look up a card by its name """
     return _CARDS[name]
 
 def index_to_card(index):
+    """ Look up a card by its index """
     return _INDEXED[index]
 
 TOURNAMENT_WINNINGS = [Princess, Diadem, Followers, TrustySteed, BagofGold]
@@ -120,6 +122,7 @@ def opening_cards():
             if card.cost in ('0', '2', '3', '4', '5')].sort()
 
 def indexes(cards):
+    """ Return a list of index for the passed list of cards """
     return [int(card.index) for card in cards]
 
 import simplejson as json
