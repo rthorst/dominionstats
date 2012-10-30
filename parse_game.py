@@ -270,10 +270,10 @@ def parse_game(game_str, dubious_check = False):
     
     turns = parse_turns(turns_str, names_list)
 
-    game_dict[VETO] = parse_vetoes(veto_str)    
     associate_game_with_norm_names(game_dict)
     associate_turns_with_owner(game_dict, turns)
     assign_win_points(game_dict)
+    game_dict[VETO] = parse_vetoes(game_dict, veto_str)
 
     if dubious_check and Game(game_dict).dubious_quality():
         raise BogusGameError('Dubious Quality')
@@ -380,12 +380,16 @@ def parse_decks(decks_blob):
     return [parse_deck(deck_blob) for deck_blob in deck_blobs]
 
 VETO_RE = re.compile('(.*) vetoes (.*)\.')
-def parse_vetoes(veto_str):
+def parse_vetoes(game_dict, veto_str):
     matches = VETO_RE.findall(veto_str)
     v_dict = {}
     if matches:
         for (player, card) in matches:
-            v_dict[player] = int(capture_cards(card)[0].index)
+            # Use the player index number (as a string) as the
+            # dictionary key, instead of the player's name, because
+            # some names contain periods, which are invalid keys for
+            # structures stored in MongoDB.
+            v_dict[str(game_dict[PLAYERS].index(player))] = int(capture_cards(card)[0].index)
     
     return v_dict
 
@@ -540,7 +544,7 @@ def parse_turn(turn_blob, names_list):
     ps_tokens: Number of pirate ship tokens gained.
     vp_tokens: Number of victory point tokens gained.
     money: Amount of money available during entire buy phase.
-    opp: Dict keyed by opponent name, containing dicts with trashes/gains.
+    opp: Dict keyed by opponent index in names_list, containing dicts with trashes/gains.
     """
     lines = turn_blob.strip().split('\n')
     header = lines[0]
@@ -550,6 +554,7 @@ def parse_turn(turn_blob, names_list):
 
     if 'pname' in parsed_header:
         possessee_name = parsed_header['name']
+        possessee_index = names_list.index(possessee_name)
         poss = True
     if 'outpost' in parsed_header:
         outpost = True
@@ -570,7 +575,14 @@ def parse_turn(turn_blob, names_list):
         if active_player == tracker.current_player():
             targ_obj = ret
         else:
-            targ_obj = opp_turn_info[names_list[active_player]]
+            # Stop using the player's name here, as it is used as a
+            # key name in a dict, which can't be stored in MongoDB if
+            # it contains a dot ('.') or starts with a dollar
+            # sign. Instead, use the player index number so we can
+            # extract the name later.
+            #
+            # targ_obj = opp_turn_info[names_list[active_player]]
+            targ_obj = opp_turn_info[str(active_player)]
 
         has_trashing = KW_TRASHING in line
         has_trashes = KW_TRASHES in line
@@ -695,7 +707,7 @@ def parse_turn(turn_blob, names_list):
     _delete_if_exists(ret, 'buy_or_gain')
 
     if poss:
-        possessee_info = opp_turn_info[possessee_name]
+        possessee_info = opp_turn_info[str(possessee_index)]
         for k in [GAINS, TRASHES]:
             _delete_if_exists(possessee_info, k)
 

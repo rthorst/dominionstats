@@ -1,9 +1,11 @@
 #!/usr/bin/python
 
+from keys import *
+import card
+import codecs
 import game
 import parse_game
 import unittest
-from keys import *
 
 class ScoreDeckTest(unittest.TestCase):
     def test_gardens(self):
@@ -76,6 +78,25 @@ class PlayerDeckTest(unittest.TestCase):
                             computed_deck_comp.keys()):
                 self.longMessage = True
                 self.assertEqual(parsed_deck_comp.get(card, 0), computed_deck_comp.get(card, 0), card)
+
+
+class ParsedGameStructureTest(unittest.TestCase):
+    """ Test cases for game structures.
+    """
+
+    def test_game_with_dots_in_player_name(self):
+        """ Test vetoes with names containing dots.
+        """
+
+        test_game = game.Game(parse_game.parse_game( \
+                codecs.open('testing/testdata/game-20120415-072057-6d356cf1.html', encoding='utf-8').read()))
+        last_state = None
+        game_state_iterator = test_game.game_state_iterator()
+        for game_state in game_state_iterator:
+            last_state = game_state
+        self.assertEquals(test_game.vetoes[str(test_game.all_player_names().index(u'nrggirl'))], int(card.PirateShip.index))
+        self.assertEquals(test_game.vetoes[str(test_game.all_player_names().index(u'Mr.Penskee'))], int(card.Masquerade.index))
+
 
 if __name__ == '__main__':
     unittest.main()

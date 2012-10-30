@@ -45,8 +45,8 @@ def turn_decode(turn_dict, field):
     return [index_to_card(i) for i in turn_dict.get(field, [])]
 
 class Turn(object):
-    def __init__(self, turn_dict, game, player, turn_no, poss_no):
-        self.game = game
+    def __init__(self, turn_dict, game_dict, player, turn_no, poss_no):
+        self.game_dict = game_dict
         self.player = player
         self.plays   = turn_decode(turn_dict, PLAYS)
         self.gains   = turn_decode(turn_dict, GAINS)
@@ -120,7 +120,8 @@ class Turn(object):
         my_change.vp_tokens += self.turn_dict.get(VP_TOKENS, 0)
 
         opp_info = self.turn_dict.get(OPP, {})
-        for opp_name, info_dict in opp_info.iteritems():
+        for opp_index, info_dict in opp_info.iteritems():
+            opp_name = self.game_dict[PLAYERS][int(opp_index)]
             change = PlayerDeckChange(opp_name)
             getattr(change, 'gains' ).extend(turn_decode(info_dict, GAINS))
             getattr(change, 'trashes').extend(turn_decode(info_dict, TRASHES))

@@ -8,6 +8,7 @@ import parse_game
 import pprint
 from keys import *
 import card
+import codecs
 
 DEF_NAME_LIST = ['p' + str(x) for x in range(15)]
 
@@ -19,7 +20,7 @@ def assert_equal_indexed_lists(list1, names, msg=None):
     list2 = [card.get_card(n) for n in names]
     if list1==list2:
         return
-    elif msg is None: 
+    elif msg is None:
         raise AssertionError(repr(list1)+' != '+repr(list2))
     else:
         raise AssertionError(msg)
@@ -33,7 +34,7 @@ def assert_equal_card_dicts(indexes, names, msg=None):
         dict2[card.get_card(n)] = c
     if dict1==dict2:
         return
-    elif msg is None:       
+    elif msg is None:
         raise AssertionError(repr(dict1)+' != '+repr(dict2))
     else:
         raise AssertionError(msg)
@@ -43,7 +44,7 @@ class CaptureCardsTest(unittest.TestCase):
         captured = parse_game.capture_cards(
             'player0 plays 3 <span class=card-treasure>Coppers</span>.')
         assert_equal_indexed_lists(captured, ['Copper'] * 3)
-        
+
         captured = parse_game.capture_cards(
             '... ... and plays the <span class=card-none>Throne Room</span> '
             'again.')
@@ -75,7 +76,7 @@ class CaptureCardsTest(unittest.TestCase):
         captured = parse_game.capture_cards(
             'player0 plays a <span class=card-none>Coppersmith</span>.')
         assert_equal_indexed_lists(captured, ['Coppersmith'])
-        
+
         captured = parse_game.capture_cards(
             'player4 buys an <span class=card-none>Expand</span>')
         assert_equal_indexed_lists(captured, ['Expand'])
@@ -92,7 +93,7 @@ class DeleteKeysTest(unittest.TestCase):
         self.assertEquals(d1, {})
 
     def test_ultimately_empty_nested_dict(self):
-        d2 = {'p1': {OPP: {}}}
+        d2 = {1: {OPP: {}}}
         parse_game.delete_keys_with_empty_vals(d2)
         self.assertEquals(d2, {})
 
@@ -119,7 +120,7 @@ class PlayerTrackerTest(unittest.TestCase):
             ('... ... gaining a <span class=card-treasure>Silver</span> and putting it on the deck.', 1),
             ('... ... player2 reveals 4 <span class=card-treasure>Golds</span>.', 2)]
         for line, expected_output in line_output_list:
-            self.assertEquals(self.tracker.get_active_player(line), 
+            self.assertEquals(self.tracker.get_active_player(line),
                               expected_output, line)
         self.assertEquals(self.tracker.current_player(), 1)
 
@@ -179,7 +180,7 @@ player2 plays a <span class=card-none>Bishop</span>.
 ... player3 trashes a <span class=card-treasure>Copper</span>.
 player2 plays 3 <span class=card-treasure>Coppers</span>.
 player2 buys a <span class=card-treasure>Silver</span>.""", DEF_NAME_LIST)
-        assert_equal_card_lists(turn_info[PLAYS], ['Bishop', 'Copper', 
+        assert_equal_card_lists(turn_info[PLAYS], ['Bishop', 'Copper',
                                                'Copper', 'Copper'])
         assert_equal_card_lists(turn_info[TRASHES], ['Copper'])
         self.assertEquals(turn_info[VP_TOKENS], 1)
@@ -205,11 +206,11 @@ u"""   --- player6's turn 4 ---
     player6 plays a <span class=card-none>Bishop</span>.
     ... getting +$1 and +1 ▼.
     ... player6 trashes an <span class=card-victory>Estate</span> and gets +1 ▼.
-    ... player3 trashes a <span class=card-treasure>Copper</span>.""", 
+    ... player3 trashes a <span class=card-treasure>Copper</span>.""",
 DEF_NAME_LIST)
         self.assertEquals(turn_info[VP_TOKENS], 2)
         assert_equal_card_lists(turn_info[TRASHES], ['Estate'])
-        assert_equal_card_lists(turn_info[OPP]['p3'][TRASHES], ['Copper'])
+        assert_equal_card_lists(turn_info[OPP]['3'][TRASHES], ['Copper'])
         self.assertEquals(turn_info[MONEY], 1)
 
     def test_trader_gain_silver_instead_of_buy(self):
@@ -221,7 +222,7 @@ u"""--- player1's turn 8 ---
    player1 buys a <span class=card-victory>Gardens</span>.
    ... player1 reveals a <span class=card-reaction>Trader</span> to gain a <span class=card-treasure>Silver</span> instead.
    ... player1 gains a <span class=card-treasure>Silver</span>.,.
-""", 
+""",
 DEF_NAME_LIST)
         assert_equal_card_lists(turn_info[GAINS], ['Silver'])
         self.assertFalse(BUYS in turn_info, 'should not be here: ' + 
@@ -237,7 +238,7 @@ u"""--- player1's turn 11 ---</a>
    ... ... player2 gains a <span class=card-treasure>Silver</span>.
    player1 plays 2 <span class=card-treasure>Silvers</span> and a <span class=card-treasure>Copper</span>.
    player1 buys an <span class=card-none>Upgrade</span>.""", DEF_NAME_LIST)
-        assert_equal_card_lists(turn_info[OPP]['p2'][GAINS], ['Silver'])
+        assert_equal_card_lists(turn_info[OPP]['2'][GAINS], ['Silver'])
 
     def test_mine_upgrade_turn(self):
         turn_info = parse_game.parse_turn(u"""--- player3's turn 12 ---
@@ -262,7 +263,7 @@ player8 plays an <span class=card-none>Ambassador</span>.
         self.assertEquals(turn_info[NAME], 'p8')
         assert_equal_card_lists(turn_info[PLAYS], ['Ambassador'])
         assert_equal_card_lists(turn_info[RETURNS], ['Estate', 'Estate'])
-        assert_equal_card_lists(turn_info[OPP]['p9'][GAINS],
+        assert_equal_card_lists(turn_info[OPP]['9'][GAINS],
                           ['Estate'])
 
     def test_ambassador_secret_chamber_response_turn(self):
@@ -278,7 +279,7 @@ player8 plays an <span class=card-none>Ambassador</span>.
         self.assertEquals(turn_info[NAME], 'p0')
         assert_equal_card_lists(turn_info[PLAYS], ['Ambassador'])
         assert_equal_card_lists(turn_info[RETURNS], ['Copper', 'Copper'])
-        assert_equal_card_lists(turn_info[OPP]['p1'][GAINS], ['Copper'])
+        assert_equal_card_lists(turn_info[OPP]['1'][GAINS], ['Copper'])
 
     def test_ambassador3(self):
         turn_info = parse_game.parse_turn(
@@ -289,7 +290,7 @@ player8 plays an <span class=card-none>Ambassador</span>.
    ... player1 gains a <span class=card-treasure>Copper</span>.""", 
 ['f', 't'])
         assert_equal_card_lists(turn_info[RETURNS], ['Copper'])
-        assert_equal_card_lists(turn_info[OPP]['t'][GAINS], ['Copper'])
+        assert_equal_card_lists(turn_info[OPP]['1'][GAINS], ['Copper'])
 
     def test_ambassador4(self):
         turn_info = parse_game.parse_turn(
@@ -312,7 +313,7 @@ player3 plays an <span class=card-none>Ambassador</span>.
 ... player0 gains a <span class=card-treasure>Copper</span>.
 """, DEF_NAME_LIST)
         assert_equal_card_lists(turn_info[RETURNS], ['Copper'])
-        assert_equal_card_lists(turn_info[OPP]['p0'][GAINS], 
+        assert_equal_card_lists(turn_info[OPP]['0'][GAINS], 
                           ['Copper', 'Copper'])
 
     def test_ambassador6(self):
@@ -325,7 +326,7 @@ player3 plays an <span class=card-none>Ambassador</span>.
  ... revealing an <span class=card-victory>Estate</span> and returning it to the supply.
  ... player1 gains an <span class=card-victory>Estate</span>.
  """, ['foo', 'bar'])
-        assert_equal_card_lists(turn_info[OPP]['bar'][GAINS], ['Estate'])
+        assert_equal_card_lists(turn_info[OPP]['1'][GAINS], ['Estate'])
 
     def test_ambassador_moat(self):
         turn_info = parse_game.parse_turn(u"""--- player0's turn 10 ---
@@ -343,8 +344,8 @@ player0 plays an <span class=card-none>Ambassador</span>.
    ... ... revealing a <span class=card-reaction>Watchtower</span>.
    ... ... trashing the <span class=card-reaction>Watchtower</span>.""",
                                           DEF_NAME_LIST)
-        assert_equal_card_lists(turn_info[OPP]['p1'][GAINS], ['Watchtower'])
-        assert_equal_card_lists(turn_info[OPP]['p1'][TRASHES], 
+        assert_equal_card_lists(turn_info[OPP]['1'][GAINS], ['Watchtower'])
+        assert_equal_card_lists(turn_info[OPP]['1'][TRASHES], 
                           ['Steward', 'Watchtower'])
 
     def test_trading_post_turn(self):
@@ -366,7 +367,7 @@ DEF_NAME_LIST)
 """--- player0's turn 14 ---
     player0 plays a <span class=card-none>Sea Hag</span>.
     ... player1 discards a <span class=card-none>Courtyard</span> and gains a <span class=card-curse>Curse</span> on top of the deck.""", DEF_NAME_LIST)
-        assert_equal_card_lists(turn_info[OPP]['p1'][GAINS], ['Curse'])
+        assert_equal_card_lists(turn_info[OPP]['1'][GAINS], ['Curse'])
 
     def test_sea_hag_turn2(self):
         turn_info = parse_game.parse_turn("""
@@ -376,7 +377,7 @@ DEF_NAME_LIST)
     player0 plays a <span class=card-treasure>Copper</span> and a <span class=card-treasure>Quarry</span>.
     player0 buys a <span class=card-none>Cutpurse</span>.
 """, DEF_NAME_LIST)
-        assert_equal_card_lists(turn_info[OPP]['p1'][GAINS], ['Curse'])
+        assert_equal_card_lists(turn_info[OPP]['1'][GAINS], ['Curse'])
         self.assertEquals(turn_info[MONEY], 2)
 
     def test_pirate_ship_turn(self):
@@ -395,7 +396,7 @@ player8 plays 2 <span class=card-treasure>Coppers</span>.
         self.assertTrue(GAINS not in turn_info)
         self.assertEquals(turn_info[MONEY], 2)
         self.assertTrue(OPP in turn_info, turn_info)
-        assert_equal_card_lists(turn_info[OPP]['p11'][TRASHES], ['Copper'])
+        assert_equal_card_lists(turn_info[OPP]['11'][TRASHES], ['Copper'])
         self.assertTrue(TRASHES not in turn_info)
         self.assertEquals(turn_info[PIRATE_TOKENS], 1)
 
@@ -408,7 +409,7 @@ player8 plays 2 <span class=card-treasure>Coppers</span>.
    ... player2 discards a <span class=card-none>Ghost Ship</span>.
    ... player1 gains the <span class=card-treasure>Silver</span>.""", 
 DEF_NAME_LIST)
-        assert_equal_card_lists(turn_info[OPP]['p2'][TRASHES], ['Silver'])
+        assert_equal_card_lists(turn_info[OPP]['2'][TRASHES], ['Silver'])
 
     def test_noble_brigand_3_p_trash(self):
         turn_info = parse_game.parse_turn(
@@ -420,7 +421,7 @@ DEF_NAME_LIST)
       ... player3 discards a <span class=card-treasure>Copper</span>.
       ... player1 gains the <span class=card-treasure>Gold</span>.""",
 DEF_NAME_LIST)
-        assert_equal_card_lists(turn_info[OPP]['p3'][TRASHES], ['Gold'])
+        assert_equal_card_lists(turn_info[OPP]['3'][TRASHES], ['Gold'])
 
 
     def test_bank_turn(self):
@@ -525,7 +526,7 @@ player0 buys a <span class=card-duration>Lighthouse</span>.
 """, DEF_NAME_LIST)
         assert_equal_card_lists(turn_info[PLAYS], ['Witch', 'Copper', 'Copper'])
         self.assertTrue(GAINS not in turn_info)
-        assert_equal_card_lists(turn_info[OPP]['p1'][GAINS], ['Curse'])
+        assert_equal_card_lists(turn_info[OPP]['1'][GAINS], ['Curse'])
         self.assertEquals(turn_info[MONEY], 2)
 
     def test_swindler_turn(self):
@@ -536,10 +537,10 @@ player0 buys a <span class=card-duration>Lighthouse</span>.
    ... replacing player2's <span class=card-treasure>Silver</span> with a <span class=card-none>Shanty Town</span>.
    ... player3 turns up a <span class=card-none>Shanty Town</span> and trashes it.
    ... replacing player3's <span class=card-none>Shanty Town</span> with a <span class=card-none>Shanty Town</span>.""", DEF_NAME_LIST)
-        assert_equal_card_lists(turn_info[OPP]['p2'][GAINS], ['Shanty Town'])
-        assert_equal_card_lists(turn_info[OPP]['p2'][TRASHES], ['Silver'])
-        assert_equal_card_lists(turn_info[OPP]['p3'][GAINS], ['Shanty Town'])
-        assert_equal_card_lists(turn_info[OPP]['p3'][TRASHES], ['Shanty Town'])
+        assert_equal_card_lists(turn_info[OPP]['2'][GAINS], ['Shanty Town'])
+        assert_equal_card_lists(turn_info[OPP]['2'][TRASHES], ['Silver'])
+        assert_equal_card_lists(turn_info[OPP]['3'][GAINS], ['Shanty Town'])
+        assert_equal_card_lists(turn_info[OPP]['3'][TRASHES], ['Shanty Town'])
 
     def test_swindler_turn2(self):
         turn_info = parse_game.parse_turn(u"""--- player0's turn 10 ---
@@ -555,9 +556,9 @@ player0 buys a <span class=card-duration>Lighthouse</span>.
  ... replacing player1's <span class=card-victory>Estate</span> with an <span class=card-victory>Estate</span>.
  player0 plays 2 <span class=card-treasure>Coppers</span>.
  player0 buys a <span class=card-treasure>Gold</span>.""", DEF_NAME_LIST)
-        assert_equal_card_lists(turn_info[OPP]['p1'][TRASHES], 
+        assert_equal_card_lists(turn_info[OPP]['1'][TRASHES], 
                           ['Copper', 'Estate'])
-        assert_equal_card_lists(turn_info[OPP]['p1'][GAINS],
+        assert_equal_card_lists(turn_info[OPP]['1'][GAINS],
                           ['Curse', 'Estate'])
 
     def test_watchtower_mountebank_turn(self):
@@ -568,7 +569,7 @@ player0 buys a <span class=card-duration>Lighthouse</span>.
     ... ... player1 gains a <span class=card-curse>Curse</span> and a <span class=card-treasure>Copper</span>.
     ... ... ... revealing a <span class=card-reaction>Watchtower</span> and trashing the <span class=card-curse>Curse</span>.
     ... ... ... revealing a <span class=card-reaction>Watchtower</span> and trashing the <span class=card-treasure>Copper</span>.""", DEF_NAME_LIST)
-        assert_equal_card_lists(turn_info[OPP]['p1'][TRASHES], ['Curse', 'Copper'], turn_info)
+        assert_equal_card_lists(turn_info[OPP]['1'][TRASHES], ['Curse', 'Copper'], turn_info)
 
     def test_mountebank_traders_turn(self):
         turn_info = parse_game.parse_turn(
@@ -582,7 +583,7 @@ player1 plays a <span class=card-none>Mountebank</span>.
 ... ... player2 gains a <span class=card-treasure>Silver</span>.
 player1 plays 2 <span class=card-treasure>Silvers</span> and 2 <span class=card-treasure>Coppers</span>.
 player1 buys a <span class=card-treasure>Bank</span>.""", DEF_NAME_LIST)
-        assert_equal_card_lists(turn_info[OPP]['p2'][GAINS], 
+        assert_equal_card_lists(turn_info[OPP]['2'][GAINS], 
                           ['Silver', 'Silver'], turn_info)
 
     def test_mountebank_traders_turn2(self):
@@ -601,8 +602,8 @@ DEF_NAME_LIST)
         # repeatedly spammed that silver -> silver, never cancelled the
         # copper though.
         # TODO: fix it if you want an adventure?
-        #self.assertEquals(turn_info[OPP]['p2'][GAINS],
-        #                  ['Copper', 'Silver'], turn_info[OPP]['p2'])
+        #self.assertEquals(turn_info[OPP]['2'][GAINS],
+        #                  ['Copper', 'Silver'], turn_info[OPP]['2'])
         # similiar bug in 
         # http://councilroom.com/game?game_id=game-20111017-112224-14cd96f7.html&debug=1#Mick_Swagger-show-turn-8
         # with develop/trader interaction.
@@ -625,7 +626,7 @@ DEF_NAME_LIST)
  ... player0 trashes one of player1's <span class=card-treasure>Silvers</span>.
  ... player0 gains the trashed <span class=card-treasure>Silver</span>.""",
                                           DEF_NAME_LIST)
-        assert_equal_card_lists(turn_info[OPP]['p1'][TRASHES], ['Silver'])
+        assert_equal_card_lists(turn_info[OPP]['1'][TRASHES], ['Silver'])
         assert_equal_card_lists(turn_info[GAINS], ['Silver'])
 
     def test_mint_turn(self):
@@ -657,8 +658,8 @@ player1 buys a <span class=card-victory>Province</span>.
    ... ... trashing it.
    ... ... gaining a <span class=card-treasure>Gold</span> on the deck.""",
 DEF_NAME_LIST)
-        assert_equal_card_lists(turn_info[OPP]['p2'][TRASHES], ["Fool's Gold"])
-        assert_equal_card_lists(turn_info[OPP]['p2'][GAINS], ["Gold"])
+        assert_equal_card_lists(turn_info[OPP]['2'][TRASHES], ["Fool's Gold"])
+        assert_equal_card_lists(turn_info[OPP]['2'][GAINS], ["Gold"])
 
     def test_saboteur_turn(self):
         turn_info = parse_game.parse_turn(u"""--- player2's turn 7 ---
@@ -672,8 +673,8 @@ player2 plays a <span class=card-none>Saboteur</span>.
 ... player3 gains nothing to replace it.
 ... player9 reveals a <span class=card-none>Baron</span> and trashes it.
 ... player9 gains nothing to replace it.""", DEF_NAME_LIST)
-        assert_equal_card_lists(turn_info[OPP]['p3'][TRASHES], ['Baron'])
-        assert_equal_card_lists(turn_info[OPP]['p9'][TRASHES], ['Baron'])
+        assert_equal_card_lists(turn_info[OPP]['3'][TRASHES], ['Baron'])
+        assert_equal_card_lists(turn_info[OPP]['9'][TRASHES], ['Baron'])
 
     def test_saboteur_turn2(self):
         turn_info = parse_game.parse_turn("""--- player9's turn 14 ---
@@ -685,9 +686,9 @@ player2 plays a <span class=card-none>Saboteur</span>.
       ... player3 gains nothing to replace it.
       player9 plays a <span class=card-treasure>Silver</span> and 3 <span class=card-treasure>Coppers</span>.
       player9 buys a <span class=card-none>Saboteur</span>.""", DEF_NAME_LIST)
-        assert_equal_card_lists(turn_info[OPP]['p2'][TRASHES], ['Saboteur'])
-        assert_equal_card_lists(turn_info[OPP]['p2'][GAINS], ['Silver'])
-        assert_equal_card_lists(turn_info[OPP]['p3'][TRASHES], ['Island'])
+        assert_equal_card_lists(turn_info[OPP]['2'][TRASHES], ['Saboteur'])
+        assert_equal_card_lists(turn_info[OPP]['2'][GAINS], ['Silver'])
+        assert_equal_card_lists(turn_info[OPP]['3'][TRASHES], ['Island'])
 
     def test_lookout_turn(self):
         turn_info = parse_game.parse_turn("""--- player2's turn 9 ---
@@ -762,7 +763,7 @@ player0 plays a <span class=card-none>University</span>.
     ... player1 gains the <span class=card-victory>Estate</span>.""",
                                           DEF_NAME_LIST)
         assert_equal_card_lists(turn_info[GAINS], ['Duchy', 'Estate'])
-        assert_equal_card_lists(turn_info[OPP]['p0'][RETURNS], [
+        assert_equal_card_lists(turn_info[OPP]['0'][RETURNS], [
                 'Duchy', 'Duchy'])
 
     def test_possession_bishop(self):
@@ -778,7 +779,7 @@ player0 plays a <span class=card-none>University</span>.
    <span class=logonly>(player0 draws: a <span class=card-treasure>Copper</span>, a <span class=card-treasure>Silver</span>, a <span class=card-none>Native Village</span>, a <span class=card-none>Laboratory</span>, and a <span class=card-none>Wishing Well</span>.)</span>
    player0 discards the "trashed" card (a <span class=card-none>Possession</span>).
    <br>""", DEF_NAME_LIST)
-        self.assertEquals(turn_info[OPP]['p0'][VP_TOKENS], 4)
+        self.assertEquals(turn_info[OPP]['0'][VP_TOKENS], 4)
 
 
 class CanonicalizeNamesTest(unittest.TestCase):
@@ -1363,8 +1364,8 @@ Arsenic03 wins!
 </pre></body></html>"""
         parsed_game = parse_game.parse_game(game_contents)
         veto_dict = parsed_game[VETO]
-        assert_equal_card_lists([veto_dict[u'Trikillall']], ["Tactician"])
-        assert_equal_card_lists([veto_dict[u'Arsenic03']], ["Fool's Gold"])
+        assert_equal_card_lists([veto_dict['1']], ["Tactician"])
+        assert_equal_card_lists([veto_dict['0']], ["Fool's Gold"])
 
 
 if __name__ == '__main__':
