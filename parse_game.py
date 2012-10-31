@@ -422,6 +422,7 @@ def parse_vetoes(game_dict, veto_str):
             # dictionary key, instead of the player's name, because
             # some names contain periods, which are invalid keys for
             # structures stored in MongoDB.
+            player = name_merger.norm_name(player)
             try:
                 v_dict[str(game_dict[PLAYERS].index(player))] = int(capture_cards(card)[0].index)
             except ValueError, ve:

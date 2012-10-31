@@ -1367,6 +1367,24 @@ Arsenic03 wins!
         assert_equal_card_lists([veto_dict['1']], ["Tactician"])
         assert_equal_card_lists([veto_dict['0']], ["Fool's Gold"])
 
+        game_contents = codecs.open('testing/testdata/game-20120120-122852-2861266d.html', encoding='utf-8').read()
+        parsed_game = parse_game.parse_game(game_contents)
+        # Name 'Slow connection - sorry' is normed down to 'Slow connectionsorry'
+        self.assertEquals(parsed_game[PLAYERS], [u'Slow connectionsorry', u'richard', u'Kazantzakis'])
+        veto_dict = parsed_game[VETO]
+        assert_equal_card_lists([veto_dict['0']], ["Upgrade"])
+        assert_equal_card_lists([veto_dict['1']], ["Ill-Gotten Gains"])
+        assert_equal_card_lists([veto_dict['2']], ["Alchemist"])
+
+        # The following game had the string "away" in a user's name, which was getting normalized away
+        game_contents = codecs.open('testing/testdata/game-20120122-190607-28dac253.html', encoding='utf-8').read()
+        parsed_game = parse_game.parse_game(game_contents)
+        self.assertEquals(parsed_game[PLAYERS], [u'carraway', u'Dad Frog', u'Lanaro'])
+        veto_dict = parsed_game[VETO]
+        assert_equal_card_lists([veto_dict['0']], ["Chancellor"])
+        assert_equal_card_lists([veto_dict['1']], ["Familiar"])
+        assert_equal_card_lists([veto_dict['2']], ["Ambassador"])
+
 
 if __name__ == '__main__':
     unittest.main()
