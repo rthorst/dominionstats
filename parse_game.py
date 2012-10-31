@@ -6,6 +6,7 @@
 import bz2
 import codecs
 import collections
+import datetime
 import itertools
 import logging
 import logging.handlers
@@ -783,7 +784,21 @@ def parse_turns(turns_blob, names_list):
     """ Return a list of turn objects, as documented by parse_turn(). """
     return [parse_turn(text, names_list) for text in split_turns(turns_blob)]
 
-def parse_game_from_dict(log, game):
+
+def save_parse_error(parse_error_col, log, game, message):
+    """ Store parsing errors with the game ID so we can reflow them later """
+    parse_error = {'game_id': game['_id'],
+                   'game_date': game['game_date'],
+                   'message': message,
+                   'inserted': datetime.datetime.isoformat(datetime.datetime.now()),
+                   }
+    try:
+        parse_error_col.save(parse_error, safe=True, check_keys=True)
+    except Exception, e:
+        log.exception("Got exception on trying to save parsing error for game %s", game['_id'])
+
+
+def parse_game_from_dict(log, parse_error_col, game):
     """ Parse game from raw_game collection dict object. """
     contents = bz2.decompress(game['text']).decode('utf-8')
 
@@ -796,18 +811,22 @@ def parse_game_from_dict(log, game):
     try:
         parsed = parse_game(contents, dubious_check = True)
         parsed['_id'] = game['_id']
+        parsed['game_date'] = game['game_date']
         return parsed
     except BogusGameError, bogus_game_exception:
         log.debug('%s got BogusGameError: %s', game['_id'], bogus_game_exception.reason)
         return None
     except ParsingError, pe:
         log.warning('%s got ParsingError: %s', game['_id'], pe.reason)
+        save_parse_error(parse_error_col, log, game, pe)
         return None
     except ParseTurnHeaderError, p:
         log.warning('%s got ParseTurnHeaderError: %s', game['_id'], p)
+        save_parse_error(parse_error_col, log, game, p)
         return None
     except AssertionError, e:
         log.warning('%s got AssertionError: %s', game['_id'], e)
+        save_parse_error(parse_error_col, log, game, e)
         return None
 
 def outer_parse_game(filename):
@@ -843,20 +862,21 @@ def dump_segment(arg_tuple):
     json.dump(segment, open(out_name, 'w'), sort_keys=True, cls=CardEncoder, skipkeys=True)
 
 
-def parse_and_insert(log, raw_games, games_col, year_month_day):
+def parse_and_insert(log, raw_games, games_col, parse_error_col, year_month_day):
     """ Parse the list of games and insert them into the MongoDB.
 
     log: Logging object
     raw_games: List of games to parse, each in dict format
     games_col: Destination MongoDB collection
+    parse_error_col: MongoDB collection for parse errors (for potential reflow later)
     year_month_day: string in yyyymmdd format encoding date
     """
     log.debug('Beginning to parse %d games for %s', len(raw_games), year_month_day)
-    parsed_games = map(lambda x: parse_game_from_dict(log, x), raw_games)
+    parsed_games = map(lambda x: parse_game_from_dict(log, parse_error_col, x), raw_games)
 
     log.debug('Beginning to filter %d games for %s', len(parsed_games), year_month_day)
     parsed_games = [x for x in parsed_games if x]
-    track_brokenness(log, parsed_games)
+    track_brokenness(log, parse_error_col, parsed_games)
 
     log.debug('Beginning to insert %d games for %s', len(parsed_games), year_month_day)
 
@@ -864,7 +884,7 @@ def parse_and_insert(log, raw_games, games_col, year_month_day):
         try:
             games_col.save(game, safe=True, check_keys=True)
         except Exception, e:
-            log.exception("Got exception on trying to insert %s", game['_id'])
+            log.exception("Got exception on trying to insert parsed game %s", game['_id'])
 
     return len(parsed_games)
 
@@ -908,7 +928,7 @@ def convert_to_json(log, raw_games, year_month_day, game_list=None):
     map(dump_segment, labelled_segments)
     #pool.close()
 
-def track_brokenness(log, parsed_games):
+def track_brokenness(log, parse_error_col, parsed_games):
     """Print some summary statistics about cards that cause bad parses."""
     failures = 0
     wrongness = collections.defaultdict(int)
@@ -917,6 +937,7 @@ def track_brokenness(log, parsed_games):
         accurately_parsed = check_game_sanity(game.Game(raw_game), log)
         if not accurately_parsed:
             log.warning('Failed to accurately parse game %s', raw_game['_id'])
+            save_parse_error(parse_error_col, log, raw_game, 'check_game_sanity failed')
             failures += 1
         for card in raw_game[SUPPLY]:
             if not accurately_parsed:

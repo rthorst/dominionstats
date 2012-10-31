@@ -51,6 +51,7 @@ def parse_games(games, day):
     db = connection.test
     raw_games_col = db.raw_games
     parsed_games_col = db.games
+    parse_error_col = db.parse_error
 
     raw_games = []
     for game_id in games:
@@ -60,7 +61,7 @@ def parse_games(games, day):
         else:
             log.warning('Found nothing for game id %s', game_id)
     
-    return parse_and_insert(log, raw_games, parsed_games_col, day)
+    return parse_and_insert(log, raw_games, parsed_games_col, parse_error_col, day)
 
 
 @celery.task
