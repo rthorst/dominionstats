@@ -813,15 +813,15 @@ def dump_segment(arg_tuple):
     json.dump(segment, open(out_name, 'w'), sort_keys=True, cls=CardEncoder, skipkeys=True)
 
 
-def parse_and_insert(log, raw_games, year_month_day):
-    """ Parse the given list of given year_month_day and insert them
-    into the mongo db.
+def parse_and_insert(log, raw_games, games_col, year_month_day):
+    """ Parse the list of games and insert them into the MongoDB.
 
     log: Logging object
     raw_games: List of games to parse, each in dict format
+    games_col: Destination MongoDB collection
     year_month_day: string in yyyymmdd format encoding date
     """
-    log.debug('Beginnng to parse %d games for %s', len(raw_games), year_month_day)
+    log.debug('Beginning to parse %d games for %s', len(raw_games), year_month_day)
     parsed_games = map(lambda x: parse_game_from_dict(log, x), raw_games)
 
     log.debug('Beginning to filter %d games for %s', len(parsed_games), year_month_day)
@@ -829,21 +829,12 @@ def parse_and_insert(log, raw_games, year_month_day):
     track_brokenness(log, parsed_games)
 
     log.debug('Beginning to insert %d games for %s', len(parsed_games), year_month_day)
-    connection = pymongo.Connection('councilroom.mccllstr.com')
-    db = connection.test
-    games_col = db.games
 
     for game in parsed_games:
-        # if game['_id'] == 'game-20101015-233429-dc9030d7.html':
-        #     pp = pprint.PrettyPrinter(indent=4)
-        #     pp.pprint(game)
-
         try:
             games_col.save(game, safe=True, check_keys=True)
         except Exception, e:
             log.exception("Got exception on trying to insert %s", game['_id'])
-
-#    games_col.insert(parsed_games, safe=True, continue_on_error=True, check_keys=True)
 
     return len(parsed_games)
 
@@ -895,7 +886,7 @@ def track_brokenness(log, parsed_games):
     for raw_game in parsed_games:
         accurately_parsed = check_game_sanity(game.Game(raw_game), log)
         if not accurately_parsed:
-            log.debug('Failed to accurately parse game %s', raw_game['_id'])
+            log.warning('Failed to accurately parse game %s', raw_game['_id'])
             failures += 1
         for card in raw_game[SUPPLY]:
             if not accurately_parsed:
@@ -907,8 +898,8 @@ def track_brokenness(log, parsed_games):
         ratios.append(((float(wrongness[card]) / overall[card]), index_to_card(card)))
     ratios.sort()
     if ratios[-1][0] > 0:
-        log.debug("Ratios for problem cards %s, %d failures out of %d games", ratios[-10:],
-                  failures, len(parsed_games))
+        log.warning("Ratios for problem cards %s, %d failures out of %d games", ratios[-10:],
+                    failures, len(parsed_games))
     else:
         log.debug('Perfect parsing, %d games!', len(parsed_games))
 
