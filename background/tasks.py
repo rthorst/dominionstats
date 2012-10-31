@@ -50,6 +50,7 @@ def parse_games(games, day):
     connection = pymongo.Connection('councilroom.mccllstr.com')
     db = connection.test
     raw_games_col = db.raw_games
+    parsed_games_col = db.games
 
     raw_games = []
     for game_id in games:
@@ -59,7 +60,7 @@ def parse_games(games, day):
         else:
             log.warning('Found nothing for game id %s', game_id)
     
-    return parse_and_insert(log, raw_games, day)
+    return parse_and_insert(log, raw_games, parsed_games_col, day)
 
 
 @celery.task
