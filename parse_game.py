@@ -159,7 +159,7 @@ def capture_cards(line):
             try:
                 card = get_card(maybe_plural)
             except KeyError, exception:
-                raise ParsingError('Failed to find card in line: %s', line)
+                raise ParsingError('Failed to find card in line: %s' % line)
             cards.extend([card] * mult)
     return cards
 
@@ -399,8 +399,8 @@ def parse_deck(deck_str):
             try:
                 card = get_card(card_name)
             except KeyError, exception:
-                raise ParsingError("Failed to get card. chunk: '%s', card_name: '%s', card_blob: '%s'",
-                                   chunk, card_name, card_blob[right_bracket_index - 10:])
+                raise ParsingError("Failed to get card. chunk: '%s', card_name: '%s', card_blob: '%s'" % \
+                                       (chunk, card_name, card_blob[right_bracket_index - 10:]))
             card_quant = int(card_blob.split()[0])
             deck_comp[str(card.index)] = card_quant
     #FIXME: deck_comp is undefined if there's no vp_list
@@ -425,7 +425,7 @@ def parse_vetoes(game_dict, veto_str):
             try:
                 v_dict[str(game_dict[PLAYERS].index(player))] = int(capture_cards(card)[0].index)
             except ValueError, ve:
-                raise ParsingError("Failed to handle veto: %s", ve)
+                raise ParsingError("Failed to handle veto: %s" % ve)
 
     return v_dict
 
