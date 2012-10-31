@@ -422,7 +422,10 @@ def parse_vetoes(game_dict, veto_str):
             # dictionary key, instead of the player's name, because
             # some names contain periods, which are invalid keys for
             # structures stored in MongoDB.
-            v_dict[str(game_dict[PLAYERS].index(player))] = int(capture_cards(card)[0].index)
+            try:
+                v_dict[str(game_dict[PLAYERS].index(player))] = int(capture_cards(card)[0].index)
+            except ValueError, ve:
+                raise ParsingError("Failed to handle veto: %s", ve)
 
     return v_dict
 
@@ -923,7 +926,7 @@ def track_brokenness(log, parsed_games):
     for card in overall:
         ratios.append(((float(wrongness[card]) / overall[card]), index_to_card(card)))
     ratios.sort()
-    if ratios[-1][0] > 0:
+    if ratios and ratios[-1][0] > 0:
         log.warning("Ratios for problem cards %s, %d failures out of %d games", ratios[-10:],
                     failures, len(parsed_games))
     else:
