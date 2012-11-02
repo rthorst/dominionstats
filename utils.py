@@ -13,7 +13,7 @@ import primitive_util
 
 
 # Module-level logging instance
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 # http://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks-in-python
@@ -100,13 +100,13 @@ def includes_day(args, str_yyyymmdd):
     assert len(str_yyyymmdd) == 8, '%s not 8 chars' % str_yyyymmdd
     return args.startdate <= str_yyyymmdd <= args.enddate 
 
-def progress_meter(iterable, chunksize=1000):
+def progress_meter(iterable, log=logger, chunksize=1000):
     """ Logs progress through iterable at chunksize intervals."""
     scan_start = time.time()
     since_last = time.time()
     for idx, val in enumerate(iterable):
         if idx % chunksize == 0 and idx > 0: 
-            log.info("Iteration: %5d; avg rate: %7.1f; inst rate: %7.1f",
+            log.info("Iteration: %5d; avg rate: %7.1f/s; inst rate: %7.1f/s",
                      idx,
                      idx / (time.time() - scan_start),
                      chunksize / (time.time() - since_last))

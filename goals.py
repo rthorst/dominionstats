@@ -119,7 +119,7 @@ def CheckMatchPurplePileDriver(g):
                 card = piles_gained[0]
                 if card == dominioncards.Curse:
                     ret.append(
-                        achievement(player, 'Gained all the curses (and won)' % card.singular, card))
+                        achievement(player, 'Gained all the curses (and won)', card))
     return ret
 
 def CheckMatchDoublePileDriver(g):
@@ -770,10 +770,8 @@ def main(args):
 
     log.info("Starting run: %s", scanner.status_msg())
 
-    for g in utils.progress_meter(scanner.scan(games_collection, {})):
+    for g in utils.progress_meter(scanner.scan(games_collection, {}), log):
         total_checked += 1
-        if total_checked > 100:
-            sys.exit
         game_val = game.Game(g)
 
         # Get existing goal set (if exists)

@@ -12,7 +12,6 @@ import pprint
 from dominioncards import index_to_card, EVERY_SET_CARDS, get_card
 from keys import *
 from primitive_util import ConvertibleDefaultDict
-from utils import lru_cache
 import dominioncards
 
 WIN, LOSS, TIE = range(3)
@@ -401,7 +400,6 @@ class Game(object):
         return s
 
 
-@lru_cache
 def score_deck(deck_comp):
     """ Given a dict of cards (as card.Card) and frequency, return the score. """
     ret = 0
@@ -417,7 +415,7 @@ def score_deck(deck_comp):
         ret += score_silk_road(deck_comp)
 
     for cardinst in deck_comp:
-        ret += cardinst.vp_per_card() * deck_comp[cardinst]
+        ret += cardinst.vp * deck_comp[cardinst]
 
     return ret
 

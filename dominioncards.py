@@ -23,6 +23,15 @@ class Card:
             prop = str.lower(key)
             setattr(self, prop, value)
 
+        # Optimize performance by cleaning up loaded values now,
+        # instead of in the getter during each call.
+        self.vp = int_or_no_int(self.vp, 0)
+        self.coins = int_or_no_int(self.coins, 0)
+        self.trash = int_or_no_int(self.trash, 1)
+        self.actions = int_or_no_int(self.actions, 1)
+        self.index = int(self.index)
+
+
     def pluralize(self, freq):
         return self.singular if freq == 1 else self.plural
 
@@ -45,16 +54,16 @@ class Card:
         return self.attack == '1'
 
     def vp_per_card(self):
-        return int_or_no_int(self.vp, 0)
+        return self.vp
 
     def money_value(self):
-        return int_or_no_int(self.coins, 0)
+        return self.coins
 
     def trashes(self):
-        return int_or_no_int(self.trash, 1)
+        return self.trash
 
     def num_plus_actions(self):
-        return int_or_no_int(self.actions, 1)
+        return self.actions
 
     def get_expansion(self):
         return self.expansion
@@ -64,19 +73,19 @@ class Card:
 
     def __eq__(self, other):
         if type(self)==type(other):
-            return self.singular==other.singular
+            return self.index==other.index
         else:
             return False
 
     def __hash__(self):
-        return self.singular.__hash__()
+        return self.index
 
     def num_copies_per_game(self, num_players):
         if self.is_victory():
             if num_players >= 3:
                 return 12
             return 8
-        card_name = str(self)
+        card_name = self.singular
         if card_name == 'Curse':
             return 10 * (num_players - 1)
         return {'Potion': 16,
@@ -93,7 +102,7 @@ def _init():
         c = Card(cardlist_row)
         _CARDS[singular] = c
         _CARDS[plural] = c
-        _INDEXED[ int(c.index) ] = c
+        _INDEXED[c.index] = c
 
 _init()
 
@@ -123,7 +132,7 @@ def opening_cards():
 
 def indexes(cards):
     """ Return a list of index for the passed list of cards """
-    return [int(card.index) for card in cards]
+    return [card.index for card in cards]
 
 import simplejson as json
 class CardEncoder(json.JSONEncoder):
