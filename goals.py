@@ -1,14 +1,25 @@
 #!/usr/bin/python
 
-import pymongo
 import collections
-import game
+import logging
+import logging.handlers
+import operator
+import os
+import os.path
+import pymongo
+import sys
+
+from keys import TRASHES
 import card
+import game
 import incremental_scanner
 import name_merger
 import utils
-import operator
-from keys import TRASHES
+
+
+# Module-level logging instance
+log = logging.getLogger(__name__)
+
 
 def GroupFuncs(funcs, group_name):
     """Attach group and priority to functions in funcs so they are sortable."""
@@ -530,6 +541,7 @@ def CheckPointsPerTurn(g, low, high=None):
     for state in g.game_state_iterator():
         score = []
         for p in players:
+            import ipdb; ipdb.set_trace()
             score.append(state.player_score(p))
         scores.append(score)
 
@@ -708,8 +720,8 @@ function toggle(item) {
 def print_totals(checker_output, total):
     for goal_name, count in sorted(checker_output.iteritems(),
                                     key=lambda t: t[1], reverse=True):
-        print "%-15s %8d %5.2f" % (goal_name, count,
-                                   count / float(total))
+        log.info("Totals: %-15s %8d %5.2f", goal_name, count,
+                 count / float(total))
 
 def check_goals(game_val, goal_names=None):
     if goal_names is None:
@@ -725,7 +737,7 @@ def check_goals(game_val, goal_names=None):
     return goals
 
 
-def main():
+def main(args):
     c = pymongo.Connection()
     games_collection = c.test.games
     output_collection = c.test.goals
@@ -733,18 +745,12 @@ def main():
 
     checker_output = collections.defaultdict(int)
 
-    parser = utils.incremental_max_parser()
-    parser.add_argument(
-        '--goals', metavar='goal_name', nargs='+', 
-        help=('If set, check only the goals specified for all of ' +
-              'the games that have already been scanned'))
-    args = parser.parse_args()
     if args.goals:
         valid_goals = True
         for goal_name in args.goals:
             if goal_name not in goal_check_funcs:
                 valid_goals = False
-                print "Unrecognized goal name '%s'" % goal_name
+                log.error("Unrecognized goal name '%s'", goal_name)
         if not valid_goals:
             exit(-1)
         goals_to_check = args.goals
@@ -763,8 +769,8 @@ def main():
         output_collection.remove()
     output_collection.ensure_index('goals.player')
 
-    print 'starting with id', scanner.get_max_game_id(), 'and num games', \
-        scanner.get_num_games()
+    log.info("Starting run: %s", scanner.status_msg())
+
     for g in utils.progress_meter(scanner.scan(games_collection, {})):
         total_checked += 1
         game_val = game.Game(g)
@@ -804,10 +810,41 @@ def main():
         if args.max_games >= 0 and total_checked >= args.max_games:
             break
 
-    print 'ending with id', scanner.get_max_game_id(), 'and num games', \
-        scanner.get_num_games()
+    log.info("Ending run: %s", scanner.status_msg())
     scanner.save()
     print_totals(checker_output, total_checked)
         
 if __name__ == '__main__':
-    main()
+    parser = utils.incremental_max_parser()
+    parser.add_argument(
+        '--goals', metavar='goal_name', nargs='+', 
+        help=('If set, check only the goals specified for all of ' +
+              'the games that have already been scanned'))
+    args = parser.parse_args()
+
+    script_root = os.path.splitext(sys.argv[0])[0]
+
+    # Configure the logger
+    log.setLevel(logging.DEBUG)
+
+    # Log to a file
+    fh = logging.handlers.TimedRotatingFileHandler(script_root + '.log', when='midnight')
+    if args.debug:
+        fh.setLevel(logging.DEBUG)
+    else:
+        fh.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+    fh.setFormatter(formatter)
+    log.addHandler(fh)
+
+    # Put logging output on stdout, too
+    ch = logging.StreamHandler(sys.stdout)
+    if args.debug:
+        ch.setLevel(logging.DEBUG)
+    else:
+        ch.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+    ch.setFormatter(formatter)
+    log.addHandler(ch)
+
+    main(args)

@@ -1,12 +1,20 @@
 #!/usr/bin/python
 
-import datetime
-import argparse
-import os
-import time
 import ConfigParser
-import primitive_util
+import argparse
+import datetime
+import logging
+import logging.handlers
+import os
 import pymongo
+import time
+
+import primitive_util
+
+
+# Module-level logging instance
+log = logging.getLogger(__name__)
+
 
 # http://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks-in-python
 def segments(lis, chunk_size):
@@ -93,15 +101,15 @@ def includes_day(args, str_yyyymmdd):
     return args.startdate <= str_yyyymmdd <= args.enddate 
 
 def progress_meter(iterable, chunksize=1000):
-    """ Prints progress through iterable at chunksize intervals."""
+    """ Logs progress through iterable at chunksize intervals."""
     scan_start = time.time()
     since_last = time.time()
     for idx, val in enumerate(iterable):
         if idx % chunksize == 0 and idx > 0: 
-            print idx
-            print 'avg rate', idx / (time.time() - scan_start)
-            print 'inst rate', chunksize / (time.time() - since_last)
+            log.info("Iteration: %5d; avg rate: %7.1f; inst rate: %7.1f",
+                     idx,
+                     idx / (time.time() - scan_start),
+                     chunksize / (time.time() - since_last))
             since_last = time.time()
-            print
         yield val
 
