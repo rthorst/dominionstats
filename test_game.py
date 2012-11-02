@@ -9,28 +9,28 @@ import unittest
 
 class ScoreDeckTest(unittest.TestCase):
     def test_gardens(self):
-        self.assertEquals(game.score_deck({'Gardens': 1, 'Copper': 9}), 1)
-        self.assertEquals(game.score_deck({'Gardens': 2, 'Copper': 8}), 2)
-        self.assertEquals(game.score_deck({'Gardens': 2, 'Copper': 7}), 0)
+        self.assertEquals(game.score_deck({card.Gardens: 1, card.Copper: 9}), 1)
+        self.assertEquals(game.score_deck({card.Gardens: 2, card.Copper: 8}), 2)
+        self.assertEquals(game.score_deck({card.Gardens: 2, card.Copper: 7}), 0)
 
     def test_fairgrounds(self):
-        self.assertEquals(game.score_deck({'Fairgrounds': 1,
-                                           'Copper': 1,
-                                           'Silver': 1,
-                                           'Gold': 1,
-                                           'Bank': 1}), 2)
+        self.assertEquals(game.score_deck({card.Fairgrounds: 1,
+                                           card.Copper: 1,
+                                           card.Silver: 1,
+                                           card.Gold: 1,
+                                           card.Bank: 1}), 2)
 
     def test_duke(self):
-        self.assertEquals(game.score_deck({'Duke': 2, 'Duchy': 2}), 10)
+        self.assertEquals(game.score_deck({card.Duke: 2, card.Duchy: 2}), 10)
 
     def test_simple(self):
         self.assertEquals(game.score_deck({
-                    'Curse': 1, 'Estate': 1, 'Duchy': 1,
-                    'Province': 1, 'Colony': 1}), 19)
+                    card.Curse: 1, card.Estate: 1, card.Duchy: 1,
+                    card.Province: 1, card.Colony: 1}), 19)
 
     def test_vineyards(self):
-        self.assertEquals(game.score_deck({'Vineyard': 2, 'Jester': 3,
-                                           'Fishing Village': 3}), 4)
+        self.assertEquals(game.score_deck({card.Vineyard: 2, card.Jester: 3,
+                                           card.FishingVillage: 3}), 4)
 
 def make_deck(name, points, win_points, order):
     return {NAME: name, POINTS: points, WIN_POINTS: win_points,
@@ -49,16 +49,24 @@ class WinLossTieTest(unittest.TestCase):
         self.assertEquals(game.LOSS, g.win_loss_tie('p3', 'p1'))
 
 class GameStateTest(unittest.TestCase):
+    outpost_game = game.Game(parse_game.parse_game( \
+            open('testing/testdata/game-20101015-094051-95e0a59e.html', 'r').read()))
+
     def _get_turn_labels(self, game_state_it):
         return [game_state_it.turn_label() for t in game_state_it]
 
     def test_turn_labels(self):
         # 'game-20101015-094051-95e0a59e.html' contains Outpost card
-        outpost_game = game.Game(parse_game.parse_game( \
-                open('testing/testdata/game-20101015-094051-95e0a59e.html', 'r').read()))
-        turn_labels = self._get_turn_labels(outpost_game.game_state_iterator())
-        for game_state in outpost_game.game_state_iterator():
+        turn_labels = self._get_turn_labels(self.outpost_game.game_state_iterator())
+        for game_state in self.outpost_game.game_state_iterator():
             pass
+
+    def test_score(self):
+        self.assertEquals(game.score_deck(self.outpost_game.get_player_deck('moop').deck),
+                          42)
+        self.assertEquals(game.score_deck(self.outpost_game.get_player_deck('qzhdad').deck),
+                          30)
+
 
 class PlayerDeckTest(unittest.TestCase):
     def test_deck_composition(self):

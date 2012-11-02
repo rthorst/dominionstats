@@ -60,7 +60,7 @@ class Card:
         return self.expansion
 
     def __repr__(self):
-        return self.singular
+        return "%s(%s)" % (self.__class__, self.singular)
 
     def __eq__(self, other):
         if type(self)==type(other):
