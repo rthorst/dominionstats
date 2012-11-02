@@ -14,7 +14,7 @@ import simplejson as json
 import sys
 
 import utils
-from card import EVERY_SET_CARDS
+from dominioncards import EVERY_SET_CARDS
 from stats import MeanVarStat
 from game import Game
 import incremental_scanner

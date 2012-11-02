@@ -7,17 +7,17 @@ except ImportError, e:
 import parse_game
 import pprint
 from keys import *
-import card
+import dominioncards
 import codecs
 
 DEF_NAME_LIST = ['p' + str(x) for x in range(15)]
 
 def assert_equal_card_lists(indexes, names, msg=None):
-    list1 = [card.index_to_card(i) for i in indexes]
+    list1 = [dominioncards.index_to_card(i) for i in indexes]
     assert_equal_indexed_lists(list1, names, msg)
 
 def assert_equal_indexed_lists(list1, names, msg=None):
-    list2 = [card.get_card(n) for n in names]
+    list2 = [dominioncards.get_card(n) for n in names]
     if list1==list2:
         return
     elif msg is None:
@@ -29,9 +29,9 @@ def assert_equal_card_dicts(indexes, names, msg=None):
     dict1 = {}
     dict2 = {}
     for i,c in indexes.iteritems():
-        dict1[card.index_to_card(int(i))] = c
+        dict1[dominioncards.index_to_card(int(i))] = c
     for n,c in names.iteritems():
-        dict2[card.get_card(n)] = c
+        dict2[dominioncards.get_card(n)] = c
     if dict1==dict2:
         return
     elif msg is None:

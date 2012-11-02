@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import card
+import dominioncards
 import game
 import utils
 
@@ -14,7 +14,7 @@ def available_cards(game_obj, gained_list):
     ret.update(game_obj.get_supply())
     ret.update(card.EVERY_SET_CARDS)
     ret.update(gained_list)
-    if 'Tournament' in ret:
-        ret.update(card.TOURNAMENT_WINNINGS)
+    if dominioncards.Tournament in ret:
+        ret.update(dominioncards.TOURNAMENT_WINNINGS)
     return ret
     

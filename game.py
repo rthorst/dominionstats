@@ -9,10 +9,11 @@ import collections
 import itertools
 import pprint
 
-from card import index_to_card, EVERY_SET_CARDS, get_card
+from dominioncards import index_to_card, EVERY_SET_CARDS, get_card
 from keys import *
 from primitive_util import ConvertibleDefaultDict
-import card
+from utils import lru_cache
+import dominioncards
 
 WIN, LOSS, TIE = range(3)
 
@@ -399,18 +400,20 @@ class Game(object):
             s += '%s\n'%str(pd)
         return s
 
+
+@lru_cache
 def score_deck(deck_comp):
     """ Given a dict of cards (as card.Card) and frequency, return the score. """
     ret = 0
-    if card.Gardens in deck_comp:
+    if dominioncards.Gardens in deck_comp:
         ret += score_gardens(deck_comp)
-    if card.Duke in deck_comp:
+    if dominioncards.Duke in deck_comp:
         ret += score_duke(deck_comp)
-    if card.Fairgrounds in deck_comp:
+    if dominioncards.Fairgrounds in deck_comp:
         ret += score_fairgrounds(deck_comp)
-    if card.Vineyard in deck_comp:
+    if dominioncards.Vineyard in deck_comp:
         ret += score_vineyard(deck_comp)
-    if card.SilkRoad in deck_comp:
+    if dominioncards.SilkRoad in deck_comp:
         ret += score_silk_road(deck_comp)
 
     for cardinst in deck_comp:
@@ -420,21 +423,21 @@ def score_deck(deck_comp):
 
 def score_gardens(deck_comp):
     deck_size = sum(deck_comp.itervalues())
-    return deck_size / 10 * deck_comp[card.Gardens]
+    return deck_size / 10 * deck_comp[dominioncards.Gardens]
 
 def score_duke(deck_comp):
-    return deck_comp[card.Duke] * deck_comp.get(card.Duchy, 0)
+    return deck_comp[dominioncards.Duke] * deck_comp.get(dominioncards.Duchy, 0)
 
 def score_fairgrounds(deck_comp):
-    return  2 * (len([count for count in deck_comp.values() if count>0] ) / 5) * deck_comp[card.Fairgrounds]
+    return  2 * (len([count for count in deck_comp.values() if count>0] ) / 5) * deck_comp[dominioncards.Fairgrounds]
 
 def score_vineyard(deck_comp):
     return sum(deck_comp[cardinst] if cardinst.is_action() else 0
-               for cardinst in deck_comp) / 3 * deck_comp[card.Vineyard]
+               for cardinst in deck_comp) / 3 * deck_comp[dominioncards.Vineyard]
 
 def score_silk_road(deck_comp):
     return sum(deck_comp[cardinst] if cardinst.is_victory() else 0
-               for cardinst in deck_comp) / 4 * deck_comp[card.SilkRoad]
+               for cardinst in deck_comp) / 4 * deck_comp[dominioncards.SilkRoad]
 
 class GameState(object):
     def __init__(self, game):
@@ -451,12 +454,12 @@ class GameState(object):
             value_type=lambda: ConvertibleDefaultDict(int))
         self.player_vp_tokens = collections.defaultdict(int)
 
-        self.supply[card.Copper] = self.supply[card.Copper] - (
+        self.supply[dominioncards.Copper] = self.supply[dominioncards.Copper] - (
             len(self.turn_ordered_players) * 7)
 
         for player in self.turn_ordered_players:
-            self.player_decks[player.name()][card.Copper] = 7
-            self.player_decks[player.name()][card.Estate] = 3
+            self.player_decks[player.name()][dominioncards.Copper] = 7
+            self.player_decks[player.name()][dominioncards.Estate] = 3
 
         self.turn_ind = 0
 

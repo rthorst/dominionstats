@@ -5,7 +5,7 @@ from __future__ import division
 import os
 
 import analysis_util
-import card
+import dominioncards
 from game import Game
 import incremental_scanner
 import pymongo

@@ -7,8 +7,8 @@ _cardlist_reader = csv.DictReader(open(
 _CARDS = {}
 _INDEXED = {}
 
-# Returns value of string if the value is unambiguous, otherwise the default
 def int_or_no_int(string, default):
+    """ Returns value of string if the value is unambiguous, otherwise the default"""
     try:
         return int(string)
     except ValueError, e:

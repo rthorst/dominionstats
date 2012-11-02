@@ -10,7 +10,7 @@ import pymongo
 import sys
 
 from keys import TRASHES
-import card
+import dominioncards
 import game
 import incremental_scanner
 import name_merger
@@ -50,7 +50,7 @@ def CheckMatchBOM(g):
                 bad = True
                 break
             if card.is_treasure():
-                treasures.append(str(card))
+                treasures.append(card.singular)
         if not bad:
             reason = 'Bought only money and vp : %s' % (', '.join(treasures))
             ret.append(achievement(player, reason))
@@ -102,10 +102,10 @@ def CheckMatchPileDriver(g):
         if g.get_player_deck(player).WinPoints() > 1.0:
             if len(piles_gained)==1:
                 card = piles_gained[0]
-                if card == 'Curse':
+                if card == dominioncards.Curse:
                     continue
                 ret.append(
-                    achievement(player, 'Gained all copies of %s (and won)' % card, card))
+                    achievement(player, 'Gained all copies of %s (and won)' % card.singular, card))
     return ret
 
 def CheckMatchPurplePileDriver(g):
@@ -117,9 +117,9 @@ def CheckMatchPurplePileDriver(g):
         if g.get_player_deck(player).WinPoints() > 1.0:
             if len(piles_gained)==1:
                 card = piles_gained[0]
-                if card == 'Curse':
+                if card == dominioncards.Curse:
                     ret.append(
-                        achievement(player, 'Gained all the curses (and won)' % card, card))
+                        achievement(player, 'Gained all the curses (and won)' % card.singular, card))
     return ret
 
 def CheckMatchDoublePileDriver(g):
@@ -290,7 +290,7 @@ def CheckMatchVintner(g):
     ret = []
     for pdeck in g.get_player_decks():
         (player, deck) = (pdeck.player_name, pdeck.deck)
-        if 'Vineyard' not in deck:
+        if dominioncards.Vineyard not in deck:
             continue
         vy_pts = game.score_vineyard(deck)
         if vy_pts >= 30:
@@ -305,7 +305,7 @@ def CheckMatchCarny(g):
     ret = []
     for pdeck in g.get_player_decks():
         (player, deck) = (pdeck.player_name, pdeck.deck)
-        if 'Fairgrounds' not in deck:
+        if dominioncards.Fairgrounds not in deck:
             continue
         fg_pts = game.score_fairgrounds(deck)
         if fg_pts >= 30:
@@ -319,7 +319,7 @@ def CheckMatchGardener(g):
     ret = []
     for pdeck in g.get_player_decks():
         (player, deck) = (pdeck.player_name, pdeck.deck)
-        if 'Gardens' not in deck:
+        if dominioncards.Gardens not in deck:
             continue
         g_pts = game.score_gardens(deck)
         if g_pts >= 20:
@@ -334,10 +334,10 @@ def CheckMatchDukeOfEarl(g):
     ret = []
     for pdeck in g.get_player_decks():
         (player, deck) = (pdeck.player_name, pdeck.deck)
-        if 'Duke' not in deck:
+        if dominioncards.Duke not in deck:
             continue
         duke_pts = game.score_duke(deck)
-        duchy_pts = deck.get('Duchy', 0) * 3
+        duchy_pts = deck.get(dominioncards.Duchy, 0) * 3
         d_pts = duke_pts + duchy_pts
         if d_pts >= 42:
             ret.append(achievement(player, '%d VP from Dukes and Duchies' % 
@@ -349,7 +349,7 @@ def CheckMatchSilkTrader(g):
     ret = []
     for pdeck in g.get_player_decks():
         (player, deck) = (pdeck.player_name, pdeck.deck)
-        if 'Silk Road' not in deck:
+        if dominioncards.SilkRoad not in deck:
             continue
         g_pts = game.score_silk_road(deck)
         if g_pts >= 20:
@@ -423,17 +423,17 @@ def one_turn(g, player, cardList):
     return found
 
 def prize_check(g):
-    if 'Tournament' not in g.supply:
+    if dominioncards.Tournament not in g.supply:
         return (False, False)
 
     for pdeck in g.get_player_decks():
         (player, deck) = (pdeck.player_name, pdeck.deck)
         n_prizes = 0
-        for prize in card.TOURNAMENT_WINNINGS:
+        for prize in dominioncards.TOURNAMENT_WINNINGS:
             if prize in deck:
                 n_prizes += 1
-        if n_prizes == len(card.TOURNAMENT_WINNINGS):
-            return (player, one_turn(g, player, card.TOURNAMENT_WINNINGS))
+        if n_prizes == len(dominioncards.TOURNAMENT_WINNINGS):
+            return (player, one_turn(g, player, dominioncards.TOURNAMENT_WINNINGS))
     return (False, False)
 
 def CheckMatchPrizeFighter(g):
@@ -492,7 +492,7 @@ GroupFuncs([CheckMatchPrizeFighter, CheckMatchChampionPrizeFighter], 'prizes')
 def CheckMatchBanker(g):
     """Played a Bank worth $10"""
     ret = []
-    if 'Bank' not in g.supply:
+    if dominioncards.Bank not in g.supply:
         return ret
 
     for turn in g.get_turns():
@@ -500,7 +500,7 @@ def CheckMatchBanker(g):
         for card in turn.plays:
             if card.is_treasure():
                 treasure_count += 1
-                if card == 'Bank':
+                if card == dominioncards.Bank:
                     if treasure_count >= 10:
                         ret.append(achievement(turn.player.player_name, 
                                 "Played a Bank worth $%d" % treasure_count))
@@ -541,8 +541,7 @@ def CheckPointsPerTurn(g, low, high=None):
     for state in g.game_state_iterator():
         score = []
         for p in players:
-            import ipdb; ipdb.set_trace()
-            score.append(state.player_score(p))
+           score.append(state.player_score(p))
         scores.append(score)
 
     for (i,p) in enumerate(players):
@@ -584,10 +583,10 @@ def CheckMatchMegaTurn(g):
     """Bought all the Provinces or Colonies in a single turn."""
     ret = []
     scores = []
-    if card.Colony in g.get_supply():
-        biggest_victory = card.Colony
+    if dominioncards.Colony in g.get_supply():
+        biggest_victory = dominioncards.Colony
     else:
-        biggest_victory = card.Province
+        biggest_victory = dominioncards.Province
 
     victory_copies = biggest_victory.num_copies_per_game(len(g.get_player_decks()))
     for turn in g.get_turns():
@@ -773,6 +772,8 @@ def main(args):
 
     for g in utils.progress_meter(scanner.scan(games_collection, {})):
         total_checked += 1
+        if total_checked > 100:
+            sys.exit
         game_val = game.Game(g)
 
         # Get existing goal set (if exists)

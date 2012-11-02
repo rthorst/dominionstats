@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from keys import *
-import card
+import dominioncards
 import codecs
 import game
 import parse_game
@@ -9,28 +9,28 @@ import unittest
 
 class ScoreDeckTest(unittest.TestCase):
     def test_gardens(self):
-        self.assertEquals(game.score_deck({card.Gardens: 1, card.Copper: 9}), 1)
-        self.assertEquals(game.score_deck({card.Gardens: 2, card.Copper: 8}), 2)
-        self.assertEquals(game.score_deck({card.Gardens: 2, card.Copper: 7}), 0)
+        self.assertEquals(game.score_deck({dominioncards.Gardens: 1, dominioncards.Copper: 9}), 1)
+        self.assertEquals(game.score_deck({dominioncards.Gardens: 2, dominioncards.Copper: 8}), 2)
+        self.assertEquals(game.score_deck({dominioncards.Gardens: 2, dominioncards.Copper: 7}), 0)
 
     def test_fairgrounds(self):
-        self.assertEquals(game.score_deck({card.Fairgrounds: 1,
-                                           card.Copper: 1,
-                                           card.Silver: 1,
-                                           card.Gold: 1,
-                                           card.Bank: 1}), 2)
+        self.assertEquals(game.score_deck({dominioncards.Fairgrounds: 1,
+                                           dominioncards.Copper: 1,
+                                           dominioncards.Silver: 1,
+                                           dominioncards.Gold: 1,
+                                           dominioncards.Bank: 1}), 2)
 
     def test_duke(self):
-        self.assertEquals(game.score_deck({card.Duke: 2, card.Duchy: 2}), 10)
+        self.assertEquals(game.score_deck({dominioncards.Duke: 2, dominioncards.Duchy: 2}), 10)
 
     def test_simple(self):
         self.assertEquals(game.score_deck({
-                    card.Curse: 1, card.Estate: 1, card.Duchy: 1,
-                    card.Province: 1, card.Colony: 1}), 19)
+                    dominioncards.Curse: 1, dominioncards.Estate: 1, dominioncards.Duchy: 1,
+                    dominioncards.Province: 1, dominioncards.Colony: 1}), 19)
 
     def test_vineyards(self):
-        self.assertEquals(game.score_deck({card.Vineyard: 2, card.Jester: 3,
-                                           card.FishingVillage: 3}), 4)
+        self.assertEquals(game.score_deck({dominioncards.Vineyard: 2, dominioncards.Jester: 3,
+                                           dominioncards.FishingVillage: 3}), 4)
 
 def make_deck(name, points, win_points, order):
     return {NAME: name, POINTS: points, WIN_POINTS: win_points,
@@ -102,8 +102,8 @@ class ParsedGameStructureTest(unittest.TestCase):
         game_state_iterator = test_game.game_state_iterator()
         for game_state in game_state_iterator:
             last_state = game_state
-        self.assertEquals(test_game.vetoes[str(test_game.all_player_names().index(u'nrggirl'))], int(card.PirateShip.index))
-        self.assertEquals(test_game.vetoes[str(test_game.all_player_names().index(u'Mr.Penskee'))], int(card.Masquerade.index))
+        self.assertEquals(test_game.vetoes[str(test_game.all_player_names().index(u'nrggirl'))], int(dominioncards.PirateShip.index))
+        self.assertEquals(test_game.vetoes[str(test_game.all_player_names().index(u'Mr.Penskee'))], int(dominioncards.Masquerade.index))
 
 
 if __name__ == '__main__':

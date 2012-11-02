@@ -18,10 +18,11 @@ import pymongo
 import re
 import sys
 
-from card import get_card, CardEncoder, indexes, index_to_card
+from dominioncards import get_card, CardEncoder, indexes, index_to_card
 from game import Game
 from keys import *
 from utils import segments
+import dominioncards
 import game
 import name_merger
 import simplejson as json
@@ -467,9 +468,9 @@ def count_money(plays):
     coppersmith_ct = 0
     money = 0
     for card in plays:
-        if card == 'Coppersmith':
+        if card == dominioncards.Coppersmith:
             coppersmith_ct += 1
-        elif card == 'Copper':
+        elif card == dominioncards.Copper:
             money += 1 + coppersmith_ct
         elif card.is_treasure():
             money += card.money_value()

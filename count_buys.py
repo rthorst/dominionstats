@@ -12,7 +12,7 @@ import pymongo
 
 from stats import MeanVarStat as MVS
 import analysis_util
-from card import EVERY_SET_CARDS
+from dominioncards import EVERY_SET_CARDS
 import game
 import incremental_scanner
 import mergeable
