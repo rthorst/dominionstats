@@ -69,14 +69,20 @@ class GameStateTest(unittest.TestCase):
 
 
 class PlayerDeckTest(unittest.TestCase):
+
+    outpost_game = game.Game(parse_game.parse_game( \
+            open('testing/testdata/game-20101015-094051-95e0a59e.html', 'r').read()))
+
+    deck_changes_game = game.Game(parse_game.parse_game( \
+            open('testing/testdata/game-20101015-024842-a866e78a.html', 'r').read()))
+
+
     def test_deck_composition(self):
-        outpost_game = game.Game(parse_game.parse_game( \
-                open('testing/testdata/game-20101015-094051-95e0a59e.html', 'r').read()))
         last_state = None
-        game_state_iterator = outpost_game.game_state_iterator()
+        game_state_iterator = self.outpost_game.game_state_iterator()
         for game_state in game_state_iterator:
             last_state = game_state
-        for player_deck in outpost_game.get_player_decks():
+        for player_deck in self.outpost_game.get_player_decks():
 
             parsed_deck_comp = player_deck.Deck()
             computed_deck_comp = last_state.get_deck_composition(
@@ -86,6 +92,18 @@ class PlayerDeckTest(unittest.TestCase):
                             computed_deck_comp.keys()):
                 self.longMessage = True
                 self.assertEqual(parsed_deck_comp.get(card, 0), computed_deck_comp.get(card, 0), card)
+
+    def test_deck_changes_per_player(self):
+        self.assertEquals(['Celicath', 'tafkal'], self.deck_changes_game.all_player_names())
+
+        pd = self.deck_changes_game.get_player_decks()[0]
+        self.assertEquals('Celicath', pd.name())
+        pd = self.deck_changes_game.get_player_decks()[1]
+        self.assertEquals('tafkal', pd.name())
+
+        for changes in self.deck_changes_game.deck_changes_per_player():
+            win_points = self.deck_changes_game.get_player_deck(changes.name).WinPoints()
+
 
 
 class ParsedGameStructureTest(unittest.TestCase):

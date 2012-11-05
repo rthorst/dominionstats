@@ -1386,5 +1386,20 @@ Arsenic03 wins!
         assert_equal_card_lists([veto_dict['2']], ["Ambassador"])
 
 
+    def test_name_folding(self):
+        """Player names get folded to remove certain strings/substrings. Check these rules."""
+
+        # Names should be consistent between the PLAYERS list and the
+        # player name stored with each deck. The player's real name in
+        # this game is "BGGDL-Celicath", but it should get normalized
+        # down to "Celicath".
+
+        game_contents = codecs.open('testing/testdata/game-20101015-024842-a866e78a.html', encoding='utf-8').read()
+        parsed_game = parse_game.parse_game(game_contents)
+        self.assertEquals(parsed_game[PLAYERS], [u'Celicath', u'tafkal'])
+        self.assertEquals(parsed_game[DECKS][0][NAME], u'Celicath')
+        self.assertEquals(parsed_game[DECKS][1][NAME], u'tafkal')
+
+
 if __name__ == '__main__':
     unittest.main()

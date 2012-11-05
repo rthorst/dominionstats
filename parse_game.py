@@ -200,13 +200,14 @@ def associate_turns_with_owner(game_dict, turns):
     on the player level dict."""
     name_to_owner = {}
     for idx, deck in enumerate(game_dict[DECKS]):
+        deck[NAME] = name_merger.norm_name(deck[NAME])
         name_to_owner[deck[NAME]] = deck
         deck[TURNS] = []
 
     order_ct = 0
 
     for idx, turn in enumerate(turns):
-        owner = name_to_owner[turn[NAME]]
+        owner = name_to_owner[name_merger.norm_name(turn[NAME])]
         owner[TURNS].append(turn)
         if not ORDER in owner:
             owner[ORDER] = idx + 1
