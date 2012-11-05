@@ -12,7 +12,7 @@ def games_stream(scanner, games_col):
 def available_cards(game_obj, gained_list):
     ret = set()
     ret.update(game_obj.get_supply())
-    ret.update(card.EVERY_SET_CARDS)
+    ret.update(dominioncards.EVERY_SET_CARDS)
     ret.update(gained_list)
     if dominioncards.Tournament in ret:
         ret.update(dominioncards.TOURNAMENT_WINNINGS)
