@@ -736,6 +736,63 @@ def check_goals(game_val, goal_names=None):
     return goals
 
 
+def calculate_goals(log, games, goals_col, goals_error_col, year_month_day, goals_to_check=None):
+    """ Analyze games for goals and insert those found into the MongoDB.
+
+    log: Logging object
+    games: List of games to analyze, each in dict format
+    goals_col: Destination MongoDB collection
+    goals_error_col: MongoDB collection for goals analysis errors (for
+        potential reflow later)
+    year_month_day: string in yyyymmdd format encoding date
+    goals_to_check: List of goals to analyze for. If passed, only the
+        listed goals will be calculated or re-calculated. Otherwise, all
+    goals are calculated.
+
+    """
+    log.debug('Beginning to analyze %d games for goals, from %s', len(games), year_month_day)
+
+    total_checked = 0
+    checker_output = collections.defaultdict(int)
+
+    for g in games:
+        total_checked += 1
+        game_val = game.Game(g)
+
+        # Get existing goal set (if exists)
+        game_id = game_val.get_id()
+        mongo_val = goals_col.find_one({'_id': game_id})
+
+        if mongo_val is None:
+            mongo_val = collections.defaultdict( dict )
+            mongo_val['_id'] = game_id
+            mongo_val['goals'] = []
+
+        # If rechecking, delete old values
+        if goals_to_check is not None:
+            goals = mongo_val['goals']
+            for ind in range(len(goals) - 1, -1, -1):
+                goal = goals[ind]
+                if goal['goal_name'] in goals_to_check:
+                    del goals[ind]
+
+        # Get new values
+        goals = check_goals(game_val, goals_to_check)
+
+        # Write new values
+        for goal in goals:
+            name = name_merger.norm_name(goal['player'])
+            goal_name = goal['goal_name']
+            mongo_val['goals'].append(goal)
+            checker_output[goal_name] += 1
+
+        mongo_val = dict(mongo_val)
+        goals_col.save(mongo_val)
+
+    print_totals(checker_output, total_checked)
+    return total_checked
+
+
 def main(args):
     c = pymongo.Connection()
     games_collection = c.test.games
