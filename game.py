@@ -37,12 +37,20 @@ class PlayerDeckChange(object):
         self.vp_tokens += other_changes.vp_tokens
 
     def __repr__(self):
-        s = ''
+        return "{classname}(player={player}, changes={changes})".format( \
+            classname=self.__class__.__name__,
+            player=self.name,
+            changes=", ".join(self.changes()))
+
+    def changes(self):
+        s = []
         for cat in self.CATEGORIES:
             j = getattr(self, cat)
             if len(j) > 0:
-                s += cat + '(' + ','.join(map(str, j)) + ') '
+                s.append(cat + '(' + ','.join(map(str, j)) + ')')
         return s
+
+
 
 def turn_decode(turn_dict, field):
     return [index_to_card(i) for i in turn_dict.get(field, [])]
@@ -61,19 +69,29 @@ class Turn(object):
         self.turn_dict = turn_dict
 
     def __repr__(self):
-        s = '%d %d | '%(self.turn_no, self.poss_no)
-        # s += self.player.name()
+        return "{classname}(player={player}, turn/pos={turn_no}/{poss_no}, plays={plays_list})".format( \
+            classname=self.__class__.__name__,
+            player=self.player.name(),
+            turn_no=self.turn_no,
+            poss_no=self.poss_no,
+            plays_list=", ".join(self.plays_list()))
+
+
+    def plays_list(self):
+        """Provide a list of the deck changes from this turn"""
+        played = []
         if self.plays:
-            s += 'Plays: %s ' % self.plays
+            played.append('Plays: %s' % self.plays)
         if self.buys:
-            s += 'Buys: %s ' % self.buys
+            played.append('Buys: %s' % self.buys)
         if self.gains:
-            s += 'Gains: %s '% self.gains
+            played.append('Gains: %s' % self.gains)
         if self.trashes:
-            s += 'Trashes: %s ' % self.trashes
+            played.append('Trashes: %s' % self.trashes)
         if self.returns:
-            s += 'Returns: %s ' % self.returns
-        return s
+            played.append('Returns: %s' % self.returns)
+        return played
+
 
     def get_player(self):
         return self.player
