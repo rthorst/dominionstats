@@ -100,8 +100,9 @@ def update_skills_for_game(game_dict, opening_skill_table,
     #     for team, rank in zip(teams, ranks)
     #     ]
     # ts.update_trueskill_team(player_results, player_skill_table)
-    
-def run_trueskill_openings(args, db, log):
+
+
+def run_trueskill_openings(args, db, log, commit_after=10000):
     games = db.games
 
 
@@ -128,6 +129,12 @@ def run_trueskill_openings(args, db, log):
                                    
         if ind == args.max_games:
             break
+
+        if ind % commit_after == 0 and ind > 0:
+            log.info("Committing calculations to the DB")
+            #player_skill_table.save()
+            opening_skill_table.save()
+            scanner.save()
 
     #player_skill_table.save()
     opening_skill_table.save()
