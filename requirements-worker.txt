@@ -8,3 +8,5 @@ wsgiref>=0.1.2
 redis
 simplejson
 pymongo
+numpy
+scipy
