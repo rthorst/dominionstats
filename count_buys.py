@@ -146,7 +146,7 @@ def do_scan(scanner, games_col, accum_stats, max_games):
 def main():
     """ Scan and update buy data"""
     start = time.time()
-    con = pymongo.Connection()
+    con = pymongo.Connection('councilroom.mccllstr.com')
     games = con.test.games
     output_db = con.test
 
