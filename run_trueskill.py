@@ -5,6 +5,7 @@ import logging.handlers
 import os
 import os.path
 import sys
+import time
 
 from game import Game
 from keys import *
@@ -102,7 +103,7 @@ def update_skills_for_game(game_dict, opening_skill_table,
     # ts.update_trueskill_team(player_results, player_skill_table)
 
 
-def run_trueskill_openings(args, db, log, commit_after=10000):
+def run_trueskill_openings(args, db, log, commit_after=25000):
     games = db.games
 
 
@@ -131,10 +132,11 @@ def run_trueskill_openings(args, db, log, commit_after=10000):
             break
 
         if ind % commit_after == 0 and ind > 0:
-            log.info("Committing calculations to the DB")
+            start = time.time()
             #player_skill_table.save()
             opening_skill_table.save()
             scanner.save()
+            log.info("Committed calculations to the DB in %5.2fs", time.time() - start)
 
     #player_skill_table.save()
     opening_skill_table.save()
