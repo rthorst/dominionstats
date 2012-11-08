@@ -14,11 +14,11 @@ import pymongo
 import sys
 import time
 
-from dominioncards import EVERY_SET_CARDS
 from keys import *
 from stats import MeanVarStat as MVS
 from utils import get_mongo_connection, progress_meter
 import analysis_util
+import dominioncards
 import game
 import incremental_scanner
 import mergeable
@@ -86,7 +86,7 @@ def accum_buy_stats(games_stream, accum_stats,
     """
     for idx, game_val in enumerate(games_stream):
         counted_game_len = False
-        every_set_cards = EVERY_SET_CARDS
+        every_set_cards = dominioncards.EVERY_SET_CARDS
 
         for changes in game_val.deck_changes_per_player():
             if not acceptable_deck_filter(game_val, changes.name):
