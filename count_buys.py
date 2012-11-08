@@ -25,6 +25,7 @@ import mergeable
 import primitive_util
 import utils
 
+BUYS_COL_NAME = 'buys'
 
 # Module-level logging instance
 log = logging.getLogger(__name__)
@@ -115,7 +116,7 @@ def accum_buy_stats(games_stream, accum_stats,
                 for card in all_avail:
                     stats_obj = accum_stats[card]
                     stats_obj.game_length.add_outcome(game_len)
-                    if 'Colony' in game_val.get_supply():
+                    if dominioncards.Colony in game_val.get_supply():
                         stats_obj.game_length_colony.add_outcome(game_len)
 
         if idx + 1 == max_games:
@@ -127,8 +128,8 @@ def add_effectiveness(accum_stats, global_stats):
     don't gain the card.
     """
     # first, find the incremental effect of the player's skill
-    any_eff = accum_stats['Estate'].available.mean_diff(
-        global_stats['Estate'].available)
+    any_eff = accum_stats[dominioncards.Estate].available.mean_diff(
+        global_stats[dominioncards.Estate].available)
 
     for card in accum_stats:
         # now compare games in which the player gains/skips the card to gains
@@ -161,8 +162,8 @@ def main(args):
 
     overall_stats = DeckBuyStats()
 
-    scanner = incremental_scanner.IncrementalScanner(BUYS, output_db)
-    buy_collection = output_db[BUYS]
+    scanner = incremental_scanner.IncrementalScanner(BUYS_COL_NAME, output_db)
+    buy_collection = output_db[BUYS_COL_NAME]
 
     if not args.incremental:
         log.warning('resetting scanner and db')
@@ -180,7 +181,7 @@ def main(args):
         utils.read_object_from_db(existing_overall_data, buy_collection, '')
         overall_stats.merge(existing_overall_data)
         def deck_freq(data_set):
-            return data_set['Estate'].available.frequency()
+            return data_set[dominioncards.Estate].available.frequency()
         log.info('existing %s decks', deck_freq(existing_overall_data))
         log.info('after merge %s decks', deck_freq(overall_stats))
 
