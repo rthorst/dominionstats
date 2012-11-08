@@ -120,6 +120,7 @@ def run_trueskill_openings(args, db, log, commit_after=25000):
     scanner = incremental_scanner.IncrementalScanner('trueskill', db)
     log.info("Starting run: %s", scanner.status_msg())
     if not args.incremental:
+        log.warning('resetting scanner and db')
         scanner.reset()
         collection.drop()
 
