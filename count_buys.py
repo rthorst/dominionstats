@@ -6,19 +6,28 @@ When this is called as a stand alone program, it will will incrementally
 update statistics for all games in the database.
 """
 
+import logging
+import logging.handlers
+import os
+import os.path
+import pymongo
+import sys
 import time
 
-import pymongo
-
-from stats import MeanVarStat as MVS
-import analysis_util
 from dominioncards import EVERY_SET_CARDS
+from keys import *
+from stats import MeanVarStat as MVS
+from utils import get_mongo_connection, progress_meter
+import analysis_util
 import game
 import incremental_scanner
 import mergeable
 import primitive_util
 import utils
-from keys import *
+
+
+# Module-level logging instance
+log = logging.getLogger(__name__)
 
 NO_INFO = MVS().mean_diff(MVS())
 
@@ -140,18 +149,15 @@ def do_scan(scanner, games_col, accum_stats, max_games):
     games_col:  Mongo collection to scan.
     accum_stats: DeckBuyStats instance to store results.
     """
-    accum_buy_stats(analysis_util.games_stream(scanner, games_col), 
+    accum_buy_stats(analysis_util.games_stream(scanner, games_col, log),
                     accum_stats, max_games=max_games)
 
-def main():
+def main(args):
     """ Scan and update buy data"""
     start = time.time()
-    con = pymongo.Connection('councilroom.mccllstr.com')
+    con = get_mongo_connection()
     games = con.test.games
     output_db = con.test
-
-    parser = utils.incremental_max_parser()
-    args = parser.parse_args()
 
     overall_stats = DeckBuyStats()
 
@@ -159,14 +165,14 @@ def main():
     buy_collection = output_db[BUYS]
 
     if not args.incremental:
-        print 'resetting scanner and db'
+        log.warning('resetting scanner and db')
         scanner.reset()
         buy_collection.drop()
 
     start_size = scanner.get_num_games()
-    print scanner.status_msg()
+    log.info("Starting run: %s", scanner.status_msg())
     do_scan(scanner, games, overall_stats, args.max_games)
-    print scanner.status_msg()
+    log.info("Ending run: %s", scanner.status_msg())
     end_size = scanner.get_num_games()
 
     if args.incremental:
@@ -175,16 +181,13 @@ def main():
         overall_stats.merge(existing_overall_data)
         def deck_freq(data_set):
             return data_set['Estate'].available.frequency()
-        print 'existing', deck_freq(existing_overall_data), 'decks'
-        print 'after merge', deck_freq(overall_stats), 'decks'
+        log.info('existing %s decks', deck_freq(existing_overall_data))
+        log.info('after merge %s decks', deck_freq(overall_stats))
 
     utils.write_object_to_db(overall_stats, buy_collection, '')
 
     scanner.save()
-    time_diff = time.time() - start
-    games_diff = end_size - start_size
-    print ('took', time_diff, 'seconds for', games_diff, 'games for a rate of',
-           games_diff / time_diff, 'games/sec')
+
 
 def profilemain():
     """ Like main(), but print a profile report."""
@@ -198,5 +201,33 @@ def profilemain():
     stats.print_stats(20)
 
 if __name__ == '__main__':
-    main()
+    args = utils.incremental_max_parser().parse_args()
+
+    script_root = os.path.splitext(sys.argv[0])[0]
+
+    # Configure the logger
+    log.setLevel(logging.DEBUG)
+
+    # Log to a file
+    fh = logging.handlers.TimedRotatingFileHandler(script_root + '.log',
+                                                   when='midnight')
+    if args.debug:
+        fh.setLevel(logging.DEBUG)
+    else:
+        fh.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+    fh.setFormatter(formatter)
+    log.addHandler(fh)
+
+    # Put logging output on stdout, too
+    ch = logging.StreamHandler(sys.stdout)
+    if args.debug:
+        ch.setLevel(logging.DEBUG)
+    else:
+        ch.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+    ch.setFormatter(formatter)
+    log.addHandler(ch)
+
+    main(args)
     

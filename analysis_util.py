@@ -4,9 +4,9 @@ import dominioncards
 import game
 import utils
 
-def games_stream(scanner, games_col):
+def games_stream(scanner, games_col, log):
     for raw_game in utils.progress_meter(
-        scanner.scan(games_col, {}), 1000):
+        scanner.scan(games_col, {}), log):
         yield game.Game(raw_game)
 
 def available_cards(game_obj, gained_list):
