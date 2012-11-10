@@ -17,7 +17,7 @@ def _render_card(card, freq, kingdom_restrict):
             return "+0"
 
     font_size = font_size(freq)
-    plural = dominioncards.pluralize(freq)
+    plural = card.pluralize(freq)
 
     rendered = '<font size="%s">%d %s</font>' % (font_size, freq, plural)
     if card in kingdom_restrict:
