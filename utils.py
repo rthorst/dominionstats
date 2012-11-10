@@ -52,6 +52,33 @@ def get_mongo_database():
 
    return db
 
+
+def get_bad_leaderboard_dates():
+    """Return a list of leaderboard dates that should be skipped
+
+    List comes from the conf.ini file, as a multi-line entry under:
+    
+    [leaderboard]
+    known bad dates = 2011-11-24
+        2011-11-25
+        2011-11-26
+        2011-11-27
+        2011-11-28
+    """
+
+    try:
+        config = ConfigParser.ConfigParser()
+        config.read('conf.ini')
+        bad_dates = config.get('leaderboard', 'known bad dates').strip().splitlines()
+    except:
+        logger.exception("Got exception, using default list")
+        bad_dates = ['2011-11-24', '2011-11-25', '2011-11-26', '2011-11-27',
+                     '2011-11-28', '2011-11-29', '2011-11-30', '2011-12-01',
+                     '2011-12-02', '2011-12-03', '2011-12-04', '2012-06-08', ]
+
+    return bad_dates
+    
+
 def read_object_from_db(obj, collection, _id):
    prim = collection.find_one({'_id': _id})
    if prim:

@@ -40,6 +40,8 @@ def main():
     filenames = os.listdir(directory)
     filenames.sort()
 
+    bad_leaderboard_dates = utils.get_bad_leaderboard_dates()
+
     for filename in filenames:
         match = filename_pattern.search(filename)
         if not match:
@@ -47,8 +49,7 @@ def main():
 
         date = match.group('date')
 
-        if ('2011-11-24' <= date and date <= '2011-12-04' or
-            '2012-06-08' == date):
+        if date in bad_leaderboard_dates:
             # don't load data from when the leaderboard was messed up
             log.warning("Skipping %s because the leaderboard was messed up", date)
             continue
