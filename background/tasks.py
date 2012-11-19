@@ -8,7 +8,6 @@ from __future__ import absolute_import
 from background.celery import celery
 from celery import current_task
 from celery.utils.log import get_task_logger
-import pymongo
 
 from parse_game import parse_and_insert
 from goals import calculate_goals
@@ -48,7 +47,7 @@ def parse_game(game):
 def parse_games(games, day):
     log.info("Parsing %d games for %s", len(games), day)
 
-    connection = pymongo.Connection('councilroom.mccllstr.com')
+    connection = utils.get_mongo_connection()
     db = connection.test
     raw_games_col = db.raw_games
     parsed_games_col = db.games
@@ -61,7 +60,7 @@ def parse_games(games, day):
             raw_games.append(game)
         else:
             log.warning('Found nothing for game id %s', game_id)
-    
+
     return parse_and_insert(log, raw_games, parsed_games_col, parse_error_col, day)
 
 
@@ -74,7 +73,7 @@ def parse_days(days):
     Returns the number of individual games found on the specified days
     """
     game_count = 0
-    connection = pymongo.Connection('councilroom.mccllstr.com')
+    connection = utils.get_mongo_connection()
     db = connection.test
     raw_games_col = db.raw_games
     raw_games_col.ensure_index('game_date')
@@ -99,7 +98,7 @@ def calc_goals(game_ids, day):
     """ Calculate the goals achieved in the passed list of games """
     log.info("Calculating goals for %d game IDs from %s", len(game_ids), day)
 
-    connection = pymongo.Connection('councilroom.mccllstr.com')
+    connection = utils.get_mongo_connection()
     db = connection.test
     games_col = db.games
     goals_col = db.goals
@@ -125,7 +124,7 @@ def calc_goals_for_days(days):
     Returns the number of individual games found on the specified days
     """
     game_count = 0
-    connection = pymongo.Connection('councilroom.mccllstr.com')
+    connection = utils.get_mongo_connection()
     db = connection.test
     games_col = db.games
     games_col.ensure_index('game_date')
@@ -143,3 +142,33 @@ def calc_goals_for_days(days):
             calc_goals.delay(chunk, day)
 
     return game_count
+
+
+@celery.task
+def scrape_raw_games(db, date):
+    """Download the specified raw game archive, store it in S3, and load it into MongoDB.
+
+    date is a datetime.date object
+    """
+    db = utils.get_mongo_database()
+
+    scraper = isotropic.IsotropicScraper(db)
+    scraper.scrape_and_store_rawgames(date)
+
+
+@celery.task
+def check_for_work():
+    """Examine the state of the database and generate tasks for necessary work.
+
+    This task is intended to be called on a regular basis, e.g., from
+    a frequently run cron job. It is intended to scan through the
+    database, identify what needs to be done to bring it to a current
+    state, and then create the needed tasks.
+    """
+
+    connection = utils.get_mongo_connection()
+    db = connection.test
+
+    # Scrape isotropic for raw games
+    for date in isotropic.dates_needing_scraping(db):
+        scrape_raw_games.delay(db, date)

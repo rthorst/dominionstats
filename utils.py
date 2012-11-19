@@ -22,6 +22,21 @@ def segments(lis, chunk_size):
     for i in xrange(0, len(lis), chunk_size):
         yield lis[i:i + chunk_size]
 
+
+def get_aws_credentials():
+    """Retrieve the AWS credentials from the config file
+
+    Returned in a dict, so you can make a call like:
+
+        boto.s3.connection.S3Connection(**utils.get_aws_credentials())
+    """
+    config = ConfigParser.ConfigParser()
+    config.read('conf.ini')
+
+    return {'aws_access_key_id': config.get('aws', 'aws_access_key_id'),
+            'aws_secret_access_key': config.get('aws', 'aws_secret_access_key')}
+
+
 def get_mongo_connection():
    mongo_connection = 'localhost'
 

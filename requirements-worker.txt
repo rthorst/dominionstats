@@ -10,3 +10,4 @@ simplejson
 pymongo
 numpy
 scipy
+boto
