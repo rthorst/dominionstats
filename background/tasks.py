@@ -43,15 +43,24 @@ def parse_games(games, day):
 
 @celery.task
 def parse_days(days):
-    """ Takes a list of one or more days in the format "YYYYMMDD" or
-    datetime.date, and generates tasks for each of the individual
-    games that occurred on those days.
+    """Parses rawgames into games records and stores them in the DB.
 
-    Returns the number of individual games found on the specified days
+    Takes a list of one or more days in the format "YYYYMMDD" or
+    datetime.date, and generates tasks to parse the games that
+    occurred on those days.
+
+    Skips days where there are no rawgames available.
+
+    Skips days where the parsed game collection has more than 65% of
+    the quantity of rawgames, as this suggests the date has already
+    been parsed.
+
+    Returns the number of individual games referred for parsing.
     """
     game_count = 0
     db = utils.get_mongo_database()
     raw_games_col = db.raw_games
+    games_col = db.games
     raw_games_col.ensure_index('game_date')
 
     for day in days:
@@ -59,8 +68,15 @@ def parse_days(days):
             day = day.strftime('%Y%m%d')
         games_to_parse = raw_games_col.find({'game_date': day}, {'_id': 1})
 
-        if games_to_parse.count() < 1:
+        raw_games_qty = games_to_parse.count()
+        if raw_games_qty < 1:
             log.info('no games to parse in %s', day)
+            continue
+
+        parsed_games_qty = games_col.find({'game_date': day}).count()
+        if parsed_games_qty / raw_games_qty > 0.65:
+            log.info('Looks like raw games for %s have already been parsed. Found %5.2f%% in games collection.',
+                     day, 100.0 * parsed_games_qty / raw_games_qty)
             continue
 
         game_count += games_to_parse.count()
