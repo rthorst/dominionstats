@@ -145,7 +145,7 @@ def calc_goals_for_days(days):
     return game_count
 
 
-@celery.task
+@celery.task(rate_limit='2/m')
 def scrape_raw_games(date):
     """Download the specified raw game archive, store it in S3, and load it into MongoDB.
 
