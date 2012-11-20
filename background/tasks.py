@@ -9,8 +9,9 @@ from background.celery import celery
 from celery import current_task
 from celery.utils.log import get_task_logger
 
-from parse_game import parse_and_insert
 from goals import calculate_goals
+from parse_game import parse_and_insert
+import isotropic
 import utils
 
 
