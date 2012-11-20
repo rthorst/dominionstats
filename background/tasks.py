@@ -66,19 +66,20 @@ def parse_games(games, day):
 
 @celery.task
 def parse_days(days):
-    """ Takes a list of one or more days in the format "YYYYMMDD", and
-    generates tasks for each of the individual games that occurred on
-    those days.
+    """ Takes a list of one or more days in the format "YYYYMMDD" or
+    datetime.date, and generates tasks for each of the individual
+    games that occurred on those days.
 
     Returns the number of individual games found on the specified days
     """
     game_count = 0
-    connection = utils.get_mongo_connection()
-    db = connection.test
+    db = utils.get_mongo_database()
     raw_games_col = db.raw_games
     raw_games_col.ensure_index('game_date')
 
     for day in days:
+        if type(day) is datetime.date:
+            day = day.strftime('%Y%m%d')
         games_to_parse = raw_games_col.find({'game_date': day}, {'_id': 1})
 
         if games_to_parse.count() < 1:
@@ -145,7 +146,7 @@ def calc_goals_for_days(days):
 
 
 @celery.task
-def scrape_raw_games(db, date):
+def scrape_raw_games(date):
     """Download the specified raw game archive, store it in S3, and load it into MongoDB.
 
     date is a datetime.date object
@@ -153,7 +154,11 @@ def scrape_raw_games(db, date):
     db = utils.get_mongo_database()
 
     scraper = isotropic.IsotropicScraper(db)
-    scraper.scrape_and_store_rawgames(date)
+    inserted = scraper.scrape_and_store_rawgames(date)
+    if inserted > 0:
+        # Also need to parse the raw games for the days where we
+        # inserted new records.
+        parse_days.delay([date])
 
 
 @celery.task
@@ -171,4 +176,4 @@ def check_for_work():
 
     # Scrape isotropic for raw games
     for date in isotropic.dates_needing_scraping(db):
-        scrape_raw_games.delay(db, date)
+        scrape_raw_games.delay(date)
