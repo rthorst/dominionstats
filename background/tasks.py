@@ -5,10 +5,10 @@
 
 from __future__ import absolute_import
 
-from background.celery import celery
-from celery import current_task
 from celery.utils.log import get_task_logger
+import datetime
 
+from background.celery import celery
 from goals import calculate_goals
 from parse_game import parse_and_insert
 import isotropic
@@ -20,32 +20,8 @@ log = get_task_logger(__name__)
 
 
 @celery.task
-def add(x, y):
-    return x + y
-
-
-@celery.task
-def mul(x, y):
-    return x * y
-
-
-@celery.task
-def xsum(numbers):
-    return sum(numbers)
-
-
-@celery.task
-def power(x, y):
-    return x ** y
-
-
-@celery.task
-def parse_game(game):
-    log.info("Parsing %s", game)
-
-
-@celery.task
 def parse_games(games, day):
+    """Takes list of game ids and a game date and parses them out."""
     log.info("Parsing %d games for %s", len(games), day)
 
     connection = utils.get_mongo_connection()
