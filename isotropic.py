@@ -17,7 +17,6 @@ import sys
 import tarfile
 import urllib2
 
-import batch
 import utils
 
 
