@@ -54,7 +54,7 @@ class IsotropicScraper(unittest.TestCase):
         # TODO: Figure out how to get this pointed at a database for
         # use in integration tests.
 
-        iso = isotropic.IsotropicScraper(utils.get_mongo_database())
+        iso = isotropic.IsotropicScraper(utils.get_mongo_database(), 'unittest_raw_games')
 
         self.assertTrue(iso.is_rawgames_in_s3(datetime.date(2010, 10, 15)))
 
@@ -70,7 +70,8 @@ class IsotropicScraper(unittest.TestCase):
             iso.copy_rawgames_to_s3(datetime.date(2012, 10, 3))
 
             # Scrape and insert a whole gameday
-            iso.scrape_and_store_rawgames(datetime.date(2012, 9, 15))
+            count = iso.scrape_and_store_rawgames(datetime.date(2012, 9, 15))
+            self.assertEquals(count, 9999, "Inserted expected number of rawgames")
 
 
 if __name__ == '__main__':

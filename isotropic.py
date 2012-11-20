@@ -99,7 +99,8 @@ class IsotropicScraper:
 
     def __init__(self, db, rawgames_name='raw_games'):
         self.db = db
-        self.rawgames_col = db[rawgames_name]
+        if db:
+            self.rawgames_col = db[rawgames_name]
 
 
     def our_gamelog_filename(self, gamedate):
@@ -173,16 +174,19 @@ class IsotropicScraper:
 
 
     def scrape_and_store_rawgames(self, date):
-        """
+        """Top-level function to scrape rawgames from isotropic and
+        store them in the local database.
+
+        Accepts a datetime.date as the date to scrape.
+        Returns the number of games inserted.
+
+        Will skip (noop) dates that have already been loaded.
         """
         yyyy_mm_dd = date.strftime('%Y%m%d')
 
-        # TODO: Don't do any of this if the contents of the tarfile
-        # are already in the database
-
         # We expect to operate from data stored in our S3 bucket, so
         # check that it is available, first.
-        if self.is_rawgames_in_s3(date):
+        if not self.is_rawgames_in_s3(date):
             # Not in S3 yet, get it and store it
             self.copy_rawgames_to_s3(date)
 
@@ -190,14 +194,24 @@ class IsotropicScraper:
         rawgames_archive_contents = self.get_rawgames_from_s3_as_filelike(date)
 
         # Insert the individual games into MongoDB
+        insert_count = 0
         with tarfile.open(fileobj=rawgames_archive_contents) as t:
-            for tarinfo in t:
-                log.debug("Working on %s", tarinfo.name)
-                g = { u'_id': tarinfo.name,
-                      u'game_date': yyyy_mm_dd,
-                      u'text': bson.Binary(bz2.compress(t.extractfile(tarinfo).read())) }
-                self.rawgames_col.save(g, safe=True)
+            # Figure out how many raw games are in the database,
+            # compared with how many are in the tarfile
+            database_count = self.rawgames_col.find({'game_date': yyyy_mm_dd}).count()
+            tarfile_count = len(t.getmembers())
+            if tarfile_count == database_count:
+                log.info("Raw games for %s have already been loaded", yyyy_mm_dd)
+            else:
+                # Insert all the games
+                for tarinfo in t:
+                    log.debug("Working on %s", tarinfo.name)
+                    g = { u'_id': tarinfo.name,
+                          u'game_date': yyyy_mm_dd,
+                          u'text': bson.Binary(bz2.compress(t.extractfile(tarinfo).read())) }
+                    self.rawgames_col.save(g, safe=True)
+                    insert_count += 1
 
         rawgames_archive_contents.close()
 
-        # TODO: Return a list of inserted IDs
+        return insert_count
