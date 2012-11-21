@@ -111,28 +111,47 @@ def calc_goals(game_ids, day):
 
 @celery.task
 def calc_goals_for_days(days):
-    """ Takes a list of one or more days in the format "YYYYMMDD", and
-    generates task that calculate the goals achieved in each of the
-    individual games that occurred on those days.
+    """Examines games and determines if any goals were achieved, storing them in the DB.
 
-    Returns the number of individual games found on the specified days
+
+    Takes a list of one or more days in the format "YYYYMMDD" or
+    datetime.date, and generates tasks to calculate the goals achieved
+    in each of the individual games that occurred on those days.
+
+    Skips days where there are no games available.
+
+    Skips games that are already present in the goal collection.
+
+    Returns the number of individual games referred for searching.
     """
     game_count = 0
-    connection = utils.get_mongo_connection()
-    db = connection.test
+    db = utils.get_mongo_database()
     games_col = db.games
+    goals_col = db.goals
     games_col.ensure_index('game_date')
 
     for day in days:
+        if type(day) is datetime.date:
+            day = day.strftime('%Y%m%d')
         games_to_process = games_col.find({'game_date': day}, {'_id': 1})
 
         if games_to_process.count() < 1:
-            log.info('no games to parse in %s', day)
+            log.info('no games to search for goals on %s', day)
             continue
 
-        game_count += games_to_process.count()
-        log.info('%s games to parse in %s', games_to_process.count(), day)
-        for chunk in utils.segments([x['_id'] for x in games_to_process], 100):
+        log.info('%s games to search for goals on %s', games_to_process.count(), day)
+
+        chunk = []
+        for game in games_to_process:
+            if len(chunk) >= 100:
+                calc_goals.delay(chunk, day)
+                chunk = []
+
+            if not goals_col.find({'_id': game['_id']}):
+                chunk.append(game['_id'])
+                game_count += 1
+
+        if len(chunk) > 0:
             calc_goals.delay(chunk, day)
 
     return game_count
