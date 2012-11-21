@@ -147,7 +147,7 @@ def calc_goals_for_days(days):
                 calc_goals.delay(chunk, day)
                 chunk = []
 
-            if not goals_col.find({'_id': game['_id']}):
+            if goals_col.find({'_id': game['_id']}).count() == 0:
                 chunk.append(game['_id'])
                 game_count += 1
 
