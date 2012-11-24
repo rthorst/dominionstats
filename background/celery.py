@@ -3,8 +3,8 @@ from __future__ import absolute_import
 from celery import Celery
 
 celery = Celery('background.celery',
-                backend='redis://councilroom.mccllstr.com:6379/0',
-                broker='redis://councilroom.mccllstr.com:6379/0',
+                backend='redis://cr-master-internal.mccllstr.com:6379/0',
+                broker='redis://cr-master-internal.mccllstr.com:6379/0',
                 include=['background.tasks'])
 
 # Optional configuration, see the application user guide.
