@@ -1,4 +1,4 @@
--r requirements-worker.txt
+-r requirements-web.txt
 ipdb
 flower
 pylint
