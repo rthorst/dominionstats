@@ -430,15 +430,14 @@ class GamePage(object):
         if game_id.endswith('.gz'):
             game_id = game_id[:-len('.gz')]
         yyyymmdd = game.Game.get_date_from_id(game_id)
-        uncompressed_fn = 'static/scrape_data/%s/%s' % (yyyymmdd, game_id)
-        compressed_fn = uncompressed_fn + '.bz2'
-        if os.path.exists(uncompressed_fn):
-            contents = codecs.open(uncompressed_fn, 'r', 
-                                   encoding='utf-8').read()
-        elif os.path.exists(compressed_fn):
-            contents = bz2.BZ2File(compressed_fn).read().decode('utf-8')
-        else:
+
+        db = utils.get_mongo_database()
+        raw_games_col = db.raw_games
+        rawgame = raw_games_col.find_one({'_id': game_id})
+        if rawgame is None:
             return 'could not find game ' + game_id
+        contents = bz2.decompress(rawgame['text']).decode('utf-8')
+
         body_err_msg = ('<body><b>Error annotating game, tell ' 
                         'rrenaud@gmail.com!</b>')
         try:
