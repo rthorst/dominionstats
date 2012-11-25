@@ -1,14 +1,25 @@
 #!/usr/bin/python
 
-import pymongo
 import collections
+import logging
+import logging.handlers
+import operator
+import os
+import os.path
+import pymongo
+import sys
+
+from keys import TRASHES
+import dominioncards
 import game
-import card
 import incremental_scanner
 import name_merger
 import utils
-import operator
-from keys import TRASHES
+
+
+# Module-level logging instance
+log = logging.getLogger(__name__)
+
 
 def GroupFuncs(funcs, group_name):
     """Attach group and priority to functions in funcs so they are sortable."""
@@ -39,7 +50,7 @@ def CheckMatchBOM(g):
                 bad = True
                 break
             if card.is_treasure():
-                treasures.append(str(card))
+                treasures.append(card.singular)
         if not bad:
             reason = 'Bought only money and vp : %s' % (', '.join(treasures))
             ret.append(achievement(player, reason))
@@ -91,10 +102,10 @@ def CheckMatchPileDriver(g):
         if g.get_player_deck(player).WinPoints() > 1.0:
             if len(piles_gained)==1:
                 card = piles_gained[0]
-                if card == 'Curse':
+                if card == dominioncards.Curse:
                     continue
                 ret.append(
-                    achievement(player, 'Gained all copies of %s (and won)' % card, card))
+                    achievement(player, 'Gained all copies of %s (and won)' % card.singular, card))
     return ret
 
 def CheckMatchPurplePileDriver(g):
@@ -106,9 +117,9 @@ def CheckMatchPurplePileDriver(g):
         if g.get_player_deck(player).WinPoints() > 1.0:
             if len(piles_gained)==1:
                 card = piles_gained[0]
-                if card == 'Curse':
+                if card == dominioncards.Curse:
                     ret.append(
-                        achievement(player, 'Gained all the curses (and won)' % card, card))
+                        achievement(player, 'Gained all the curses (and won)', card))
     return ret
 
 def CheckMatchDoublePileDriver(g):
@@ -279,7 +290,7 @@ def CheckMatchVintner(g):
     ret = []
     for pdeck in g.get_player_decks():
         (player, deck) = (pdeck.player_name, pdeck.deck)
-        if 'Vineyard' not in deck:
+        if dominioncards.Vineyard not in deck:
             continue
         vy_pts = game.score_vineyard(deck)
         if vy_pts >= 30:
@@ -294,7 +305,7 @@ def CheckMatchCarny(g):
     ret = []
     for pdeck in g.get_player_decks():
         (player, deck) = (pdeck.player_name, pdeck.deck)
-        if 'Fairgrounds' not in deck:
+        if dominioncards.Fairgrounds not in deck:
             continue
         fg_pts = game.score_fairgrounds(deck)
         if fg_pts >= 30:
@@ -308,7 +319,7 @@ def CheckMatchGardener(g):
     ret = []
     for pdeck in g.get_player_decks():
         (player, deck) = (pdeck.player_name, pdeck.deck)
-        if 'Gardens' not in deck:
+        if dominioncards.Gardens not in deck:
             continue
         g_pts = game.score_gardens(deck)
         if g_pts >= 20:
@@ -323,10 +334,10 @@ def CheckMatchDukeOfEarl(g):
     ret = []
     for pdeck in g.get_player_decks():
         (player, deck) = (pdeck.player_name, pdeck.deck)
-        if 'Duke' not in deck:
+        if dominioncards.Duke not in deck:
             continue
         duke_pts = game.score_duke(deck)
-        duchy_pts = deck.get('Duchy', 0) * 3
+        duchy_pts = deck.get(dominioncards.Duchy, 0) * 3
         d_pts = duke_pts + duchy_pts
         if d_pts >= 42:
             ret.append(achievement(player, '%d VP from Dukes and Duchies' % 
@@ -338,7 +349,7 @@ def CheckMatchSilkTrader(g):
     ret = []
     for pdeck in g.get_player_decks():
         (player, deck) = (pdeck.player_name, pdeck.deck)
-        if 'Silk Road' not in deck:
+        if dominioncards.SilkRoad not in deck:
             continue
         g_pts = game.score_silk_road(deck)
         if g_pts >= 20:
@@ -412,17 +423,17 @@ def one_turn(g, player, cardList):
     return found
 
 def prize_check(g):
-    if 'Tournament' not in g.supply:
+    if dominioncards.Tournament not in g.supply:
         return (False, False)
 
     for pdeck in g.get_player_decks():
         (player, deck) = (pdeck.player_name, pdeck.deck)
         n_prizes = 0
-        for prize in card.TOURNAMENT_WINNINGS:
+        for prize in dominioncards.TOURNAMENT_WINNINGS:
             if prize in deck:
                 n_prizes += 1
-        if n_prizes == len(card.TOURNAMENT_WINNINGS):
-            return (player, one_turn(g, player, card.TOURNAMENT_WINNINGS))
+        if n_prizes == len(dominioncards.TOURNAMENT_WINNINGS):
+            return (player, one_turn(g, player, dominioncards.TOURNAMENT_WINNINGS))
     return (False, False)
 
 def CheckMatchPrizeFighter(g):
@@ -481,7 +492,7 @@ GroupFuncs([CheckMatchPrizeFighter, CheckMatchChampionPrizeFighter], 'prizes')
 def CheckMatchBanker(g):
     """Played a Bank worth $10"""
     ret = []
-    if 'Bank' not in g.supply:
+    if dominioncards.Bank not in g.supply:
         return ret
 
     for turn in g.get_turns():
@@ -489,7 +500,7 @@ def CheckMatchBanker(g):
         for card in turn.plays:
             if card.is_treasure():
                 treasure_count += 1
-                if card == 'Bank':
+                if card == dominioncards.Bank:
                     if treasure_count >= 10:
                         ret.append(achievement(turn.player.player_name, 
                                 "Played a Bank worth $%d" % treasure_count))
@@ -530,7 +541,7 @@ def CheckPointsPerTurn(g, low, high=None):
     for state in g.game_state_iterator():
         score = []
         for p in players:
-            score.append(state.player_score(p))
+           score.append(state.player_score(p))
         scores.append(score)
 
     for (i,p) in enumerate(players):
@@ -572,10 +583,10 @@ def CheckMatchMegaTurn(g):
     """Bought all the Provinces or Colonies in a single turn."""
     ret = []
     scores = []
-    if card.Colony in g.get_supply():
-        biggest_victory = card.Colony
+    if dominioncards.Colony in g.get_supply():
+        biggest_victory = dominioncards.Colony
     else:
-        biggest_victory = card.Province
+        biggest_victory = dominioncards.Province
 
     victory_copies = biggest_victory.num_copies_per_game(len(g.get_player_decks()))
     for turn in g.get_turns():
@@ -708,8 +719,8 @@ function toggle(item) {
 def print_totals(checker_output, total):
     for goal_name, count in sorted(checker_output.iteritems(),
                                     key=lambda t: t[1], reverse=True):
-        print "%-15s %8d %5.2f" % (goal_name, count,
-                                   count / float(total))
+        log.info("Totals: %-15s %8d %5.2f", goal_name, count,
+                 count / float(total))
 
 def check_goals(game_val, goal_names=None):
     if goal_names is None:
@@ -725,7 +736,64 @@ def check_goals(game_val, goal_names=None):
     return goals
 
 
-def main():
+def calculate_goals(log, games, goals_col, goals_error_col, year_month_day, goals_to_check=None):
+    """ Analyze games for goals and insert those found into the MongoDB.
+
+    log: Logging object
+    games: List of games to analyze, each in dict format
+    goals_col: Destination MongoDB collection
+    goals_error_col: MongoDB collection for goals analysis errors (for
+        potential reflow later)
+    year_month_day: string in yyyymmdd format encoding date
+    goals_to_check: List of goals to analyze for. If passed, only the
+        listed goals will be calculated or re-calculated. Otherwise, all
+    goals are calculated.
+
+    """
+    log.debug('Beginning to analyze %d games for goals, from %s', len(games), year_month_day)
+
+    total_checked = 0
+    checker_output = collections.defaultdict(int)
+
+    for g in games:
+        total_checked += 1
+        game_val = game.Game(g)
+
+        # Get existing goal set (if exists)
+        game_id = game_val.get_id()
+        mongo_val = goals_col.find_one({'_id': game_id})
+
+        if mongo_val is None:
+            mongo_val = collections.defaultdict( dict )
+            mongo_val['_id'] = game_id
+            mongo_val['goals'] = []
+
+        # If rechecking, delete old values
+        if goals_to_check is not None:
+            goals = mongo_val['goals']
+            for ind in range(len(goals) - 1, -1, -1):
+                goal = goals[ind]
+                if goal['goal_name'] in goals_to_check:
+                    del goals[ind]
+
+        # Get new values
+        goals = check_goals(game_val, goals_to_check)
+
+        # Write new values
+        for goal in goals:
+            name = name_merger.norm_name(goal['player'])
+            goal_name = goal['goal_name']
+            mongo_val['goals'].append(goal)
+            checker_output[goal_name] += 1
+
+        mongo_val = dict(mongo_val)
+        goals_col.save(mongo_val)
+
+    print_totals(checker_output, total_checked)
+    return total_checked
+
+
+def main(args):
     c = pymongo.Connection()
     games_collection = c.test.games
     output_collection = c.test.goals
@@ -733,18 +801,12 @@ def main():
 
     checker_output = collections.defaultdict(int)
 
-    parser = utils.incremental_max_parser()
-    parser.add_argument(
-        '--goals', metavar='goal_name', nargs='+', 
-        help=('If set, check only the goals specified for all of ' +
-              'the games that have already been scanned'))
-    args = parser.parse_args()
     if args.goals:
         valid_goals = True
         for goal_name in args.goals:
             if goal_name not in goal_check_funcs:
                 valid_goals = False
-                print "Unrecognized goal name '%s'" % goal_name
+                log.error("Unrecognized goal name '%s'", goal_name)
         if not valid_goals:
             exit(-1)
         goals_to_check = args.goals
@@ -763,9 +825,9 @@ def main():
         output_collection.remove()
     output_collection.ensure_index('goals.player')
 
-    print 'starting with id', scanner.get_max_game_id(), 'and num games', \
-        scanner.get_num_games()
-    for g in utils.progress_meter(scanner.scan(games_collection, {})):
+    log.info("Starting run: %s", scanner.status_msg())
+
+    for g in utils.progress_meter(scanner.scan(games_collection, {}), log):
         total_checked += 1
         game_val = game.Game(g)
 
@@ -804,10 +866,41 @@ def main():
         if args.max_games >= 0 and total_checked >= args.max_games:
             break
 
-    print 'ending with id', scanner.get_max_game_id(), 'and num games', \
-        scanner.get_num_games()
+    log.info("Ending run: %s", scanner.status_msg())
     scanner.save()
     print_totals(checker_output, total_checked)
         
 if __name__ == '__main__':
-    main()
+    parser = utils.incremental_max_parser()
+    parser.add_argument(
+        '--goals', metavar='goal_name', nargs='+', 
+        help=('If set, check only the goals specified for all of ' +
+              'the games that have already been scanned'))
+    args = parser.parse_args()
+
+    script_root = os.path.splitext(sys.argv[0])[0]
+
+    # Configure the logger
+    log.setLevel(logging.DEBUG)
+
+    # Log to a file
+    fh = logging.handlers.TimedRotatingFileHandler(script_root + '.log', when='midnight')
+    if args.debug:
+        fh.setLevel(logging.DEBUG)
+    else:
+        fh.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+    fh.setFormatter(formatter)
+    log.addHandler(fh)
+
+    # Put logging output on stdout, too
+    ch = logging.StreamHandler(sys.stdout)
+    if args.debug:
+        ch.setLevel(logging.DEBUG)
+    else:
+        ch.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+    ch.setFormatter(formatter)
+    log.addHandler(ch)
+
+    main(args)

@@ -1,13 +1,23 @@
 """ Update trueskill ratings for openings."""
 
-from utils import get_mongo_connection, progress_meter
+import logging
+import logging.handlers
+import os
+import os.path
+import sys
+import time
 
-import trueskill.trueskill as ts
+from game import Game
+from keys import *
+from utils import get_mongo_connection, progress_meter
 import incremental_scanner
 import primitive_util
+import trueskill.trueskill as ts
 import utils
-from keys import *
-from game import Game
+
+# Module-level logging instance
+log = logging.getLogger(__name__)
+
 
 def results_to_ranks(results):
     sorted_results = sorted(results)
@@ -91,11 +101,11 @@ def update_skills_for_game(game_dict, opening_skill_table,
     #     for team, rank in zip(teams, ranks)
     #     ]
     # ts.update_trueskill_team(player_results, player_skill_table)
-    
-def run_trueskill_openings():
-    con = get_mongo_connection()
-    db = con.test
+
+
+def run_trueskill_openings(args, db, log, commit_after=25000):
     games = db.games
+
 
     collection = db.trueskill_openings
     player_collection = db.trueskill_players
@@ -107,27 +117,67 @@ def run_trueskill_openings():
     opening_skill_table = DbBackedSkillTable(collection)
     # player_skill_table = DbBackedSkillTable(player_collection)
 
-    args = utils.incremental_max_parser().parse_args()
     scanner = incremental_scanner.IncrementalScanner('trueskill', db)
+    log.info("Starting run: %s", scanner.status_msg())
     if not args.incremental:
+        log.warning('resetting scanner and db')
         scanner.reset()
         collection.drop()
 
     for ind, game in enumerate(
-        progress_meter(scanner.scan(db.games, {}), 100)):
+        progress_meter(scanner.scan(db.games, {}), log)):
         if len(game[DECKS]) >= 2 and len(game[DECKS][1][TURNS]) >= 5:
             update_skills_for_game(game, opening_skill_table)
                                    
         if ind == args.max_games:
             break
 
+        if ind % commit_after == 0 and ind > 0:
+            start = time.time()
+            #player_skill_table.save()
+            opening_skill_table.save()
+            scanner.save()
+            log.info("Committed calculations to the DB in %5.2fs", time.time() - start)
+
     #player_skill_table.save()
     opening_skill_table.save()
     scanner.save()
-    print scanner.status_msg()
+    log.info("Ending run: %s", scanner.status_msg())
 
-def main():
-    run_trueskill_openings()
+
+def main(args):
+    con = get_mongo_connection()
+    db = con.test
+
+    run_trueskill_openings(args, db, log)
 
 if __name__ == '__main__':
-    main()
+    args = utils.incremental_max_parser().parse_args()
+
+    script_root = os.path.splitext(sys.argv[0])[0]
+
+    # Configure the logger
+    log.setLevel(logging.DEBUG)
+
+    # Log to a file
+    fh = logging.handlers.TimedRotatingFileHandler(script_root + '.log',
+                                                   when='midnight')
+    if args.debug:
+        fh.setLevel(logging.DEBUG)
+    else:
+        fh.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+    fh.setFormatter(formatter)
+    log.addHandler(fh)
+
+    # Put logging output on stdout, too
+    ch = logging.StreamHandler(sys.stdout)
+    if args.debug:
+        ch.setLevel(logging.DEBUG)
+    else:
+        ch.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+    ch.setFormatter(formatter)
+    log.addHandler(ch)
+
+    main(args)

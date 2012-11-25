@@ -1,20 +1,20 @@
 #!/usr/bin/python
 
-import card
+import dominioncards
 import game
 import utils
 
-def games_stream(scanner, games_col):
+def games_stream(scanner, games_col, log):
     for raw_game in utils.progress_meter(
-        scanner.scan(games_col, {}), 1000):
+        scanner.scan(games_col, {}), log):
         yield game.Game(raw_game)
 
 def available_cards(game_obj, gained_list):
     ret = set()
     ret.update(game_obj.get_supply())
-    ret.update(card.EVERY_SET_CARDS)
+    ret.update(dominioncards.EVERY_SET_CARDS)
     ret.update(gained_list)
-    if 'Tournament' in ret:
-        ret.update(card.TOURNAMENT_WINNINGS)
+    if dominioncards.Tournament in ret:
+        ret.update(dominioncards.TOURNAMENT_WINNINGS)
     return ret
     

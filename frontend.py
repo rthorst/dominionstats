@@ -19,7 +19,7 @@ from optimal_card_ratios import DBCardRatioTracker
 from record_summary import RecordSummary
 from small_gain_stat import SmallGainStat
 import annotate_game
-import card
+import dominioncards
 import datetime
 import game
 import goals
@@ -105,7 +105,7 @@ class OpeningPage(object):
 
         results = db.trueskill_openings.find({'_id': {'$regex': '^open:'}})
         openings = list(results)
-        card_list = card.opening_cards()
+        card_list = dominioncards.opening_cards()
         def split_opening(o):
             ret = o['_id'][len('open:'):].split('+')
             if ret == ['']: return []
@@ -124,7 +124,7 @@ class OpeningPage(object):
             opening['skill_str'] = skill_str(opening['mu'], opening['sigma'])
             opening['cards'] = split_opening(opening)
             opening['cards'].sort()
-            opening['cards'].sort(key=card.cost, reverse=True)
+            opening['cards'].sort(key=dominioncards.cost, reverse=True)
             costs = [str(card.cost) for card in opening['cards']]
             while len(costs) < 2:
                 costs.append('-')
@@ -190,7 +190,7 @@ def standard_heading(title):
     <link href='http://fonts.googleapis.com/css?family=Terminal+Dosis' rel='stylesheet' type='text/css'>
   </head>
   <body>
-    <a href="http://councilroom.com"><h1>CouncilRoom.com</h1></a>""" % title
+    <a href="http://councilroom.mccllstr.com"><h1>CouncilRoom.McCllstr.com</h1></a>""" % title
 
 class PlayerPage(object):
     def GET(self):
@@ -430,15 +430,14 @@ class GamePage(object):
         if game_id.endswith('.gz'):
             game_id = game_id[:-len('.gz')]
         yyyymmdd = game.Game.get_date_from_id(game_id)
-        uncompressed_fn = 'static/scrape_data/%s/%s' % (yyyymmdd, game_id)
-        compressed_fn = uncompressed_fn + '.bz2'
-        if os.path.exists(uncompressed_fn):
-            contents = codecs.open(uncompressed_fn, 'r', 
-                                   encoding='utf-8').read()
-        elif os.path.exists(compressed_fn):
-            contents = bz2.BZ2File(compressed_fn).read().decode('utf-8')
-        else:
+
+        db = utils.get_mongo_database()
+        raw_games_col = db.raw_games
+        rawgame = raw_games_col.find_one({'_id': game_id})
+        if rawgame is None:
             return 'could not find game ' + game_id
+        contents = bz2.decompress(rawgame['text']).decode('utf-8')
+
         body_err_msg = ('<body><b>Error annotating game, tell ' 
                         'rrenaud@gmail.com!</b>')
         try:
@@ -603,7 +602,7 @@ class SupplyWinApi(object):
         # unconditional: opt param, if present, also get unconditional stats.
         targets = query_dict.get('targets', '').split(',')
         if sum(len(t) for t in targets) == 0:
-            targets = card.all_cards()
+            targets = dominioncards.all_cards()
             
         target_inds = map(self.str_card_index, targets)
         interaction_tuples = self.interaction_card_index_tuples(query_dict)
@@ -621,8 +620,8 @@ class OptimalCardRatios(object):
         web.header("Content-Type", "text/html; charset=utf-8")
         query_dict = dict(urlparse.parse_qsl(web.ctx.env['QUERY_STRING']))
 
-        card_list = sorted(set(card.all_cards()) - 
-                           set(card.TOURNAMENT_WINNINGS))
+        card_list = sorted(set(dominioncards.all_cards()) - 
+                           set(dominioncards.TOURNAMENT_WINNINGS))
 
         card_x = query_dict.get('card_x', 'Minion')
         card_y = query_dict.get('card_y', 'Gold')

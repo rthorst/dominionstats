@@ -22,5 +22,5 @@ TRASHES = 't'
 RETURNS = 'r'
 OUTPOST = '0'
 POSSESSION = 'p'
-PIRATE_TOKENS = '$'
+PIRATE_TOKENS = '%'
 

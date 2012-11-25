@@ -6,11 +6,14 @@ players in the game or other games in the collection belongs here.
 """
 
 import collections
-import pprint
-from primitive_util import ConvertibleDefaultDict
 import itertools
+import pprint
+
+from dominioncards import index_to_card, EVERY_SET_CARDS, get_card
 from keys import *
-from card import index_to_card, EVERY_SET_CARDS, get_card
+from primitive_util import ConvertibleDefaultDict
+import dominioncards
+
 WIN, LOSS, TIE = range(3)
 
 class PlayerDeckChange(object):
@@ -34,19 +37,27 @@ class PlayerDeckChange(object):
         self.vp_tokens += other_changes.vp_tokens
 
     def __repr__(self):
-        s = ''
+        return "{classname}(player={player}, changes={changes})".format( \
+            classname=self.__class__.__name__,
+            player=self.name,
+            changes=", ".join(self.changes()))
+
+    def changes(self):
+        s = []
         for cat in self.CATEGORIES:
             j = getattr(self, cat)
             if len(j) > 0:
-                s += cat + '(' + ','.join(map(str, j)) + ') '
+                s.append(cat + '(' + ','.join(map(str, j)) + ')')
         return s
+
+
 
 def turn_decode(turn_dict, field):
     return [index_to_card(i) for i in turn_dict.get(field, [])]
 
 class Turn(object):
-    def __init__(self, turn_dict, game, player, turn_no, poss_no):
-        self.game = game
+    def __init__(self, turn_dict, game_dict, player, turn_no, poss_no):
+        self.game_dict = game_dict
         self.player = player
         self.plays   = turn_decode(turn_dict, PLAYS)
         self.gains   = turn_decode(turn_dict, GAINS)
@@ -58,21 +69,28 @@ class Turn(object):
         self.turn_dict = turn_dict
 
     def __repr__(self):
-        s = '%d %d | '%(self.turn_no, self.poss_no)
-        # s += self.player.name()
+        return "{classname}(player={player}, turn/pos={turn_no}/{poss_no}, plays={plays_list})".format( \
+            classname=self.__class__.__name__,
+            player=self.player.name(),
+            turn_no=self.turn_no,
+            poss_no=self.poss_no,
+            plays_list=", ".join(self.plays_list()))
+
+
+    def plays_list(self):
+        """Provide a list of the deck changes from this turn"""
+        played = []
         if self.plays:
-            s += 'Plays: %s ' % self.plays
+            played.append('Plays: %s' % self.plays)
         if self.buys:
-            s += 'Buys: %s ' % self.buys
+            played.append('Buys: %s' % self.buys)
         if self.gains:
-            s += 'Gains: %s '% self.gains
+            played.append('Gains: %s' % self.gains)
         if self.trashes:
-            s += 'Trashes: %s ' % self.trashes
+            played.append('Trashes: %s' % self.trashes)
         if self.returns:
-            s += 'Returns: %s ' % self.returns
-        if OPP in self.turn_dict:
-            s += str(self.turn_dict.get(OPP, {}))
-        return s
+            played.append('Returns: %s' % self.returns)
+        return played
 
     def get_player(self):
         return self.player
@@ -122,7 +140,8 @@ class Turn(object):
         my_change.vp_tokens += self.turn_dict.get(VP_TOKENS, 0)
 
         opp_info = self.turn_dict.get(OPP, {})
-        for opp_name, info_dict in opp_info.iteritems():
+        for opp_index, info_dict in opp_info.iteritems():
+            opp_name = self.game_dict[PLAYERS][int(opp_index)]
             change = PlayerDeckChange(opp_name)
             change.gains.extend(turn_decode(info_dict, GAINS))
             change.trashes.extend(turn_decode(info_dict, TRASHES))
@@ -189,9 +208,7 @@ class PlayerDeck(object):
         return 'red'
 
     def __repr__(self):
-        s = '\t%s %f %d %2d %s\n\t\t'%("",self.win_points, self.points, self.turn_order, self.player_name)
-        s += str(self.deck)
-        return s
+        return "%s(win_points: %f, points: %d, turn_order: %d, deck: %s)" \
 
 
 class Game(object):
@@ -225,6 +242,7 @@ class Game(object):
 
 
     def get_player_deck(self, player_name):
+        """ Return the deck for the named player. """
         for p in self.player_decks:
             if p.name() == player_name:
                 return p
@@ -400,43 +418,43 @@ class Game(object):
                 s += '%s\n'%str(turn)
         return s
 
+
 def score_deck(deck_comp):
-    """ Given a dict of card, frequency, return the score. """
+    """ Given a dict of cards (as card.Card) and frequency, return the score. """
     ret = 0
-    if 'Gardens' in deck_comp:
+    if dominioncards.Gardens in deck_comp:
         ret += score_gardens(deck_comp)
-    if 'Duke' in deck_comp:
+    if dominioncards.Duke in deck_comp:
         ret += score_duke(deck_comp)
-    if 'Fairgrounds' in deck_comp:
+    if dominioncards.Fairgrounds in deck_comp:
         ret += score_fairgrounds(deck_comp)
-    if 'Vineyard' in deck_comp:
+    if dominioncards.Vineyard in deck_comp:
         ret += score_vineyard(deck_comp)
-    if 'Silk Road' in deck_comp:
+    if dominioncards.SilkRoad in deck_comp:
         ret += score_silk_road(deck_comp)
 
-    for card_name in deck_comp:
-        card = get_card(card_name)
-        ret += card.vp_per_card() * deck_comp[card_name]
+    for cardinst in deck_comp:
+        ret += cardinst.vp * deck_comp[cardinst]
 
     return ret
 
 def score_gardens(deck_comp):
     deck_size = sum(deck_comp.itervalues())
-    return deck_size / 10 * deck_comp['Gardens']
+    return deck_size / 10 * deck_comp[dominioncards.Gardens]
 
 def score_duke(deck_comp):
-    return deck_comp['Duke'] * deck_comp.get('Duchy', 0)
+    return deck_comp[dominioncards.Duke] * deck_comp.get(dominioncards.Duchy, 0)
 
 def score_fairgrounds(deck_comp):
-    return  2 * (len([count for count in deck_comp.values() if count>0] ) / 5) * deck_comp['Fairgrounds']
+    return  2 * (len([count for count in deck_comp.values() if count>0] ) / 5) * deck_comp[dominioncards.Fairgrounds]
 
 def score_vineyard(deck_comp):
-    return sum(deck_comp[card] if get_card(card).is_action() else 0
-               for card in deck_comp) / 3 * deck_comp['Vineyard']
+    return sum(deck_comp[cardinst] if cardinst.is_action() else 0
+               for cardinst in deck_comp) / 3 * deck_comp[dominioncards.Vineyard]
 
 def score_silk_road(deck_comp):
-    return sum(deck_comp[card] if get_card(card).is_victory() else 0
-               for card in deck_comp) / 4 * deck_comp['Silk Road']
+    return sum(deck_comp[cardinst] if cardinst.is_victory() else 0
+               for cardinst in deck_comp) / 4 * deck_comp[dominioncards.SilkRoad]
 
 class GameState(object):
     def __init__(self, game):
@@ -445,22 +463,20 @@ class GameState(object):
             sort_by_turn_order=True)
         self.supply = ConvertibleDefaultDict(value_type=int)
         num_players = len(game.get_player_decks())
-        for card in itertools.chain(EVERY_SET_CARDS,
-                                    game.get_supply()):
-            self.supply[card] = card.num_copies_per_game(num_players)
+        for cardinst in itertools.chain(EVERY_SET_CARDS,
+                                        game.get_supply()):
+            self.supply[cardinst] = cardinst.num_copies_per_game(num_players)
 
         self.player_decks = ConvertibleDefaultDict(
             value_type=lambda: ConvertibleDefaultDict(int))
         self.player_vp_tokens = collections.defaultdict(int)
 
-        copper = get_card('Copper')
-        estate = get_card('Estate')
-        self.supply[copper] = self.supply[copper] - (
+        self.supply[dominioncards.Copper] = self.supply[dominioncards.Copper] - (
             len(self.turn_ordered_players) * 7)
 
         for player in self.turn_ordered_players:
-            self.player_decks[player.name()][copper] = 7
-            self.player_decks[player.name()][estate] = 3
+            self.player_decks[player.name()][dominioncards.Copper] = 7
+            self.player_decks[player.name()][dominioncards.Estate] = 3
 
         self.turn_ind = 0
 
@@ -505,9 +521,9 @@ class GameState(object):
 
     def _take_turn(self, turn):
         def apply_diff(cards, name, supply_dir, deck_dir):
-            for card in cards:
-                self.supply[card] += supply_dir
-                self.player_decks[name][card] += deck_dir
+            for cardinst in cards:
+                self.supply[cardinst] += supply_dir
+                self.player_decks[name][cardinst] += deck_dir
 
         for deck_change in turn.deck_changes():
             apply_diff(deck_change.buys + deck_change.gains, deck_change.name, -1, 1)

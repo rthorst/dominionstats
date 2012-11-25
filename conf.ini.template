@@ -1,4 +1,19 @@
 [mongo]
 connection: localhost
 database: test
-output_database: test2
+
+[leaderboard]
+known bad dates:
+    2011-09-15
+    2011-11-24
+    2011-11-25
+    2011-11-26
+    2011-11-27
+    2011-11-28
+    2011-11-29
+    2011-11-30
+    2011-12-01
+    2011-12-02
+    2011-12-03
+    2011-12-04
+    2012-06-08

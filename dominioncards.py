@@ -7,8 +7,8 @@ _cardlist_reader = csv.DictReader(open(
 _CARDS = {}
 _INDEXED = {}
 
-# Returns value of string if the value is unambiguous, otherwise the default
 def int_or_no_int(string, default):
+    """ Returns value of string if the value is unambiguous, otherwise the default"""
     try:
         return int(string)
     except ValueError, e:
@@ -22,6 +22,15 @@ class Card:
         for key, value in cardlist_row.iteritems():
             prop = str.lower(key)
             setattr(self, prop, value)
+
+        # Optimize performance by cleaning up loaded values now,
+        # instead of in the getter during each call.
+        self.vp = int_or_no_int(self.vp, 0)
+        self.coins = int_or_no_int(self.coins, 0)
+        self.trash = int_or_no_int(self.trash, 1)
+        self.actions = int_or_no_int(self.actions, 1)
+        self.index = int(self.index)
+
 
     def pluralize(self, freq):
         return self.singular if freq == 1 else self.plural
@@ -45,38 +54,38 @@ class Card:
         return self.attack == '1'
 
     def vp_per_card(self):
-        return int_or_no_int(self.vp, 0)
+        return self.vp
 
     def money_value(self):
-        return int_or_no_int(self.coins, 0)
+        return self.coins
 
     def trashes(self):
-        return int_or_no_int(self.trash, 1)
+        return self.trash
 
     def num_plus_actions(self):
-        return int_or_no_int(self.actions, 1)
+        return self.actions
 
     def get_expansion(self):
         return self.expansion
 
     def __repr__(self):
-        return self.singular
+        return "%s(%s)" % (self.__class__.__name__, self.singular)
 
     def __eq__(self, other):
         if type(self)==type(other):
-            return self.singular==other.singular
+            return self.index==other.index
         else:
             return False
 
     def __hash__(self):
-        return self.singular.__hash__()
+        return self.index
 
     def num_copies_per_game(self, num_players):
         if self.is_victory():
             if num_players >= 3:
                 return 12
             return 8
-        card_name = str(self)
+        card_name = self.singular
         if card_name == 'Curse':
             return 10 * (num_players - 1)
         return {'Potion': 16,
@@ -93,7 +102,7 @@ def _init():
         c = Card(cardlist_row)
         _CARDS[singular] = c
         _CARDS[plural] = c
-        _INDEXED[ int(c.index) ] = c
+        _INDEXED[c.index] = c
 
 _init()
 
@@ -105,9 +114,11 @@ for c in all_cards():
     vars()[ pname ] = c
 
 def get_card(name):
+    """ Look up a card by its name """
     return _CARDS[name]
 
 def index_to_card(index):
+    """ Look up a card by its index """
     return _INDEXED[index]
 
 TOURNAMENT_WINNINGS = [Princess, Diadem, Followers, TrustySteed, BagofGold]
@@ -120,7 +131,8 @@ def opening_cards():
             if card.cost in ('0', '2', '3', '4', '5')].sort()
 
 def indexes(cards):
-    return [int(card.index) for card in cards]
+    """ Return a list of index for the passed list of cards """
+    return [card.index for card in cards]
 
 import simplejson as json
 class CardEncoder(json.JSONEncoder):

@@ -2,7 +2,7 @@ import urllib
 
 import pymongo
 
-import card
+import dominioncards
 import game
 import name_merger
 from keys import *
