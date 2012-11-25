@@ -27,6 +27,7 @@ Long, ardous but incredibly rewarding full setup
 ====
 The code depends on:
 
+- Python version 2.6 or 2.7
 - mongodb (http://www.mongodb.org) (1.5.3+ or later)
 - pymongo (http://api.mongodb.org/python/1.9%2B/index.html)
 - web.py (http://webpy.org)

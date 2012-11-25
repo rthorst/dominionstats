@@ -5,7 +5,7 @@
 
 import itertools
 
-import card_info as ci
+import dominioncards
 import game
 import random
 import utils
@@ -15,11 +15,11 @@ def nice_feature_name(n):
 
 def composition_deck_extractor(deck_comp, game_state, player):
     ret = []
-    for card in ci.card_names():
+    for card in dominioncards.all_cards():
         ret.append(deck_comp.get(card, 0))
     return ret
 composition_deck_extractor.feature_names = map(nice_feature_name, 
-                                               ci.card_names())
+                                               dominioncards.all_cards())
 
 def score_deck_extractor(deck_comp, game_state, player):
     return [game_state.player_score(player)]
@@ -30,7 +30,7 @@ def deck_size_deck_extractor(deck_comp, game_state, player):
 def action_balance_deck_extractor(deck_comp, game_state, player):
     ret = 0
     for card, quant in deck_comp.iteritems():
-        ret += (ci.num_plus_actions(card) - ci.is_action(card)) * quant
+        ret += (dominioncards.num_plus_actions() - dominioncards.is_action()) * quant
     return [ret / (sum(deck_comp.itervalues()) or 1)]
 
 def unique_deck_extractor(deck_comp, game_state, player):
@@ -70,10 +70,10 @@ def turn_no_common_extractor(g, game_state):
 
 def supply_common_extractor(g, game_state):
     ret = []
-    for card in ci.card_names():
+    for card in dominioncards.all_cards():
         ret.append(game_state.supply.get(card, 0))
     return ret
-supply_common_extractor.feature_names = map(nice_feature_name, ci.card_names())
+supply_common_extractor.feature_names = map(nice_feature_name, dominioncards.all_cards())
 
 def make_extractor_list(suffix):
     extractor_names = [n[:-len(suffix)] for n in 

@@ -7,6 +7,7 @@ import simplejson as json
 import game
 import goals
 import parse_game
+from keys import *
 
 def _pretty_format_html(v):
     return '<br>' + pprint.pformat(v).replace(
@@ -40,7 +41,8 @@ def get_goals(game):
 def annotate_game(contents, game_id, debug=False):
     """ Decorate game contents with some JS that makes a score keeper 
     and provides anchors per turn."""
-    contents = contents.replace('&mdash;', '---')
+    contents = contents.replace('&mdash;', '---').replace(
+        'semistatic/log.css', 'client.css')
     parsed_game = parse_game.parse_game(contents, dubious_check = False)
     states = []
     
@@ -82,7 +84,7 @@ def annotate_game(contents, game_id, debug=False):
             ret += '%d %d %d %s %s<br>' % (
                 turn.get_turn_no(),
                 turn.get_player().TurnOrder(), turn.get_poss_no(),
-                turn.turn_dict.get('poss', False),
+                turn.turn_dict.get(POSSESSION, False),
                 turn.get_player().name())
 
     import cStringIO as StringIO

@@ -1,10 +1,11 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
+import bz2
 import codecs
 import collections
 import itertools
 import math
 import operator
+import os
 import pprint
 import urllib
 import urlparse
@@ -18,13 +19,14 @@ from optimal_card_ratios import DBCardRatioTracker
 from record_summary import RecordSummary
 from small_gain_stat import SmallGainStat
 import annotate_game
-import card_info
+import dominioncards
 import datetime
 import game
 import goals
 import parse_game
 import query_matcher
 import utils
+from keys import *
 
 urls = (
   '/', 'IndexPage',
@@ -63,7 +65,7 @@ class PopularBuyPage(object):
 
         if 'player' in query_dict:
             targ_name = norm_name(query_dict['player'])
-            games = map(game.Game, list(db.games.find({'players': targ_name})))
+            games = map(game.Game, list(db.games.find({PLAYERS: targ_name})))
             player_buy_summary = count_buys.DeckBuyStats()
             match_name = lambda g, name: norm_name(name) == targ_name
             count_buys.accum_buy_stats(games, player_buy_summary, match_name)
@@ -103,7 +105,7 @@ class OpeningPage(object):
 
         results = db.trueskill_openings.find({'_id': {'$regex': '^open:'}})
         openings = list(results)
-        card_list = card_info.OPENING_CARDS
+        card_list = dominioncards.opening_cards()
         def split_opening(o):
             ret = o['_id'][len('open:'):].split('+')
             if ret == ['']: return []
@@ -122,9 +124,8 @@ class OpeningPage(object):
             opening['skill_str'] = skill_str(opening['mu'], opening['sigma'])
             opening['cards'] = split_opening(opening)
             opening['cards'].sort()
-            opening['cards'].sort(key=lambda card: (card_info.cost(card)),
-                reverse=True)
-            costs = [str(card_info.cost(card)) for card in opening['cards']]
+            opening['cards'].sort(key=dominioncards.cost, reverse=True)
+            costs = [str(card.cost) for card in opening['cards']]
             while len(costs) < 2:
                 costs.append('-')
             opening['cost'] = '/'.join(costs)
@@ -148,11 +149,11 @@ class PlayerJsonPage(object):
         db = utils.get_mongo_database()
         games = db.games
         norm_target_player = norm_name(target_player)
-        games_coll = games.find({'players': norm_target_player})
+        games_coll = games.find({PLAYERS: norm_target_player})
 
         from pymongo import json_util
 
-        games_arr = [{'game': g['decks'], 'id': g['_id']} for g in games_coll]
+        games_arr = [{'game': g[DECKS], 'id': g['_id']} for g in games_coll]
 
         return json.dumps(games_arr, default=json_util.default)
 
@@ -189,7 +190,7 @@ def standard_heading(title):
     <link href='http://fonts.googleapis.com/css?family=Terminal+Dosis' rel='stylesheet' type='text/css'>
   </head>
   <body>
-    <a href="http://councilroom.com"><h1>CouncilRoom.com</h1></a>""" % title
+    <a href="http://councilroom.mccllstr.com"><h1>CouncilRoom.McCllstr.com</h1></a>""" % title
 
 class PlayerPage(object):
     def GET(self):
@@ -201,7 +202,7 @@ class PlayerPage(object):
         db = utils.get_mongo_database()
         games = db.games
         norm_target_player = norm_name(target_player)
-        games_coll = games.find({'players': norm_target_player})
+        games_coll = games.find({PLAYERS: norm_target_player})
 
         leaderboard_history_result = db.leaderboard_history.find_one(
             {'_id': norm_target_player})
@@ -361,7 +362,7 @@ class GamesByOpponentPage(object):
         db = utils.get_mongo_database()
         games = db.games
         norm_target_player = norm_name(target_player)
-        games_coll = games.find({'players': norm_target_player})
+        games_coll = games.find({PLAYERS: norm_target_player})
 
         keyed_by_opp = collections.defaultdict(list)
         game_list = []
@@ -429,8 +430,14 @@ class GamePage(object):
         if game_id.endswith('.gz'):
             game_id = game_id[:-len('.gz')]
         yyyymmdd = game.Game.get_date_from_id(game_id)
-        contents = codecs.open('static/scrape_data/%s/%s' % (
-                yyyymmdd, game_id), 'r', encoding='utf-8').read()
+
+        db = utils.get_mongo_database()
+        raw_games_col = db.raw_games
+        rawgame = raw_games_col.find_one({'_id': game_id})
+        if rawgame is None:
+            return 'could not find game ' + game_id
+        contents = bz2.decompress(rawgame['text']).decode('utf-8')
+
         body_err_msg = ('<body><b>Error annotating game, tell ' 
                         'rrenaud@gmail.com!</b>')
         try:
@@ -534,10 +541,7 @@ class GoalsPage(object):
 
 class SupplyWinApi(object):
     def str_card_index(self, card_name):
-        title = card_info.sane_title(card_name)
-        if title:
-            return str(card_info.card_index(title))
-        return ''
+        return str(card.index)
 
     def interaction_card_index_tuples(self, query_dict):
         cards = query_dict.get('interaction', '').split(',')
@@ -598,7 +602,7 @@ class SupplyWinApi(object):
         # unconditional: opt param, if present, also get unconditional stats.
         targets = query_dict.get('targets', '').split(',')
         if sum(len(t) for t in targets) == 0:
-            targets = card_info.card_names()
+            targets = dominioncards.all_cards()
             
         target_inds = map(self.str_card_index, targets)
         interaction_tuples = self.interaction_card_index_tuples(query_dict)
@@ -616,8 +620,8 @@ class OptimalCardRatios(object):
         web.header("Content-Type", "text/html; charset=utf-8")
         query_dict = dict(urlparse.parse_qsl(web.ctx.env['QUERY_STRING']))
 
-        card_list = sorted(set(card_info.card_names()) - 
-                           set(card_info.TOURNAMENT_WINNINGS))
+        card_list = sorted(set(dominioncards.all_cards()) - 
+                           set(dominioncards.TOURNAMENT_WINNINGS))
 
         card_x = query_dict.get('card_x', 'Minion')
         card_y = query_dict.get('card_y', 'Gold')

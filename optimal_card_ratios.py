@@ -1,12 +1,24 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import utils
+import logging
+import logging.handlers
+import os
+import os.path
 import pymongo
-import incremental_scanner
+import sys
+import time
+
+from game import Game
 from primitive_util import PrimitiveConversion, ConvertibleDefaultDict
 from stats import MeanVarStat
-from game import Game
+from utils import get_mongo_connection, progress_meter
+import incremental_scanner
+import utils
+
+
+# Module-level logging instance
+log = logging.getLogger(__name__)
 
 class DBCardRatioTracker(PrimitiveConversion):
     """ This keeps track of every final and progressive card ratio for one
@@ -70,8 +82,9 @@ class CardRatioTracker:
         ratios = {}
         for card1 in self.card_counts.iterkeys():
             for card2 in self.card_counts.iterkeys():
-                if card1 < card2:
-                    ratios[card1 + ':' + card2] = set([(self.card_counts[card1], self.card_counts[card2])])
+                if str(card1) < str(card2):
+                    key = str(card1) + ':' + str(card2)
+                    ratios[key] = set([(self.card_counts[card1], self.card_counts[card2])])
         return ratios
 
 class FinalCardRatioTracker(CardRatioTracker):
@@ -108,8 +121,13 @@ class ProgressiveCardRatioTracker(CardRatioTracker):
 
         for card2 in self.card_counts.iterkeys():
             if card != card2:
-                c1, c2 = sorted([card, card2])
-                self.ratios[c1 + ':' + c2].add((self.card_counts[c1], self.card_counts[c2]))
+                if str(card) < str(card2):
+                    c1, c2 = card, card2
+                else:
+                    c1, c2 = card2, card
+
+                key = str(c1) + ':' + str(c2)
+                self.ratios[key].add((self.card_counts[c1], self.card_counts[c2]))
 
     def get_ratio_dict(self):
         return self.ratios
@@ -145,11 +163,9 @@ def process_game(game):
                        name_to_win_points[name]])
     return retval
 
-def main():
-    parser = utils.incremental_max_parser()
-    args = parser.parse_args()
-
-    conn = pymongo.Connection()
+def main(args):
+    commit_after = 25000
+    conn = get_mongo_connection()
     database = conn.test
     games = database.games
     collection = database.optimal_card_ratios
@@ -158,34 +174,64 @@ def main():
     scanner = incremental_scanner.IncrementalScanner('optimal_card_ratios', database)
 
     if not args.incremental:
+        log.warning('resetting scanner and db')
         scanner.reset()
 
-    print scanner.status_msg()
+    log.info("Starting run: %s", scanner.status_msg())
 
-    total_checked = 0
-    for game in scanner.scan(games, {}):
+    for ind, game in enumerate(
+        progress_meter(scanner.scan(games, {}), log)):
         if not db_tracker:
             db_tracker = DBCardRatioTrackerManager(collection, args.incremental)
-
-        total_checked += 1
 
         result = process_game(Game(game))
         for final_ratio_dict, progressive_ratio_dict, win_points in result:
             db_tracker.integrate_results('final', final_ratio_dict, win_points)
             db_tracker.integrate_results('progressive', progressive_ratio_dict, win_points)
 
-        if total_checked % 1000 == 0:
-            print total_checked
-
-        if args.max_games >= 0 and total_checked >= args.max_games:
+        if args.max_games >= 0 and ind >= args.max_games:
+            log.info("Reached max_games of %d", args.max_games)
             break
 
-    print scanner.status_msg()
+        if ind % commit_after == 0 and ind > 0:
+            start = time.time()
+            db_tracker.save()
+            scanner.save()
+            log.info("Committed calculations to the DB in %5.2fs", time.time() - start)
+
+    log.info("Ending run: %s", scanner.status_msg())
 
     if db_tracker:
         db_tracker.save()
     scanner.save()
 
 if __name__ == '__main__':
-    main()
+    args = utils.incremental_max_parser().parse_args()
 
+    script_root = os.path.splitext(sys.argv[0])[0]
+
+    # Configure the logger
+    log.setLevel(logging.DEBUG)
+
+    # Log to a file
+    fh = logging.handlers.TimedRotatingFileHandler(script_root + '.log',
+                                                   when='midnight')
+    if args.debug:
+        fh.setLevel(logging.DEBUG)
+    else:
+        fh.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+    fh.setFormatter(formatter)
+    log.addHandler(fh)
+
+    # Put logging output on stdout, too
+    ch = logging.StreamHandler(sys.stdout)
+    if args.debug:
+        ch.setLevel(logging.DEBUG)
+    else:
+        ch.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+    ch.setFormatter(formatter)
+    log.addHandler(ch)
+
+    main(args)

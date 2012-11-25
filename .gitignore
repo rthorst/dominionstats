@@ -11,3 +11,8 @@ static/scrape_data
 db
 static/leaderboard
 
+.venv*
+build
+*.log
+*.log.*
+

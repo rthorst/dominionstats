@@ -4,7 +4,7 @@ import re
 
 bgg_spam = re.compile('(b[bg]g[012\- ]?d?l?[012\- ]?[012\- ]?)', re.IGNORECASE)
 
-words_to_strip = ['afk', 'away', '()', '[]', ' - ']
+words_to_strip = ['\bafk\b', '\baway\b', '()', '[]', ' - ']
 
 def norm_name(name):
     bgg_spam_match = bgg_spam.search(name)

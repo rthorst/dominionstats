@@ -1,11 +1,23 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import re
-import os
-import name_merger
-import pymongo
 import bz2
+import logging
+import logging.handlers
+import os
+import os.path
+import re
+import sys
+import time
+
+from utils import get_mongo_connection, progress_meter
+import name_merger
+import utils
+
+
+# Module-level logging instance
+log = logging.getLogger(__name__)
+
 
 def main():
     filename_pattern = re.compile('^(?P<date>\d\d\d\d-\d\d-\d\d)\.html\.bz2$')
@@ -15,7 +27,7 @@ def main():
                                      '(?P<eligible_games_played>\d+)</td><td>' + \
                                      '(?P<nickname>[^<]*) <')
 
-    conn = pymongo.Connection()
+    conn = get_mongo_connection()
     database = conn.test
     history_collection = database.leaderboard_history
     scanner_collection = database.scanner
@@ -28,6 +40,8 @@ def main():
     filenames = os.listdir(directory)
     filenames.sort()
 
+    bad_leaderboard_dates = utils.get_bad_leaderboard_dates()
+
     for filename in filenames:
         match = filename_pattern.search(filename)
         if not match:
@@ -35,14 +49,16 @@ def main():
 
         date = match.group('date')
 
-        if '2011-11-24' <= date and date <= '2011-12-04':
+        if date in bad_leaderboard_dates:
             # don't load data from when the leaderboard was messed up
+            log.warning("Skipping %s because the leaderboard was messed up", date)
             continue
 
         if date <= last_date:
+            log.warning("Date %s is less than last date %s", date, last_date)
             continue
 
-        print date
+        log.info('Processing %s', date)
 
         file_obj = bz2.BZ2File(directory + filename)
         content = file_obj.read().decode('utf-8')
@@ -70,31 +86,58 @@ def main():
             if normed_nickname not in nickname_to_entry:
                 nickname_to_entry[normed_nickname] = [date, skill_mean, skill_error, rank, eligible_games_played]
             else:
-                print 'normed nickname already exists for this day:', normed_nickname
+                log.info('normed nickname %s already exists for %s', normed_nickname, date)
 
             last_rank = rank
             pos = match.end()
 
-        print num_matches, 'entries matched'
+        log.info('%d entries matched', num_matches)
 
         if num_matches == 0:
-            print 'ERROR: no entries found, so the regex is probably not doing its job anymore.'
+            log.error('No entries found, so the regex is probably not doing its job anymore.')
             break
 
         if num_matches != last_rank:
-            print 'ERROR: # entries does not match last rank, so the regex is probably not doing its job anymore.'
+            log.error('ERROR: # entries does not match last rank, so the regex is probably not doing its job anymore.')
             break
 
         for nickname, data in nickname_to_entry.iteritems():
             history_collection.update({'_id': nickname}, {'$push': {'history': data}}, upsert=True)
 
-        print len(nickname_to_entry), 'player histories updated'
-        print
+        log.info('%d player histories updated', len(nickname_to_entry))
 
         last_date = date
 
     scanner_collection.update({'_id': 'leaderboard_history'}, {'$set': {'last_date': last_date}}, upsert=True)
 
-if __name__ == '__main__':
-    main()
 
+if __name__ == '__main__':
+    args = utils.incremental_parser().parse_args()
+
+    script_root = os.path.splitext(sys.argv[0])[0]
+
+    # Configure the logger
+    log.setLevel(logging.DEBUG)
+
+    # Log to a file
+    fh = logging.handlers.TimedRotatingFileHandler(script_root + '.log',
+                                                   when='midnight')
+    if args.debug:
+        fh.setLevel(logging.DEBUG)
+    else:
+        fh.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+    fh.setFormatter(formatter)
+    log.addHandler(fh)
+
+    # Put logging output on stdout, too
+    ch = logging.StreamHandler(sys.stdout)
+    if args.debug:
+        ch.setLevel(logging.DEBUG)
+    else:
+        ch.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+    ch.setFormatter(formatter)
+    log.addHandler(ch)
+
+    main()

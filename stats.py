@@ -71,7 +71,9 @@ class MeanVarStat(primitive_util.ListSlotPrimitiveConversion,
     def render_interval(self, factor=2, sig_digits=2):
         if self.sample_std_dev() >= 10000:
             return u'-'
-        return u'%.2f ± %.2f' % (self.mean(), factor * self.sample_std_dev())
+        fmt = u'%.' + unicode(sig_digits) + u'f'
+        fmt = fmt + u' ± ' + fmt
+        return fmt % (self.mean(), factor * self.sample_std_dev())
 
     def __eq__(self, o):
         assert type(o) == MeanVarStat

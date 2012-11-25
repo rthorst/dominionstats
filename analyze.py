@@ -4,18 +4,25 @@
 
 from __future__ import division
 
+import collections
+import logging
+import logging.handlers
 import os
+import os.path
+import pymongo
+import simplejson as json
+import sys
 
-import card_info
+import utils
+from dominioncards import EVERY_SET_CARDS
 from stats import MeanVarStat
 from game import Game
 import incremental_scanner
-import pymongo
-import collections
-import simplejson as json
 from primitive_util import PrimitiveConversion, ConvertibleDefaultDict
 
-import utils
+# Module-level logging instance
+log = logging.getLogger(__name__)
+
 
 class CardStatistic(PrimitiveConversion):
     """ Per card statistics.
@@ -54,7 +61,7 @@ class GamesAnalysis(PrimitiveConversion):
         self.num_games += 1
         seen_cards_players = set()
         self.max_game_id = max(self.max_game_id, game.get_id())
-        for card in game.get_supply() + card_info.EVERY_SET_CARDS:
+        for card in game.get_supply() + EVERY_SET_CARDS:
             self.card_stats[card].available += len(game.get_player_decks())
 
         accumed_by_player = collections.defaultdict(lambda : collections.defaultdict(int))
@@ -87,13 +94,9 @@ class GamesAnalysis(PrimitiveConversion):
                 per_card_stat.win_diff_accum[card_diff_index].add_outcome(
                     deck.WinPoints())
 
-def main():
+def main(args):
     """ Update analysis statistics.  By default, do so incrementally, unless
     --noincremental argument is given."""
-    parser = utils.incremental_max_parser()
-    parser.add_argument('--output_collection_name', default='analysis')
-
-    args = parser.parse_args()
 
     conn = pymongo.Connection()
     database = conn.test
@@ -116,20 +119,18 @@ def main():
     if not os.path.exists('static/output'):
         os.makedirs('static/output')
 
-    print scanner.status_msg()
+    log.info(scanner.status_msg())
 
     for idx, raw_game in enumerate(scanner.scan(games, {})):
         try:
             if idx % 1000 == 0:
-                print idx
+                log.debug('Index is %d', idx)
             game_analysis.analyze_game(Game(raw_game))
 
             if idx == args.max_games:
                 break
         except int, exception:
-            print Game(raw_game).isotropic_url()
-            print exception
-            print raw_game
+            log.exception('Exception occurred for %s in raw game %s', Game(raw_game).isotropic_url(), raw_game)
             raise 
 
     game_analysis.max_game_id = scanner.get_max_game_id()
@@ -140,8 +141,38 @@ def main():
     output_file.write('var all_card_data = ')
 
     json.dump(game_analysis.to_primitive_object(), output_file)
-    print scanner.status_msg()
+    log.info(scanner.status_msg())
     scanner.save()
 
 if __name__ == '__main__':
-    main() 
+    parser = utils.incremental_max_parser()
+    parser.add_argument('--output_collection_name', default='analysis')
+
+    args = parser.parse_args()
+
+    script_root = os.path.splitext(sys.argv[0])[0]
+
+    # Configure the logger
+    log.setLevel(logging.DEBUG)
+
+    # Log to a file
+    fh = logging.handlers.TimedRotatingFileHandler(script_root + '.log', when='midnight')
+    if args.debug:
+        fh.setLevel(logging.DEBUG)
+    else:
+        fh.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+    fh.setFormatter(formatter)
+    log.addHandler(fh)
+
+    # Put logging output on stdout, too
+    ch = logging.StreamHandler(sys.stdout)
+    if args.debug:
+        ch.setLevel(logging.DEBUG)
+    else:
+        ch.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+    ch.setFormatter(formatter)
+    log.addHandler(ch)
+
+    main(args)

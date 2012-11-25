@@ -8,8 +8,8 @@ import sys
 utils.ensure_exists('static/status')
 
 cmds = [
-    'python scrape.py --startdate=%(month_ago)s',            
-    'python parse_game.py --startdate=%(month_ago)s', 
+    'python scrape.py',
+    'python parse_game.py',
     'python load_parsed_data.py ',
     'python analyze.py', 
     'python goals.py',

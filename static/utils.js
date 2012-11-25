@@ -80,3 +80,8 @@ function ExpandCardGlob(glob) {
     return ret;
 };
 
+if (exports) {
+    exports.ExpandCardGlob = ExpandCardGlob;    
+    exports.InitCardGlobber = InitCardGlobber;
+}
+

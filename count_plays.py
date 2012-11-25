@@ -1,5 +1,6 @@
 import pymongo
 from collections import defaultdict
+from keys import *
 #module-level things like this can break
 c = pymongo.Connection()
 games = c.test.games
@@ -24,7 +25,8 @@ def analyze_plays():
     counter = 0
     for game in games.find():
         counter += 1
-        for deck in game['decks']:
+	# FIXME: Use game object instead
+        for deck in game[DECKS]:
             analyze_deck(deck)
         if counter % 10 == 0:
             print(counter)
@@ -70,11 +72,11 @@ def analyze_deck(deck):
     Analyze the card plays in a single recorded deck, adding results to the
     `plays` and `plays_by_turn` collections.
     """
-    win_points = deck['win_points']
-    victory_points = deck['points']
-    for turn in deck['turns']:
-        money = turn.get('money', 0)
-        plays = turn.get('plays', [])
+    win_points = deck[WIN_POINTS]
+    victory_points = deck[POINTS]
+    for turn in deck[TURNS]:
+        money = turn.get(MONEY, 0)
+        plays = turn.get(PLAYS, [])
         turn_number = turn['number']
 
         # Some bookkeeping to make sure we count repeated combos in a way

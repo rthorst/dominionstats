@@ -32,6 +32,25 @@ def _init():
 
 _init()
 
+def sanity_check_abbrevs():
+    def consistent_abbrev(abbrev, from_phrase, long_phrase):
+        if from_phrase.startswith(abbrev) and (
+            not long_phrase.startswith(abbrev)):
+            return False
+        cur_a, cur_b = 0, 0
+        while cur_a < len(abbrev) and cur_b < len(long_phrase):
+            if abbrev[cur_a] == long_phrase[cur_b]:
+                cur_a += 1
+            cur_b += 1
+        return cur_a == len(abbrev)
+
+    for c1 in _card_names:
+        for c2 in _card_names:
+            if c1 != c2 and not c1 in c2: # (black)? market, (copper)?smith
+                c1_abbrev = abbrev(c1)
+                assert not consistent_abbrev(c1_abbrev, c1, c2), \
+                    '%s (%s) confusible with %s' % (c1_abbrev, c1 ,c2)
+
 def singular_of(card_name):
     return _to_singular[card_name]
 
@@ -53,6 +72,9 @@ def is_treasure(singular_card_name):
 def is_reaction(singular_card_name):
     return _card_info_rows[singular_card_name]['Reaction'] == '1'
 
+def is_duration(singular_card_name):
+    return _card_info_rows[singular_card_name]['Duration'] == '1'
+
 def cost(singular_card_name):
     return _card_info_rows[singular_card_name]['Cost']
 
@@ -62,6 +84,16 @@ def money_value(card_name):
         return int(_card_info_rows[card_name]['Coins'])
     except ValueError, e:
         return 0
+
+def coin_cost(singular_card_name):
+    cost_str = _card_info_rows[singular_card_name]['Cost']
+    cost_str = cost_str.replace('P', '').replace('*', '')
+    if cost_str == '':
+        return 0
+    return int(cost_str)
+
+def potion_cost(singular_card_name):
+    return 'P' in _card_info_rows[singular_card_name]['Cost']
 
 def is_victory(singular_card_name):
     return _card_info_rows[singular_card_name]['Victory'] == '1'
@@ -81,6 +113,14 @@ def trashes(singular_card_name):
         trash_str = 1
     return int(trash_str)
 
+def num_plus_buys(singular_card_name):
+    buys_str = _card_info_rows[singular_card_name]['Buys']
+    if buys_str == '?':
+        return 1
+    if buys_str == '':
+        return 0
+    return int(buys_str)
+
 def num_plus_actions(singular_card_name):
     r = _card_info_rows[singular_card_name]['Actions']
     try:
@@ -88,6 +128,18 @@ def num_plus_actions(singular_card_name):
     except ValueError:
         # variable number of plus actions, just say 1
         return 1
+
+def num_plus_cards(singular_card_name):
+    r = _card_info_rows[singular_card_name]['Cards']
+    try:
+        return int(r)
+    except ValueError:
+        # variable number of plus actions, just say 1
+        return 1
+
+def abbrev(singular_card_name):
+    return _card_info_rows[singular_card_name]['Abbreviation']
+
 
 def num_copies_per_game(card_name, num_players):
     if is_victory(card_name):
@@ -124,3 +176,6 @@ def card_names():
 
 def card_var_names():
     return _card_var_names
+
+if __name__ == '__main__':
+    sanity_check_abbrevs()

@@ -1,15 +1,24 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import re
-import os
-import datetime
-import httplib
-import socket
 import StringIO
-import gzip
 import bz2
+import datetime
+import gzip
+import httplib
+import logging
+import logging.handlers
+import os
+import os.path
+import re
+import socket
+import sys
+import time
 import utils
+
+
+# Module-level logging instance
+log = logging.getLogger(__name__)
 
 output_directory = 'static/leaderboard/'
 
@@ -48,10 +57,14 @@ def get_date_of_current_isotropic_leaderboard():
 def save_file(date, data, is_gzipped):
     if is_gzipped:
         f = gzip.GzipFile(fileobj=StringIO.StringIO(data))
-        data = f.read()
+        try:
+            decompressed_data = f.read()
+            data = decompressed_data
+        except IOError, ioe:
+            log.warning('Received data was not in gzip format')
         f.close()
 
-        data = bz2.compress(data)
+    data = bz2.compress(data)
 
     f = open(output_directory + str(date) + '.html.bz2', 'w')
     f.write(data)
@@ -95,19 +108,19 @@ def run_scrape_function_with_retries(scrape_function, date):
         status = scrape_function(date)
 
         if status == 200:
-            print 'successful'
+            log.info('successful')
             break
         elif status == 404:
-            print 'file not found'
+            log.info('file not found')
             break
         elif status == 'leaderboard updated':
-            print 'the leaderboard was updated after this script was started, so re-run this script'
+            log.warning('the leaderboard was updated after this script was started, so re-run this script')
             break
         else:
             if num_attempts < 3:
-                print 'retrying'
+                log.info('Status was %s, retrying', status)
             else:
-                print 'reached 3 attempts, aborting'
+                log.error('reached 3 attempts, aborting')
                 break
 
     return status
@@ -116,42 +129,68 @@ def main():
     utils.ensure_exists(output_directory)
 
     date_of_last_cached_leaderboard = get_date_of_last_cached_leaderboard()
-    print 'date of the last cached leaderboard is', date_of_last_cached_leaderboard
+    log.info('date of the last cached leaderboard is %s', date_of_last_cached_leaderboard)
 
     date_of_current_isotropic_leaderboard = get_date_of_current_isotropic_leaderboard()
     if date_of_current_isotropic_leaderboard is None:
-        print 'could not determine the date of the current isotropic leaderboard, so please try again later'
+        log.warning('could not determine the date of the current isotropic leaderboard, so please try again later')
         return
-    print 'date of the current isotropic leaderboard is', date_of_current_isotropic_leaderboard
+    log.info('date of the current isotropic leaderboard is %s', date_of_current_isotropic_leaderboard)
 
     one_day_delta = datetime.timedelta(1)
     date = date_of_last_cached_leaderboard + one_day_delta
 
     while date <= date_of_current_isotropic_leaderboard:
-        print
-        print date
+        log.info('Processing %s', date)
 
         if date == date_of_current_isotropic_leaderboard:
-            print 'scraping from isotropic'
+            log.info('scraping from isotropic')
             status = run_scrape_function_with_retries(scrape_leaderboard_from_isotropic, date)
         else:
-            print 'scraping from councilroom'
+            log.info('scraping from councilroom')
             status = run_scrape_function_with_retries(scrape_leaderboard_from_councilroom, date)
 
             if status != 200:
-                print 'scraping from bggdl'
+                log.info('scraping from bggdl')
                 status = run_scrape_function_with_retries(scrape_leaderboard_from_bggdl, date)
 
         if status == 200:
             pass
         elif status == 404:
-            print 'file not found, so we will assume that it does not exist, and go to the next day'
+            log.warning('file not found, so we will assume that it does not exist, and go to the next day')
         else:
-            print 'please try again later'
+            log.warning('Unexpected status of %d, please try again later', status)
             break
 
         date += one_day_delta
 
 if __name__ == '__main__':
-    main()
+    args = utils.incremental_parser().parse_args()
 
+    script_root = os.path.splitext(sys.argv[0])[0]
+
+    # Configure the logger
+    log.setLevel(logging.DEBUG)
+
+    # Log to a file
+    fh = logging.handlers.TimedRotatingFileHandler(script_root + '.log',
+                                                   when='midnight')
+    if args.debug:
+        fh.setLevel(logging.DEBUG)
+    else:
+        fh.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+    fh.setFormatter(formatter)
+    log.addHandler(fh)
+
+    # Put logging output on stdout, too
+    ch = logging.StreamHandler(sys.stdout)
+    if args.debug:
+        ch.setLevel(logging.DEBUG)
+    else:
+        ch.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+    ch.setFormatter(formatter)
+    log.addHandler(ch)
+
+    main()
