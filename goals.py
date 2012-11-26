@@ -709,6 +709,7 @@ function toggle(item) {
                 return goal.get('sort_key'), goal['_id']
             found_goals.sort(key = KeyAndDate)
             
+            temp_ret = ''
             for match in found_goals:
                 game_id = match['_id']
 
@@ -716,8 +717,9 @@ function toggle(item) {
                 m['link'] = game.Game.get_councilroom_link_from_id(game_id, ' class="goal"')
                 m['date'] = game.Game.get_datetime_from_id(game_id).strftime("%d %b %Y")
                 
-                ret += GOAL_BOX % m
+                temp_ret += GOAL_BOX % m
 
+            ret += temp_ret
             ret += '</div></div>'
         ret += '</div>'
         ret += '<div style="clear: both;">&nbsp;</div>'
