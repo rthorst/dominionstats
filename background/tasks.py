@@ -172,6 +172,8 @@ def scrape_raw_games(date):
         # inserted new records.
         parse_days.delay([date])
 
+    return inserted
+
 
 @celery.task
 def check_for_work():
