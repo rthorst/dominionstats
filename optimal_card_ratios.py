@@ -2,23 +2,19 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import logging.handlers
-import os
-import os.path
-import pymongo
-import sys
 import time
 
 from game import Game
 from primitive_util import PrimitiveConversion, ConvertibleDefaultDict
 from stats import MeanVarStat
-from utils import get_mongo_connection, progress_meter
+import dominionstats.utils.log
 import incremental_scanner
 import utils
 
-
 # Module-level logging instance
 log = logging.getLogger(__name__)
+log.addHandler(logging.NullHandler())
+
 
 class DBCardRatioTracker(PrimitiveConversion):
     """ This keeps track of every final and progressive card ratio for one
@@ -165,8 +161,7 @@ def process_game(game):
 
 def main(args):
     commit_after = 25000
-    conn = get_mongo_connection()
-    database = conn.test
+    database = utils.get_mongo_database()
     games = database.games
     collection = database.optimal_card_ratios
     db_tracker = None
@@ -180,7 +175,7 @@ def main(args):
     log.info("Starting run: %s", scanner.status_msg())
 
     for ind, game in enumerate(
-        progress_meter(scanner.scan(games, {}), log)):
+        utils.progress_meter(scanner.scan(games, {}))):
         if not db_tracker:
             db_tracker = DBCardRatioTrackerManager(collection, args.incremental)
 
@@ -206,32 +201,7 @@ def main(args):
     scanner.save()
 
 if __name__ == '__main__':
-    args = utils.incremental_max_parser().parse_args()
-
-    script_root = os.path.splitext(sys.argv[0])[0]
-
-    # Configure the logger
-    log.setLevel(logging.DEBUG)
-
-    # Log to a file
-    fh = logging.handlers.TimedRotatingFileHandler(script_root + '.log',
-                                                   when='midnight')
-    if args.debug:
-        fh.setLevel(logging.DEBUG)
-    else:
-        fh.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
-    fh.setFormatter(formatter)
-    log.addHandler(fh)
-
-    # Put logging output on stdout, too
-    ch = logging.StreamHandler(sys.stdout)
-    if args.debug:
-        ch.setLevel(logging.DEBUG)
-    else:
-        ch.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
-    ch.setFormatter(formatter)
-    log.addHandler(ch)
-
+    parser = utils.incremental_max_parser()
+    args = parser.parse_args()
+    dominionstats.utils.log.initialize_logging(args.debug)
     main(args)

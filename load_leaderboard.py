@@ -3,32 +3,28 @@
 
 import bz2
 import logging
-import logging.handlers
 import os
-import os.path
 import re
-import sys
-import time
 
-from utils import get_mongo_connection, progress_meter
+import dominionstats.utils.log
 import name_merger
 import utils
 
 
 # Module-level logging instance
 log = logging.getLogger(__name__)
+log.addHandler(logging.NullHandler())
 
 
 def main():
-    filename_pattern = re.compile('^(?P<date>\d\d\d\d-\d\d-\d\d)\.html\.bz2$')
-    leaderboard_pattern = re.compile('<td>(?P<skill_mean>-?\d+\.\d+) &plusmn; ' + \
-                                     '(?P<skill_error>-?\d+\.\d+)</td><td class=c2>' + \
-                                     '(?P<rank>\d+)</td><td class=c>' + \
-                                     '(?P<eligible_games_played>\d+)</td><td>' + \
-                                     '(?P<nickname>[^<]*) <')
+    filename_pattern = re.compile(r'^(?P<date>\d\d\d\d-\d\d-\d\d)\.html\.bz2$')
+    leaderboard_pattern = re.compile(r'<td>(?P<skill_mean>-?\d+\.\d+) &plusmn; ' + \
+                                     r'(?P<skill_error>-?\d+\.\d+)</td><td class=c2>' + \
+                                     r'(?P<rank>\d+)</td><td class=c>' + \
+                                     r'(?P<eligible_games_played>\d+)</td><td>' + \
+                                     r'(?P<nickname>[^<]*) <')
 
-    conn = get_mongo_connection()
-    database = conn.test
+    database = utils.get_mongo_database()
     history_collection = database.leaderboard_history
     scanner_collection = database.scanner
 
@@ -112,32 +108,7 @@ def main():
 
 
 if __name__ == '__main__':
-    args = utils.incremental_parser().parse_args()
-
-    script_root = os.path.splitext(sys.argv[0])[0]
-
-    # Configure the logger
-    log.setLevel(logging.DEBUG)
-
-    # Log to a file
-    fh = logging.handlers.TimedRotatingFileHandler(script_root + '.log',
-                                                   when='midnight')
-    if args.debug:
-        fh.setLevel(logging.DEBUG)
-    else:
-        fh.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
-    fh.setFormatter(formatter)
-    log.addHandler(fh)
-
-    # Put logging output on stdout, too
-    ch = logging.StreamHandler(sys.stdout)
-    if args.debug:
-        ch.setLevel(logging.DEBUG)
-    else:
-        ch.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
-    ch.setFormatter(formatter)
-    log.addHandler(ch)
-
+    parser = utils.incremental_parser()
+    args = parser.parse_args()
+    dominionstats.utils.log.initialize_logging(args.debug)
     main()

@@ -4,7 +4,6 @@ import ConfigParser
 import argparse
 import datetime
 import logging
-import logging.handlers
 import os
 import pymongo
 import time
@@ -13,7 +12,8 @@ import primitive_util
 
 
 # Module-level logging instance
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
+log.addHandler(logging.NullHandler())
 
 
 # http://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks-in-python
@@ -86,7 +86,7 @@ def get_bad_leaderboard_dates():
         config.read('conf.ini')
         bad_dates = str(config.get('leaderboard', 'known bad dates')).strip().splitlines()
     except:
-        logger.exception("Got exception, using default list")
+        log.exception("Got exception, using default list")
         bad_dates = ['2011-11-24', '2011-11-25', '2011-11-26', '2011-11-27',
                      '2011-11-28', '2011-11-29', '2011-11-30', '2011-12-01',
                      '2011-12-02', '2011-12-03', '2011-12-04', '2012-06-08', ]
@@ -166,8 +166,11 @@ def includes_day(args, str_yyyymmdd):
     assert len(str_yyyymmdd) == 8, '%s not 8 chars' % str_yyyymmdd
     return args.startdate <= str_yyyymmdd <= args.enddate
 
-def progress_meter(iterable, log=logger, chunksize=1000):
-    """ Logs progress through iterable at chunksize intervals."""
+def progress_meter(iterable, passed_log=None, chunksize=1000):
+    """Logs progress through iterable at chunksize intervals.
+
+    Note, passed_log is now ignored.
+    """
     scan_start = time.time()
     since_last = time.time()
     for idx, val in enumerate(iterable):

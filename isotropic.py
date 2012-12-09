@@ -87,6 +87,16 @@ def dates_needing_scraping(db):
         raw_game_count = raw_games_col.find({'game_date': str_date}).count()
 
 
+class ScrapeError(Exception):
+    """Indicates an error with the requested scrape."""
+    def __init__(self, reason):
+        self.args = reason,
+        self.reason = reason
+
+    def __str__(self):
+        return '<scrape error %s>' % self.reason
+
+
 class IsotropicScraper:
     """Implements the functions necessary to scrape data (games and
     leaderboards) from Isotropic or its related mirrors.
@@ -141,7 +151,10 @@ class IsotropicScraper:
         self.establish_s3_connection()
 
         # Get a response object for the source data
-        response = urllib2.urlopen(self.isotropic_rawgame_url(date))
+        try:
+            response = urllib2.urlopen(self.isotropic_rawgame_url(date))
+        except urllib2.HTTPError:
+            raise ScrapeError("Unable to retrieve data from %s" % self.isotropic_rawgame_url(date))
 
         # Upload the contents to s3 in the appropriate key
         bucket = self.s3conn.get_bucket('static.councilroom.mccllstr.com')

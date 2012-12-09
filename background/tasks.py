@@ -166,13 +166,18 @@ def scrape_raw_games(date):
     db = utils.get_mongo_database()
 
     scraper = isotropic.IsotropicScraper(db)
-    inserted = scraper.scrape_and_store_rawgames(date)
-    if inserted > 0:
-        # Also need to parse the raw games for the days where we
-        # inserted new records.
-        parse_days.delay([date])
 
-    return inserted
+    try:
+        inserted = scraper.scrape_and_store_rawgames(date)
+        if inserted > 0:
+            # Also need to parse the raw games for the days where we
+            # inserted new records.
+            parse_days.delay([date])
+        return inserted
+
+    except isotropic.ScrapeError:
+        log.info("Data for %s is not yet available", date)
+        return None
 
 
 @celery.task
