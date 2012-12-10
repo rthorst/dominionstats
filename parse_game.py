@@ -1042,9 +1042,9 @@ def main(args, log):
 
         try:
             log.info("Parsing %s", year_month_day)
-            convert_to_json(log, raw_games, year_month_day):
+            convert_to_json(log, raw_games, year_month_day)
             continue
-            day['data_status'] = DataStatus.PARSED
+            day[BEEN_PARSED_KEY] = True
             day_status_col.save(day)
         except ParseTurnHeaderError, e:
             log.error("ParseTurnHeaderError occurred while parsing %s: %s", year_month_day, e)

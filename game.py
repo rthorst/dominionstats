@@ -92,6 +92,7 @@ class Turn(object):
             played.append('Returns: %s' % self.returns)
         return played
 
+
     def get_player(self):
         return self.player
 
@@ -134,7 +135,7 @@ class Turn(object):
         my_change = PlayerDeckChange(self.player.name())
         ret.append(my_change)
         setattr(my_change, 'gains', self.gains)
-        setattr(my_change, 'buys', self.buys)
+        setattr(my_change, 'buys' , self.buys)
         setattr(my_change, 'trashes', self.trashes)
         setattr(my_change, 'returns', self.returns)
         my_change.vp_tokens += self.turn_dict.get(VP_TOKENS, 0)
@@ -143,7 +144,7 @@ class Turn(object):
         for opp_index, info_dict in opp_info.iteritems():
             opp_name = self.game_dict[PLAYERS][int(opp_index)]
             change = PlayerDeckChange(opp_name)
-            getattr(change, 'gains').extend(turn_decode(info_dict, GAINS))
+            getattr(change, 'gains' ).extend(turn_decode(info_dict, GAINS))
             getattr(change, 'trashes').extend(turn_decode(info_dict, TRASHES))
             getattr(change, 'returns').extend(turn_decode(info_dict, RETURNS))
             change.vp_tokens += info_dict.get(VP_TOKENS, 0)
@@ -210,6 +211,7 @@ class PlayerDeck(object):
     def __repr__(self):
         return "%s(win_points: %f, points: %d, turn_order: %d, deck: %s)" \
             % (self.__class__, self.win_points, self.points, self.turn_order, self.deck)
+
 
 class Game(object):
     def __init__(self, game_dict):
@@ -510,8 +512,8 @@ class GameState(object):
                 self.player_decks[name][cardinst] += deck_dir
 
         for deck_change in turn.deck_changes():
-            apply_diff(getattr(deck_change, 'buys') + getattr(deck_change, 'gains'), 
-                        deck_change.name, -1, 1)
+            apply_diff(getattr(deck_change, 'buys') + getattr(deck_change, 'gains'),
+                      deck_change.name, -1, 1)
             apply_diff(getattr(deck_change, 'trashes'), deck_change.name, 0, -1)
             apply_diff(getattr(deck_change, 'returns'), deck_change.name, 1, -1)
             self.player_vp_tokens[deck_change.name] += deck_change.vp_tokens
