@@ -1020,6 +1020,8 @@ def main(args, log):
 
     connection = pymongo.Connection()
     db = connection.test
+    raw_games = db.raw_games
+    raw_games.ensure_index('game_date')
 
     utils.ensure_exists('parsed_out')
 
@@ -1032,6 +1034,7 @@ def main(args, log):
         if not utils.includes_day(args, year_month_day):
             log.debug("Raw games for %s available in the database but not in date range, skipping", year_month_day)
             continue
+
         if BEEN_PARSED_KEY not in day:
             day[BEEN_PARSED_KEY] = False
             day_status_col.save(day)
