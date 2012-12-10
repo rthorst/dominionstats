@@ -4,7 +4,6 @@ import ConfigParser
 import argparse
 import datetime
 import logging
-import logging.handlers
 import os
 import pymongo
 import time
@@ -13,7 +12,8 @@ import primitive_util
 
 
 # Module-level logging instance
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
+log.addHandler(logging.NullHandler())
 
 
 # http://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks-in-python
@@ -72,7 +72,7 @@ def get_bad_leaderboard_dates():
     """Return a list of leaderboard dates that should be skipped
 
     List comes from the conf.ini file, as a multi-line entry under:
-    
+
     [leaderboard]
     known bad dates = 2011-11-24
         2011-11-25
@@ -84,15 +84,15 @@ def get_bad_leaderboard_dates():
     try:
         config = ConfigParser.ConfigParser()
         config.read('conf.ini')
-        bad_dates = config.get('leaderboard', 'known bad dates').strip().splitlines()
+        bad_dates = str(config.get('leaderboard', 'known bad dates')).strip().splitlines()
     except:
-        logger.exception("Got exception, using default list")
+        log.exception("Got exception, using default list")
         bad_dates = ['2011-11-24', '2011-11-25', '2011-11-26', '2011-11-27',
                      '2011-11-28', '2011-11-29', '2011-11-30', '2011-12-01',
                      '2011-12-02', '2011-12-03', '2011-12-04', '2012-06-08', ]
 
     return bad_dates
-    
+
 
 def read_object_from_db(obj, collection, _id):
    prim = collection.find_one({'_id': _id})
@@ -113,16 +113,40 @@ def at_least_as_big_as(path, min_file_size):
         return False
     return os.stat(path).st_size >= min_file_size
 
-def daterange(start_date, end_date):
-    for n in range((end_date - start_date).days):
+
+def daterange(start_date, end_date, reverse=False):
+    """Returns a generator that produces the datetime.date() objects
+    that are between start_date (inclusive) and end_date (exclusive).
+
+    Normally returns dates in the natural order between start_date and
+    end_date, but when reverse=True is passed, the sequence will be
+    reversed.
+    """
+    if end_date >= start_date:
+        step = 1
+    else:
+        step = -1
+
+    sequence = range(0, (end_date - start_date).days, step)
+    if reverse:
+        sequence = reversed(sequence)
+
+    for n in sequence:
         yield start_date + datetime.timedelta(n)
 
-def incremental_parser():
+
+def base_parser():
+    """Root command line parser for scripts"""
     parser = argparse.ArgumentParser()
-    parser.add_argument('--noincremental', action='store_false', 
-                        dest='incremental')
     parser.add_argument('--debug', dest='debug', action='store_true',
                         default=False, help='Output debug detail')
+    return parser
+
+def incremental_parser():
+    """Command line parser for scripts that handle the --noincremental arg"""
+    parser = base_parser()
+    parser.add_argument('--noincremental', action='store_false',
+                        dest='incremental')
     return parser
 
 def incremental_max_parser():
@@ -140,14 +164,17 @@ def incremental_date_range_cmd_line_parser():
 
 def includes_day(args, str_yyyymmdd):
     assert len(str_yyyymmdd) == 8, '%s not 8 chars' % str_yyyymmdd
-    return args.startdate <= str_yyyymmdd <= args.enddate 
+    return args.startdate <= str_yyyymmdd <= args.enddate
 
-def progress_meter(iterable, log=logger, chunksize=1000):
-    """ Logs progress through iterable at chunksize intervals."""
+def progress_meter(iterable, passed_log=None, chunksize=1000):
+    """Logs progress through iterable at chunksize intervals.
+
+    Note, passed_log is now ignored.
+    """
     scan_start = time.time()
     since_last = time.time()
     for idx, val in enumerate(iterable):
-        if idx % chunksize == 0 and idx > 0: 
+        if idx % chunksize == 0 and idx > 0:
             log.info("Iteration: %5d; avg rate: %7.1f/s; inst rate: %7.1f/s",
                      idx,
                      idx / (time.time() - scan_start),

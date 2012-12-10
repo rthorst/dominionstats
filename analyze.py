@@ -6,23 +6,21 @@ from __future__ import division
 
 import collections
 import logging
-import logging.handlers
 import os
-import os.path
-import pymongo
 import simplejson as json
-import sys
+import time
 
-import utils
 from dominioncards import EVERY_SET_CARDS
-from stats import MeanVarStat
 from game import Game
-import incremental_scanner
 from primitive_util import PrimitiveConversion, ConvertibleDefaultDict
+from stats import MeanVarStat
+import dominionstats.utils.log
+import incremental_scanner
+import utils
 
 # Module-level logging instance
 log = logging.getLogger(__name__)
-
+log.addHandler(logging.NullHandler())
 
 class CardStatistic(PrimitiveConversion):
     """ Per card statistics.
@@ -98,11 +96,12 @@ def main(args):
     """ Update analysis statistics.  By default, do so incrementally, unless
     --noincremental argument is given."""
 
-    conn = pymongo.Connection()
-    database = conn.test
+    commit_after = 25000
+
+    database = utils.get_mongo_database()
     games = database.games
 
-    output_collection_name = args.output_collection_name
+    output_collection_name = 'analysis'
     output_collection = database[output_collection_name]
     game_analysis = GamesAnalysis()
 
@@ -112,6 +111,7 @@ def main(args):
     if args.incremental:
         utils.read_object_from_db(game_analysis, output_collection, '')
     else:
+        log.warning('resetting scanner and db')
         scanner.reset()
 
     output_file_name = 'static/output/all_games_card_stats.js'
@@ -119,16 +119,24 @@ def main(args):
     if not os.path.exists('static/output'):
         os.makedirs('static/output')
 
-    log.info(scanner.status_msg())
+    log.info("Starting run: %s", scanner.status_msg())
 
-    for idx, raw_game in enumerate(scanner.scan(games, {})):
+    for idx, raw_game in enumerate(utils.progress_meter(scanner.scan(games, {}))):
         try:
-            if idx % 1000 == 0:
-                log.debug('Index is %d', idx)
             game_analysis.analyze_game(Game(raw_game))
 
-            if idx == args.max_games:
+            if args.max_games >= 0 and idx >= args.max_games:
+                log.info("Reached max_games of %d", args.max_games)
                 break
+
+            if idx % commit_after == 0 and idx > 0:
+                start = time.time()
+                game_analysis.max_game_id = scanner.get_max_game_id()
+                game_analysis.num_games = scanner.get_num_games()
+                utils.write_object_to_db(game_analysis, output_collection, '')
+                scanner.save()
+                log.info("Committed calculations to the DB in %5.2fs", time.time() - start)
+
         except int, exception:
             log.exception('Exception occurred for %s in raw game %s', Game(raw_game).isotropic_url(), raw_game)
             raise 
@@ -141,38 +149,12 @@ def main(args):
     output_file.write('var all_card_data = ')
 
     json.dump(game_analysis.to_primitive_object(), output_file)
-    log.info(scanner.status_msg())
+    log.info("Ending run: %s", scanner.status_msg())
     scanner.save()
+
 
 if __name__ == '__main__':
     parser = utils.incremental_max_parser()
-    parser.add_argument('--output_collection_name', default='analysis')
-
     args = parser.parse_args()
-
-    script_root = os.path.splitext(sys.argv[0])[0]
-
-    # Configure the logger
-    log.setLevel(logging.DEBUG)
-
-    # Log to a file
-    fh = logging.handlers.TimedRotatingFileHandler(script_root + '.log', when='midnight')
-    if args.debug:
-        fh.setLevel(logging.DEBUG)
-    else:
-        fh.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
-    fh.setFormatter(formatter)
-    log.addHandler(fh)
-
-    # Put logging output on stdout, too
-    ch = logging.StreamHandler(sys.stdout)
-    if args.debug:
-        ch.setLevel(logging.DEBUG)
-    else:
-        ch.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
-    ch.setFormatter(formatter)
-    log.addHandler(ch)
-
+    dominionstats.utils.log.initialize_logging(args.debug)
     main(args)

@@ -7,28 +7,24 @@ update statistics for all games in the database.
 """
 
 import logging
-import logging.handlers
-import os
-import os.path
-import pymongo
-import sys
 import time
 
 from keys import *
 from stats import MeanVarStat as MVS
-from utils import get_mongo_connection, progress_meter
 import analysis_util
 import dominioncards
 import game
+import dominionstats.utils.log
 import incremental_scanner
 import mergeable
 import primitive_util
 import utils
 
-BUYS_COL_NAME = 'buys'
-
 # Module-level logging instance
 log = logging.getLogger(__name__)
+log.addHandler(logging.NullHandler())
+
+BUYS_COL_NAME = 'buys'
 
 NO_INFO = MVS().mean_diff(MVS())
 
@@ -150,15 +146,15 @@ def do_scan(scanner, games_col, accum_stats, max_games):
     games_col:  Mongo collection to scan.
     accum_stats: DeckBuyStats instance to store results.
     """
-    accum_buy_stats(analysis_util.games_stream(scanner, games_col, log),
+    accum_buy_stats(analysis_util.games_stream(scanner, games_col),
                     accum_stats, max_games=max_games)
 
 def main(args):
     """ Scan and update buy data"""
     start = time.time()
-    con = get_mongo_connection()
-    games = con.test.games
-    output_db = con.test
+    db = utils.get_mongo_database()
+    games = db.games
+    output_db = db
 
     overall_stats = DeckBuyStats()
 
@@ -202,33 +198,7 @@ def profilemain():
     stats.print_stats(20)
 
 if __name__ == '__main__':
-    args = utils.incremental_max_parser().parse_args()
-
-    script_root = os.path.splitext(sys.argv[0])[0]
-
-    # Configure the logger
-    log.setLevel(logging.DEBUG)
-
-    # Log to a file
-    fh = logging.handlers.TimedRotatingFileHandler(script_root + '.log',
-                                                   when='midnight')
-    if args.debug:
-        fh.setLevel(logging.DEBUG)
-    else:
-        fh.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
-    fh.setFormatter(formatter)
-    log.addHandler(fh)
-
-    # Put logging output on stdout, too
-    ch = logging.StreamHandler(sys.stdout)
-    if args.debug:
-        ch.setLevel(logging.DEBUG)
-    else:
-        ch.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
-    ch.setFormatter(formatter)
-    log.addHandler(ch)
-
+    parser = utils.incremental_max_parser()
+    args = parser.parse_args()
+    dominionstats.utils.log.initialize_logging(args.debug)
     main(args)
-    

@@ -7,18 +7,17 @@ import datetime
 import gzip
 import httplib
 import logging
-import logging.handlers
 import os
-import os.path
 import re
 import socket
-import sys
-import time
-import utils
 
+import dominionstats.utils.log
+import utils
 
 # Module-level logging instance
 log = logging.getLogger(__name__)
+log.addHandler(logging.NullHandler())
+
 
 output_directory = 'static/leaderboard/'
 
@@ -26,7 +25,7 @@ def date_from_http_header_time(http_header_time):
     return datetime.datetime.strptime(http_header_time, '%a, %d %b %Y %H:%M:%S %Z').date()
 
 def get_date_of_last_cached_leaderboard():
-    filename_pattern = re.compile('^(?P<year>\d\d\d\d)-(?P<month>\d\d)-(?P<day>\d\d)\.html\.bz2$')
+    filename_pattern = re.compile(r'^(?P<year>\d\d\d\d)-(?P<month>\d\d)-(?P<day>\d\d)\.html\.bz2$')
     filenames = os.listdir(output_directory)
     filenames.sort(reverse=True)
 
@@ -165,32 +164,7 @@ def main():
         date += one_day_delta
 
 if __name__ == '__main__':
-    args = utils.incremental_parser().parse_args()
-
-    script_root = os.path.splitext(sys.argv[0])[0]
-
-    # Configure the logger
-    log.setLevel(logging.DEBUG)
-
-    # Log to a file
-    fh = logging.handlers.TimedRotatingFileHandler(script_root + '.log',
-                                                   when='midnight')
-    if args.debug:
-        fh.setLevel(logging.DEBUG)
-    else:
-        fh.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
-    fh.setFormatter(formatter)
-    log.addHandler(fh)
-
-    # Put logging output on stdout, too
-    ch = logging.StreamHandler(sys.stdout)
-    if args.debug:
-        ch.setLevel(logging.DEBUG)
-    else:
-        ch.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
-    ch.setFormatter(formatter)
-    log.addHandler(ch)
-
+    parser = utils.incremental_parser()
+    args = parser.parse_args()
+    dominionstats.utils.log.initialize_logging(args.debug)
     main()

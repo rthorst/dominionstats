@@ -1,15 +1,11 @@
 """ Update trueskill ratings for openings."""
 
 import logging
-import logging.handlers
-import os
-import os.path
-import sys
 import time
 
 from game import Game
 from keys import *
-from utils import get_mongo_connection, progress_meter
+import dominionstats.utils.log
 import incremental_scanner
 import primitive_util
 import trueskill.trueskill as ts
@@ -17,6 +13,7 @@ import utils
 
 # Module-level logging instance
 log = logging.getLogger(__name__)
+log.addHandler(logging.NullHandler())
 
 
 def results_to_ranks(results):
@@ -125,7 +122,7 @@ def run_trueskill_openings(args, db, log, commit_after=25000):
         collection.drop()
 
     for ind, game in enumerate(
-        progress_meter(scanner.scan(db.games, {}), log)):
+        utils.progress_meter(scanner.scan(db.games, {}))):
         if len(game[DECKS]) >= 2 and len(game[DECKS][1][TURNS]) >= 5:
             update_skills_for_game(game, opening_skill_table)
                                    
@@ -146,38 +143,12 @@ def run_trueskill_openings(args, db, log, commit_after=25000):
 
 
 def main(args):
-    con = get_mongo_connection()
-    db = con.test
+    db = utils.get_mongo_database()
 
     run_trueskill_openings(args, db, log)
 
 if __name__ == '__main__':
-    args = utils.incremental_max_parser().parse_args()
-
-    script_root = os.path.splitext(sys.argv[0])[0]
-
-    # Configure the logger
-    log.setLevel(logging.DEBUG)
-
-    # Log to a file
-    fh = logging.handlers.TimedRotatingFileHandler(script_root + '.log',
-                                                   when='midnight')
-    if args.debug:
-        fh.setLevel(logging.DEBUG)
-    else:
-        fh.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
-    fh.setFormatter(formatter)
-    log.addHandler(fh)
-
-    # Put logging output on stdout, too
-    ch = logging.StreamHandler(sys.stdout)
-    if args.debug:
-        ch.setLevel(logging.DEBUG)
-    else:
-        ch.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
-    ch.setFormatter(formatter)
-    log.addHandler(ch)
-
+    parser = utils.incremental_max_parser()
+    args = parser.parse_args()
+    dominionstats.utils.log.initialize_logging(args.debug)
     main(args)

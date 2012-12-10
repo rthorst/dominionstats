@@ -836,7 +836,7 @@ def main(args):
 
     log.info("Starting run: %s", scanner.status_msg())
 
-    for g in utils.progress_meter(scanner.scan(games_collection, {}), log):
+    for g in utils.progress_meter(scanner.scan(games_collection, {})):
         total_checked += 1
         game_val = game.Game(g)
 
