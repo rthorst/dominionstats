@@ -36,9 +36,9 @@ particular card or "All cards".
 <option>All cards</option>
 $for card in card_list:
     $if card == selected_card:
-        <option selected>$card</option>
+        <option selected>$card.singular</option>
     $else:
-        <option>$card</option>
+        <option>$card.singular</option>
 </select>
 <input type="submit" value="Go">
 </form>

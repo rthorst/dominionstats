@@ -102,6 +102,7 @@ def _init():
         c = Card(cardlist_row)
         _CARDS[singular] = c
         _CARDS[plural] = c
+        _CARDS[c.__repr__()] = c      # Enable lookup by __repr__()
         _INDEXED[c.index] = c
 
 _init()
@@ -109,9 +110,9 @@ _init()
 def all_cards():
     return _INDEXED.values()
 
-for c in all_cards():
-    pname = PythonifyName(c.singular)
-    vars()[ pname ] = c
+for init_card in all_cards():
+    pname = PythonifyName(init_card.singular)
+    vars()[ pname ] = init_card
 
 def get_card(name):
     """ Look up a card by its name """

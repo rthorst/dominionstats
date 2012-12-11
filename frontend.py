@@ -109,7 +109,10 @@ class OpeningPage(object):
         def split_opening(o):
             ret = o['_id'][len('open:'):].split('+')
             if ret == ['']: return []
-            return ret
+
+            # Convert the __repr__() representation stored in the
+            # database to the singular version of the card name.
+            return [dominioncards.get_card(card).singular for card in ret]
 
         if selected_card not in ('All cards', ''):
             openings = [o for o in openings if selected_card in 
@@ -124,8 +127,8 @@ class OpeningPage(object):
             opening['skill_str'] = skill_str(opening['mu'], opening['sigma'])
             opening['cards'] = split_opening(opening)
             opening['cards'].sort()
-            opening['cards'].sort(key=dominioncards.cost, reverse=True)
-            costs = [str(card.cost) for card in opening['cards']]
+            opening['cards'].sort(key=lambda card: dominioncards.get_card(card).cost, reverse=True)
+            costs = [str(dominioncards.get_card(card).cost) for card in opening['cards']]
             while len(costs) < 2:
                 costs.append('-')
             opening['cost'] = '/'.join(costs)
