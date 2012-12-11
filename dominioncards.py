@@ -127,8 +127,8 @@ EVERY_SET_CARDS = [Estate, Duchy, Province, Copper, Silver, Gold, Curse]
 
 
 def opening_cards():
-    return [card for card in all_cards()
-            if card.cost in ('0', '2', '3', '4', '5')].sort()
+    return sorted([card for card in all_cards()
+            if card.cost in ('0', '2', '3', '4', '5')])
 
 def indexes(cards):
     """ Return a list of index for the passed list of cards """
