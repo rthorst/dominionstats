@@ -236,7 +236,12 @@ class PlayerPage(object):
             game_list.append(g_id)
 
             name = g[NAME]
-            #aliases.add(target_player_cur_name) TODO: Turn this back
+
+            # TODO: Turn this back. The concept of aliases only comes
+            #into play when two different "real" player names both
+            #normalize to the same "normalized" player name.
+            # aliases.add(target_player_cur_name)
+
             wp = g[WIN_POINTS]
             res = g[RESULT]
             overall_record.record_result(res, wp)
