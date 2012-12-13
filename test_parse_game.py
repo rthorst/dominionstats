@@ -5,7 +5,6 @@ try:
 except ImportError, e:
     import unittest
 import parse_game
-import pprint
 from keys import *
 import dominioncards
 import codecs
@@ -225,7 +224,7 @@ u"""--- player1's turn 8 ---
 """,
 DEF_NAME_LIST)
         assert_equal_card_lists(turn_info[GAINS], ['Silver'])
-        self.assertFalse(BUYS in turn_info, 'should not be here: ' + 
+        self.assertFalse(BUYS in turn_info, 'should not be here: ' +
                          str(turn_info.get(BUYS, [])))
 
     def test_trader_gain_silver_instead_of_gain(self):
@@ -287,7 +286,7 @@ player8 plays an <span class=card-none>Ambassador</span>.
    player0 plays an <span class=card-none>Ambassador</span>.
    ... player0 reveals a <span class=card-treasure>Copper</span>.
    ... returning it to the supply.
-   ... player1 gains a <span class=card-treasure>Copper</span>.""", 
+   ... player1 gains a <span class=card-treasure>Copper</span>.""",
 ['f', 't'])
         assert_equal_card_lists(turn_info[RETURNS], ['Copper'])
         assert_equal_card_lists(turn_info[OPP]['1'][GAINS], ['Copper'])
@@ -313,7 +312,7 @@ player3 plays an <span class=card-none>Ambassador</span>.
 ... player0 gains a <span class=card-treasure>Copper</span>.
 """, DEF_NAME_LIST)
         assert_equal_card_lists(turn_info[RETURNS], ['Copper'])
-        assert_equal_card_lists(turn_info[OPP]['0'][GAINS], 
+        assert_equal_card_lists(turn_info[OPP]['0'][GAINS],
                           ['Copper', 'Copper'])
 
     def test_ambassador6(self):
@@ -345,7 +344,7 @@ player0 plays an <span class=card-none>Ambassador</span>.
    ... ... trashing the <span class=card-reaction>Watchtower</span>.""",
                                           DEF_NAME_LIST)
         assert_equal_card_lists(turn_info[OPP]['1'][GAINS], ['Watchtower'])
-        assert_equal_card_lists(turn_info[OPP]['1'][TRASHES], 
+        assert_equal_card_lists(turn_info[OPP]['1'][TRASHES],
                           ['Steward', 'Watchtower'])
 
     def test_trading_post_turn(self):
@@ -356,7 +355,7 @@ player1 plays a <span class=card-none>Trading Post</span>.
       player1 plays a <span class=card-treasure>Copper</span> and a <span class=card-treasure>Silver</span>.
       player1 buys a <span class=card-treasure>Silver</span>.
       (player1 reshuffles.)
-      <span class=logonly>(player1 draws: 2 <span class=card-curse>Curses</span>, a <span class=card-treasure>Copper</span>, a <span class=card-none>Trading Post</span>, and a <span class=card-none>Laboratory</span>.)</span>""", 
+      <span class=logonly>(player1 draws: 2 <span class=card-curse>Curses</span>, a <span class=card-treasure>Copper</span>, a <span class=card-none>Trading Post</span>, and a <span class=card-none>Laboratory</span>.)</span>""",
 DEF_NAME_LIST)
         assert_equal_card_lists(turn_info[TRASHES], ['Copper', 'Estate'])
         assert_equal_card_lists(turn_info[GAINS], ['Silver'])
@@ -407,7 +406,7 @@ player8 plays 2 <span class=card-treasure>Coppers</span>.
    ... getting +$1.
    ... player2 draws and reveals a <span class=card-none>Ghost Ship</span> and a <span class=card-treasure>Silver</span>, trashing a <span class=card-treasure>Silver</span>.
    ... player2 discards a <span class=card-none>Ghost Ship</span>.
-   ... player1 gains the <span class=card-treasure>Silver</span>.""", 
+   ... player1 gains the <span class=card-treasure>Silver</span>.""",
 DEF_NAME_LIST)
         assert_equal_card_lists(turn_info[OPP]['2'][TRASHES], ['Silver'])
 
@@ -438,7 +437,7 @@ player1 buys a <span class=card-none>Noble Brigand</span>.
 span>, an <span class=card-none>Alchemist</span>, and a <span class=card-treasure>Silver</span>.)</span>
 """, DEF_NAME_LIST)
         assert_equal_card_lists(turn_info[GAINS], ['Talisman', 'Noble Brigand'])
-        
+
 
 
     def test_bank_turn(self):
@@ -497,7 +496,7 @@ player0 buys a <span class=card-none>Pawn</span>.
    ... ... drawing 2 cards.
    ... ... player1 reveals a <span class=card-reaction>Moat</span>.
    ... playing the <span class=card-none>Chapel</span> second.
-   ... ... trashing an <span class=card-victory>Estate</span>.""", 
+   ... ... trashing an <span class=card-victory>Estate</span>.""",
                                           DEF_NAME_LIST)
         assert_equal_card_lists(turn_info[PLAYS], ['Golem', 'Witch', 'Chapel'])
         assert_equal_card_lists(turn_info[TRASHES], ['Estate'])
@@ -527,11 +526,11 @@ player1 plays a <span class=card-none>Throne Room</span>.
 ... ... player2 puts an <span class=card-victory>Estate</span> back on the deck.
 ... and plays the <span class=card-none>Bureaucrat</span> again.
 ... ... gaining a <span class=card-treasure>Silver</span> and putting it on the deck.
-... ... player2 reveals 4 <span class=card-treasure>Golds</span>.""", 
+... ... player2 reveals 4 <span class=card-treasure>Golds</span>.""",
                                           DEF_NAME_LIST)
         assert_equal_card_lists(turn_info[GAINS], ['Silver', 'Silver'])
         self.assertTrue(not OPP in turn_info, turn_info)
-        
+
     def test_witch_turn(self):
         turn_info = parse_game.parse_turn(u"""
 --- player0's turn 5 ---
@@ -573,7 +572,7 @@ player0 buys a <span class=card-duration>Lighthouse</span>.
  ... replacing player1's <span class=card-victory>Estate</span> with an <span class=card-victory>Estate</span>.
  player0 plays 2 <span class=card-treasure>Coppers</span>.
  player0 buys a <span class=card-treasure>Gold</span>.""", DEF_NAME_LIST)
-        assert_equal_card_lists(turn_info[OPP]['1'][TRASHES], 
+        assert_equal_card_lists(turn_info[OPP]['1'][TRASHES],
                           ['Copper', 'Estate'])
         assert_equal_card_lists(turn_info[OPP]['1'][GAINS],
                           ['Curse', 'Estate'])
@@ -600,7 +599,7 @@ player1 plays a <span class=card-none>Mountebank</span>.
 ... ... player2 gains a <span class=card-treasure>Silver</span>.
 player1 plays 2 <span class=card-treasure>Silvers</span> and 2 <span class=card-treasure>Coppers</span>.
 player1 buys a <span class=card-treasure>Bank</span>.""", DEF_NAME_LIST)
-        assert_equal_card_lists(turn_info[OPP]['2'][GAINS], 
+        assert_equal_card_lists(turn_info[OPP]['2'][GAINS],
                           ['Silver', 'Silver'], turn_info)
 
     def test_mountebank_traders_turn2(self):
@@ -621,7 +620,7 @@ DEF_NAME_LIST)
         # TODO: fix it if you want an adventure?
         #self.assertEquals(turn_info[OPP]['2'][GAINS],
         #                  ['Copper', 'Silver'], turn_info[OPP]['2'])
-        # similiar bug in 
+        # similiar bug in
         # http://councilroom.com/game?game_id=game-20111017-112224-14cd96f7.html&debug=1#Mick_Swagger-show-turn-8
         # with develop/trader interaction.
 
@@ -746,7 +745,7 @@ player0 plays a <span class=card-none>University</span>.
 ... ... player1 gains the <span class=card-none>Mint</span>.
 player0 plays a <span class=card-none>University</span>.
 ... gaining a <span class=card-none>Bazaar</span>.
-... ... player1 gains the <span class=card-none>Bazaar</span>.""", 
+... ... player1 gains the <span class=card-none>Bazaar</span>.""",
             DEF_NAME_LIST)
         self.assertEquals(turn_info[NAME], 'p1')
         assert_equal_card_lists(turn_info[GAINS], ['Mint', 'Bazaar'])
@@ -832,7 +831,7 @@ player0 plays 3 <span class=card-treasure>Coppers</span>.""")
     player0 plays 3 <span class=card-treasure>Coppers</span>.
     player0 buys a <span class=card-none>Masquerade</span>.
     (player0 reshuffles.)""")
-                          
+
 class SplitTurnsTest(unittest.TestCase):
     def test_split_simple(self):
         split_turns = parse_game.split_turns(
@@ -853,10 +852,10 @@ Bar
 --- player3's turn 1 ---
 Ick""")
         self.assertEquals(len(split_turns), 3)
-        self.assertEquals(split_turns[0], 
+        self.assertEquals(split_turns[0],
  "--- player0's turn (possessed by player1) ---\n"
  "player0 plays an <span class=card-duration>Outpost</span>.\n")
-        
+
     def test_outpost_split(self):
         split_turns = parse_game.split_turns(
 """--- player0's turn 1 ---
@@ -1029,14 +1028,14 @@ class AssignWinPointsTest(unittest.TestCase):
                 ]}
         parse_game.assign_win_points(g)
         self.assertEquals(g[DECKS][0][WIN_POINTS], 0.0)
-        self.assertEquals(g[DECKS][1][WIN_POINTS], 2.0)        
-        
+        self.assertEquals(g[DECKS][1][WIN_POINTS], 2.0)
+
     def test_tie(self):
         g = {DECKS: [
                 {POINTS: 2, TURNS: [{}, {}]},
                 {POINTS: 2, TURNS: [{}, {}]}
                 ]}
-        parse_game.assign_win_points(g)        
+        parse_game.assign_win_points(g)
         self.assertEquals(g[DECKS][0][WIN_POINTS], 1.0)
         self.assertEquals(g[DECKS][1][WIN_POINTS], 1.0)
 
@@ -1046,7 +1045,7 @@ class AssignWinPointsTest(unittest.TestCase):
                 {POINTS: 2, TURNS: [{}, {}]},
                 {POINTS: 1, TURNS: [{}, {}]}
                 ]}
-        parse_game.assign_win_points(g)        
+        parse_game.assign_win_points(g)
         self.assertEquals(g[DECKS][0][WIN_POINTS], 1.5)
         self.assertEquals(g[DECKS][1][WIN_POINTS], 1.5)
 
@@ -1064,7 +1063,7 @@ class AssignWinPointsTest(unittest.TestCase):
                 {POINTS: 2, TURNS: [{}, {}]},
                 ]}
         parse_game.assign_win_points(g)
-        self.assertEquals(g[DECKS][0][WIN_POINTS], 1.0)        
+        self.assertEquals(g[DECKS][0][WIN_POINTS], 1.0)
 
 class ParseGameHeaderTest(unittest.TestCase):
     def test_parse_header(self):
@@ -1092,7 +1091,7 @@ cards in supply: <span cardname="Bank" class=card-treasure>Bank</span>, <span ca
 """)
         self.assertEquals(parsed_header[GAME_END], [])
         self.assertEquals(parsed_header[RESIGNED], True)
-        
+
 
     def test_parse_header_with_multi_end(self):
         parsed_header = parse_game.parse_header(u"""<html><head><link rel="stylesheet" href="/dom/client.css"><title>Dominion Game #3865</title></head><body><pre>stormybriggs wins!
@@ -1100,7 +1099,7 @@ cards in supply: <span cardname="Bank" class=card-treasure>Bank</span>, <span ca
 
 cards in supply: <span cardname="Colony" class=card-victory>Colony</span>, <span cardname="Grand Market" class=card-none>Grand Market</span>, <span cardname="Loan" class=card-treasure>Loan</span>, <span cardname="Mine" class=card-none>Mine</span>, <span cardname="Monument" class=card-none>Monument</span>, <span cardname="Outpost" class=card-duration>Outpost</span>, <span cardname="Peddler" class=card-none>Peddler</span>, <span cardname="Platinum" class=card-treasure>Platinum</span>, <span cardname="Stash" class=card-treasure>Stash</span>, <span cardname="Warehouse" class=card-none>Warehouse</span>, <span cardname="Witch" class=card-none>Witch</span>, and <span cardname="Worker's Village" class=card-none>Worker's Village</span>
 """)
-        assert_equal_card_lists(parsed_header[GAME_END], ['Duchy', 'Estate', 
+        assert_equal_card_lists(parsed_header[GAME_END], ['Duchy', 'Estate',
                                                       'Peddler'])
         self.assertEquals(parsed_header[RESIGNED], False)
 
@@ -1189,21 +1188,21 @@ Alenia wins!
         self.assertEquals(parsed_game[DECKS][1][ORDER], 2)
         self.assertEquals(len(parsed_game[DECKS][0][TURNS]), 3)
         self.assertEquals(len(parsed_game[DECKS][1][TURNS]), 2)
-        
+
         self.assertEquals(parsed_game[DECKS][0][WIN_POINTS], 2.0)
         self.assertEquals(parsed_game[DECKS][1][WIN_POINTS], 0.0)
 
-        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][2][PLAYS], 
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][2][PLAYS],
                           ['Coppersmith', 'Silver', 'Copper', 'Copper'])
         assert_equal_card_lists(parsed_game[SUPPLY],
-                          ["Coppersmith", 
+                          ["Coppersmith",
                            "Expand",
                            "Gardens",
                            "Mining Village",
                            "Nobles",
                            "Outpost",
                            "Pearl Diver",
-                           "Thief", 
+                           "Thief",
                            "Throne Room",
                            "Worker's Village"])
 
