@@ -195,6 +195,9 @@ def standard_heading(title):
   <body>
     <a href="http://councilroom.mccllstr.com"><h1>CouncilRoom.McCllstr.com</h1></a>""" % title
 
+def compkey(*args):
+    return ".".join(args)
+
 class PlayerPage(object):
     def GET(self):
         web.header("Content-Type", "text/html; charset=utf-8")  
@@ -205,7 +208,7 @@ class PlayerPage(object):
         db = utils.get_mongo_database()
         game_stats = db.game_stats
         norm_target_player = norm_name(target_player)
-        games_coll = game_stats.find({NAME: norm_target_player})
+        games_coll = game_stats.find({compkey('_id', NAME): norm_target_player})
 
         leaderboard_history_result = db.leaderboard_history.find_one(
             {'_id': norm_target_player})
@@ -230,12 +233,13 @@ class PlayerPage(object):
             cutoff = datetime.datetime.now().date() + datetime.timedelta(days = -delta)
             cutoffs[delta] = cutoff.strftime("%Y%m%d")
 
+        # NOTE: This assumes that game IDs can be lexically sorted
+        # into temporal order
         for g in games_coll.sort('_id', pymongo.DESCENDING):
-            g_id = g['_id']
-            g_id = g_id[: g_id.index('/')]
+            g_id = g['_id']['game_id']
             game_list.append(g_id)
 
-            name = g[NAME]
+            name = g['_id'][NAME]
 
             # TODO: Turn this back. The concept of aliases only comes
             #into play when two different "real" player names both

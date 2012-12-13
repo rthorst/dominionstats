@@ -40,8 +40,7 @@ def get_game_stat_entries(game_val, g_id, date, supply):
     for full_name in all_p:
         m = {}
         name = norm_name(full_name)
-        m['_id'] = "%s/%s" % (g_id, name)
-        m[keys.NAME] = name
+        m['_id'] = { keys.NAME: name, 'game_id': g_id }
         m[keys.PLAYERS] = [p for p in all_p if p != full_name]
         m['game_date'] = date
 

@@ -11,6 +11,7 @@ import datetime
 from background.celery import celery
 from goals import calculate_goals
 from parse_game import parse_and_insert
+import game_stats
 import isotropic
 import utils
 
@@ -196,3 +197,71 @@ def check_for_work():
     # Scrape isotropic for raw games
     for date in isotropic.dates_needing_scraping(db):
         scrape_raw_games.delay(date)
+
+
+@celery.task
+def summarize_game_stats_for_days(days):
+    """Examines games and determines if need to be summarized.
+
+    Takes a list of one or more days in the format "YYYYMMDD" or
+    datetime.date, and generates tasks to summarize each of the
+    individual games that occurred on those days.
+
+    Skips days where there are no games available.
+
+    Skips games that are already present in the games_stats
+    collection.
+
+    Returns the number of individual games referred for summarizing.
+    """
+    game_count = 0
+    db = utils.get_mongo_database()
+    games_col = db.games
+    game_stats_col = db.game_stats
+    games_col.ensure_index('game_date')
+
+    for day in days:
+        if type(day) is datetime.date:
+            day = day.strftime('%Y%m%d')
+        games_to_process = games_col.find({'game_date': day}, {'_id': 1})
+
+        if games_to_process.count() < 1:
+            log.info('No games available to summarize on %s', day)
+            continue
+
+        log.info('%s games to summarize on %s', games_to_process.count(), day)
+
+        chunk = []
+        for game in games_to_process:
+            if len(chunk) >= 100:
+                summarize_games.delay(chunk, day)
+                chunk = []
+
+            if game_stats_col.find({'_id.game_id': game['_id']}).count() == 0:
+                chunk.append(game['_id'])
+                game_count += 1
+
+        if len(chunk) > 0:
+            summarize_games.delay(chunk, day)
+
+    return game_count
+
+
+@celery.task
+def summarize_games(game_ids, day):
+    """Summarize the passed list of games"""
+    log.info("Summarizing %d games from %s", len(game_ids), day)
+
+    db = utils.get_mongo_database()
+    games_col = db.games
+    game_stats_col = db.game_stats
+
+    games = []
+    for game_id in game_ids:
+        game = games_col.find_one({'_id': game_id})
+        if game:
+            games.append(game)
+        else:
+            log.warning('Found nothing for game id %s', game_id)
+
+    return game_stats.calculate_game_stats(games, game_stats_col)

@@ -56,7 +56,7 @@ def watch_and_log(signature, log_interval=15):
 
     log.info("Done with background task %s: %s", task_name, summarize_task_status(c))
     return async_result
-    
+
 
 def main(parsed_args):
     """Primary update cycle"""
@@ -91,7 +91,19 @@ def main(parsed_args):
         if inserted == 0:
             log.info("No games parsed for goals on %s", date)
             break
-    
+
+    # Check for game_stats
+    log.info("Starting game_stats summarization")
+    for date in utils.daterange(datetime.date(2010, 10, 15),
+                                datetime.date.today(), reverse=True):
+        log.info("Summarizing games on %s", date)
+        async_result = watch_and_log(background.tasks.summarize_game_stats_for_days.s([date]))
+        inserted = async_result.get()
+
+        if inserted == 0:
+            log.info("No new games summarized on %s", date)
+            break
+
     # Invoke the count_buys script
     log.info("Counting buys")
     count_buys.main(parsed_args)
