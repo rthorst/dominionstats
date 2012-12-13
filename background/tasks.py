@@ -233,7 +233,7 @@ def summarize_game_stats_for_days(days):
 
         chunk = []
         for game in games_to_process:
-            if len(chunk) >= 100:
+            if len(chunk) >= 1000:
                 summarize_games.delay(chunk, day)
                 chunk = []
 
