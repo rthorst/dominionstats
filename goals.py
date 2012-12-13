@@ -610,7 +610,7 @@ def CheckMatchOscarTheGrouch(g):
 
 goal_check_funcs = {}
 
-for gloal_name in dict(globals()):
+for global_name in dict(globals()):
     if global_name.startswith('CheckMatch'):
         outer_goal = global_name[len('CheckMatch'):]
         goal_func = globals()[global_name]
