@@ -106,7 +106,7 @@ def calc_goals(game_ids, day):
         else:
             log.warning('Found nothing for game id %s', game_id)
 
-    return calculate_goals(log, games, goals_col, goals_error_col, day)
+    return calculate_goals(games, goals_col, goals_error_col, day)
 
 
 @celery.task

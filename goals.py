@@ -2,15 +2,11 @@
 
 import collections
 import logging
-import logging.handlers
 import operator
-import os
-import os.path
-import pymongo
-import sys
 
 from keys import TRASHES
 import dominioncards
+import dominionstats.utils.log
 import game
 import incremental_scanner
 import name_merger
@@ -19,6 +15,7 @@ import utils
 
 # Module-level logging instance
 log = logging.getLogger(__name__)
+log.addHandler(logging.NullHandler())
 
 
 def GroupFuncs(funcs, group_name):
@@ -28,13 +25,13 @@ def GroupFuncs(funcs, group_name):
         func.priority = idx
 
 def achievement(player, reason, sort_key=None):
-    achievement = {'player': player,
-                   'reason': reason}
+    ach = {'player': player,
+           'reason': reason}
     if sort_key is not None:
         if type(sort_key) != type(0):
             sort_key = str(sort_key)
-        achievement['sort_key'] = sort_key
-    return achievement
+        ach['sort_key'] = sort_key
+    return ach
 
 def CheckMatchBOM(g):
     """Bought only money and Victory."""
@@ -76,7 +73,7 @@ def CheckMatchGolfer(g):
     for player in g.get_player_decks():
         if player.WinPoints() > 1.0 and player.Points() < 0:
             points = player.Points()
-            ret.append(achievement(player.name(), 
+            ret.append(achievement(player.name(),
                         'Won with a negative score, %d points' % points,
                         points))
     return ret
@@ -166,7 +163,7 @@ def CheckMatchOneTrickPony(g):
                 continue
             action, quant = actions_quants[0]
             ret.append(
-                achievement(player, 
+                achievement(player,
                             'Bought no action other than %d %s' % (
                         quant, action.pluralize(quant)),
                             action))
@@ -190,7 +187,7 @@ def CheckScore(g, low, high=None):
     for player in g.get_player_decks():
         score = player.points
         if score >= low and (high is None or score < high):
-            ret.append(achievement(player.name(), 
+            ret.append(achievement(player.name(),
                                    "Scored more than %d points" % low, score))
     return ret
 
@@ -223,7 +220,7 @@ GroupFuncs([CheckMatchPeer, CheckMatchRegent, CheckMatchRoyalHeir,
 
 # Win by X points
 # Come From X points behind
-# "Subjugation" ... win a 3-player game with more points than the other 2 players combined 
+# "Subjugation" ... win a 3-player game with more points than the other 2 players combined
 # "Domination"... win a 4-player game with more points than the other 3 players combined
 
 # == How the game ends
@@ -235,7 +232,7 @@ def CheckMatchBuzzerBeater(g):
     for player in g.get_player_decks():
         score = player.points
         scores[player.name()] = score
-    s_scores = sorted(scores.iteritems(), 
+    s_scores = sorted(scores.iteritems(),
                       key=operator.itemgetter(1), reverse=True)
     if len(s_scores)>1 and s_scores[0][1] == s_scores[1][1] + 1:
         return [achievement(s_scores[0][0], "Won by exactly one point")]
@@ -260,7 +257,7 @@ def CheckMatchAnticlimactic(g):
             return ret
         elif wp!=0.0:
             ret.append(
-                achievement(player.name(), 
+                achievement(player.name(),
                             'Shared a victory with two or more opponents'))
 
     return ret
@@ -294,13 +291,13 @@ def CheckMatchVintner(g):
             continue
         vy_pts = game.score_vineyard(deck)
         if vy_pts >= 30:
-            ret.append(achievement(player, 
+            ret.append(achievement(player,
                                    '%d VP from Vineyards' % vy_pts, vy_pts))
     return ret
 
 def CheckMatchCarny(g):
     """Obtained at least 30 VP from Fairgrounds"""
-    # Original suggestion: Blue ribbon - ended game with a Fairgrounds worth 
+    # Original suggestion: Blue ribbon - ended game with a Fairgrounds worth
     # 8 VP
     ret = []
     for pdeck in g.get_player_decks():
@@ -309,7 +306,7 @@ def CheckMatchCarny(g):
             continue
         fg_pts = game.score_fairgrounds(deck)
         if fg_pts >= 30:
-            ret.append(achievement(player, 
+            ret.append(achievement(player,
                                    '%d VP from Fairgrounds' % fg_pts, fg_pts))
     return ret
 
@@ -323,7 +320,7 @@ def CheckMatchGardener(g):
             continue
         g_pts = game.score_gardens(deck)
         if g_pts >= 20:
-            ret.append(achievement(player, 
+            ret.append(achievement(player,
                                    '%d VP from Gardens' % g_pts, g_pts))
 
     return ret
@@ -340,7 +337,7 @@ def CheckMatchDukeOfEarl(g):
         duchy_pts = deck.get(dominioncards.Duchy, 0) * 3
         d_pts = duke_pts + duchy_pts
         if d_pts >= 42:
-            ret.append(achievement(player, '%d VP from Dukes and Duchies' % 
+            ret.append(achievement(player, '%d VP from Dukes and Duchies' %
                                    d_pts, d_pts))
     return ret
 
@@ -353,15 +350,15 @@ def CheckMatchSilkTrader(g):
             continue
         g_pts = game.score_silk_road(deck)
         if g_pts >= 20:
-            ret.append(achievement(player, 
+            ret.append(achievement(player,
                                    '%d VP from Silk Road' % g_pts, g_pts))
 
-    return ret    
+    return ret
 
 # Who Needs Green Cards?
 # vineyards award would be nice. how about "sideways" ... http://www.sideways-movie.com/sideways.jpg
 # Underboss/Mafia Don/Godfather for scoring 30/40/50 VP with Goons?
-# DHARMA Initiative: set aside 8+ Islands 
+# DHARMA Initiative: set aside 8+ Islands
 
 GroupFuncs([CheckMatchCarny, CheckMatchGardener, CheckMatchDukeOfEarl,
             CheckMatchSilkTrader, CheckMatchVintner], 'vvp')
@@ -370,8 +367,8 @@ GroupFuncs([CheckMatchCarny, CheckMatchGardener, CheckMatchDukeOfEarl,
 #("Puppet Master") Play more than 4 Possession in one turn.
 # Crucio: Use the Torturer three times in a single turn.
 # Imperio: Use Possession three times in a single turn.
-# Time Lord: played 10 (20?) Duration actions in one turn 
-# Buy-More: Used 10 Buy-actions in one turn (or 15?) 
+# Time Lord: played 10 (20?) Duration actions in one turn
+# Buy-More: Used 10 Buy-actions in one turn (or 15?)
 
 # == Every Turn
 # Protego: Reacted to all attacks against you (and at least 5).
@@ -398,12 +395,12 @@ def CheckMatchBully(g):
             players.remove(player)
             if len(players) == 0:
                 break
-    return [achievement(player, 'Played an attack every turn after turn 4') for player in players] 
+    return [achievement(player, 'Played an attack every turn after turn 4') for player in players]
 
 # == Never Use Cards
 # Empty Throne Room
 # Empty Kings Court
-# Arrested Development: Bought 3+ Develop cards without ever using them 
+# Arrested Development: Bought 3+ Develop cards without ever using them
 
 # == Number of Cards acquired
 
@@ -419,7 +416,7 @@ def one_turn(g, player, cardList):
                         return False
                     else:
                         found = True
-                        break 
+                        break
     return found
 
 def prize_check(g):
@@ -464,7 +461,7 @@ GroupFuncs([CheckMatchPrizeFighter, CheckMatchChampionPrizeFighter], 'prizes')
 # Snow White: played 7 Wharves in one turn
 # O Canada!: Finish with exactly 10 Provinces and 3 Duchys (territories) [obviously only attainable in 3+ player games]
 # TARDIS: Finish a game with a deck where the total of all "+X Card(s)" is higher than (or if that's too easy, then over double) the number of cards. Not sure if this is an easy one to program or not.
-# Paid in Pennies: Won a game with no Gold/Platinum in your deck 
+# Paid in Pennies: Won a game with no Gold/Platinum in your deck
 
 # Researcher: Acquire 7 Alchemists or Laboratories.
 # Evil Overlord: Acquire 7 or more Minions.
@@ -502,9 +499,9 @@ def CheckMatchBanker(g):
                 treasure_count += 1
                 if card == dominioncards.Bank:
                     if treasure_count >= 10:
-                        ret.append(achievement(turn.player.player_name, 
+                        ret.append(achievement(turn.player.player_name,
                                 "Played a Bank worth $%d" % treasure_count))
-    return ret    
+    return ret
 
 def CheckActionsPerTurn(g, low, high=None):
     ret = []
@@ -515,7 +512,7 @@ def CheckActionsPerTurn(g, low, high=None):
                 action_count += 1
 
         if action_count >= low and (high is None or action_count < high):
-            ret.append(achievement(turn.player.player_name, 
+            ret.append(achievement(turn.player.player_name,
                     "Played %d or more actions in one turn" % low, action_count))
     return ret
 
@@ -541,14 +538,14 @@ def CheckPointsPerTurn(g, low, high=None):
     for state in g.game_state_iterator():
         score = []
         for p in players:
-           score.append(state.player_score(p))
+            score.append(state.player_score(p))
         scores.append(score)
 
     for (i,p) in enumerate(players):
         for turn_no in range(i, len(scores)-1):
             gain = scores[turn_no+1][i] - scores[turn_no][i]
             if gain >= low and (high is None or gain < high):
-                ret.append(achievement(p, 
+                ret.append(achievement(p,
                         "Scored %d or more points in one turn" % low, gain))
     return ret
 
@@ -582,7 +579,6 @@ GroupFuncs([CheckMatchSlam, CheckMatchCrash, CheckMatchCharge, CheckMatchKO,
 def CheckMatchMegaTurn(g):
     """Bought all the Provinces or Colonies in a single turn."""
     ret = []
-    scores = []
     if dominioncards.Colony in g.get_supply():
         biggest_victory = dominioncards.Colony
     else:
@@ -596,7 +592,7 @@ def CheckMatchMegaTurn(g):
         if new_cards.count(biggest_victory) == victory_copies:
             ret.append(
                 achievement(turn.player.name(),
-                 "Obtained all of the %s cards in one turn" % 
+                 "Obtained all of the %s cards in one turn" %
                             biggest_victory, biggest_victory))
     return ret
 
@@ -607,18 +603,18 @@ def CheckMatchOscarTheGrouch(g):
 	#FIXME: Update Turn Object to have Trashes Member
         trashes = len(turn.turn_dict.get(TRASHES,[]))
         if trashes >= 7:
-            ret.append(achievement(turn.player.name(), 
-                                   "Trashed %d cards in one turn" % trashes, 
+            ret.append(achievement(turn.player.name(),
+                                   "Trashed %d cards in one turn" % trashes,
                                    trashes))
     return ret
 
 goal_check_funcs = {}
 
-for name in dict(globals()):
-    if name.startswith('CheckMatch'):
-        goal = name[len('CheckMatch'):]
-        goal_func = globals()[name]
-        goal_check_funcs[goal] = goal_func
+for gloal_name in dict(globals()):
+    if global_name.startswith('CheckMatch'):
+        outer_goal = global_name[len('CheckMatch'):]
+        goal_func = globals()[global_name]
+        goal_check_funcs[outer_goal] = goal_func
         if not hasattr(goal_func, 'group'):
             goal_func.group = 'ungrouped'
             goal_func.priority = 0
@@ -688,7 +684,7 @@ function toggle(item) {
                 goals_by_name[goal_name].append(goal)
                 if goal_name not in goals_achieved:
                     goals_achieved.append(goal_name)
-        
+
         def GroupPriorityAndName(goal):
             if goal not in goal_check_funcs:
                 return None
@@ -708,7 +704,7 @@ function toggle(item) {
             def KeyAndDate(goal):
                 return goal.get('sort_key'), goal['_id']
             found_goals.sort(key = KeyAndDate)
-            
+
             temp_ret = ''
             for match in found_goals:
                 game_id = match['_id']
@@ -716,7 +712,7 @@ function toggle(item) {
                 m['reason'] = match.get('reason', '')
                 m['link'] = game.Game.get_councilroom_link_from_id(game_id, ' class="goal"')
                 m['date'] = game.Game.get_datetime_from_id(game_id).strftime("%d %b %Y")
-                
+
                 temp_ret += GOAL_BOX % m
 
             ret += temp_ret
@@ -745,18 +741,17 @@ def check_goals(game_val, goal_names=None):
     return goals
 
 
-def calculate_goals(log, games, goals_col, goals_error_col, year_month_day, goals_to_check=None):
+def calculate_goals(games, goals_col, goals_error_col, year_month_day, goals_to_check=None):
     """ Analyze games for goals and insert those found into the MongoDB.
 
-    log: Logging object
     games: List of games to analyze, each in dict format
     goals_col: Destination MongoDB collection
     goals_error_col: MongoDB collection for goals analysis errors (for
-        potential reflow later)
+        potential reflow later). This is a TODO for now.
     year_month_day: string in yyyymmdd format encoding date
     goals_to_check: List of goals to analyze for. If passed, only the
         listed goals will be calculated or re-calculated. Otherwise, all
-    goals are calculated.
+        goals are calculated.
 
     """
     log.debug('Beginning to analyze %d games for goals, from %s', len(games), year_month_day)
@@ -790,7 +785,6 @@ def calculate_goals(log, games, goals_col, goals_error_col, year_month_day, goal
 
         # Write new values
         for goal in goals:
-            name = name_merger.norm_name(goal['player'])
             goal_name = goal['goal_name']
             mongo_val['goals'].append(goal)
             checker_output[goal_name] += 1
@@ -803,9 +797,9 @@ def calculate_goals(log, games, goals_col, goals_error_col, year_month_day, goal
 
 
 def main(args):
-    c = pymongo.Connection()
-    games_collection = c.test.games
-    output_collection = c.test.goals
+    db = utils.get_mongo_database()
+    games_collection = db.games
+    output_collection = db.goals
     total_checked = 0
 
     checker_output = collections.defaultdict(int)
@@ -820,13 +814,13 @@ def main(args):
             exit(-1)
         goals_to_check = args.goals
 
-        scanner = incremental_scanner.IncrementalScanner('subgoals', c.test)
+        scanner = incremental_scanner.IncrementalScanner('subgoals', db)
         scanner.reset()
-        main_scanner = incremental_scanner.IncrementalScanner('goals', c.test)
+        main_scanner = incremental_scanner.IncrementalScanner('goals', db)
         last = main_scanner.get_max_game_id()
     else:
         goals_to_check = None
-        scanner = incremental_scanner.IncrementalScanner('goals', c.test)
+        scanner = incremental_scanner.IncrementalScanner('goals', db)
         last = None
 
     if not args.incremental:
@@ -860,9 +854,8 @@ def main(args):
         # Get new values
         goals = check_goals(game_val, goals_to_check)
 
-        # Write new values        
+        # Write new values
         for goal in goals:
-            name = name_merger.norm_name(goal['player'])
             goal_name = goal['goal_name']
             mongo_val['goals'].append(goal)
             checker_output[goal_name] += 1
@@ -878,38 +871,13 @@ def main(args):
     log.info("Ending run: %s", scanner.status_msg())
     scanner.save()
     print_totals(checker_output, total_checked)
-        
+
 if __name__ == '__main__':
     parser = utils.incremental_max_parser()
     parser.add_argument(
-        '--goals', metavar='goal_name', nargs='+', 
+        '--goals', metavar='goal_name', nargs='+',
         help=('If set, check only the goals specified for all of ' +
               'the games that have already been scanned'))
     args = parser.parse_args()
-
-    script_root = os.path.splitext(sys.argv[0])[0]
-
-    # Configure the logger
-    log.setLevel(logging.DEBUG)
-
-    # Log to a file
-    fh = logging.handlers.TimedRotatingFileHandler(script_root + '.log', when='midnight')
-    if args.debug:
-        fh.setLevel(logging.DEBUG)
-    else:
-        fh.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
-    fh.setFormatter(formatter)
-    log.addHandler(fh)
-
-    # Put logging output on stdout, too
-    ch = logging.StreamHandler(sys.stdout)
-    if args.debug:
-        ch.setLevel(logging.DEBUG)
-    else:
-        ch.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
-    ch.setFormatter(formatter)
-    log.addHandler(ch)
-
+    dominionstats.utils.log.initialize_logging(args.debug)
     main(args)
