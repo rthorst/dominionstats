@@ -22,6 +22,7 @@ def calculate_game_stats(games, game_stats):
     """
     log.debug("Beginning to analyze game statistics for %d games", len(games))
     game_stats.ensure_index(keys.NAME)
+    added = 0
     for game_dict in games:
         game_val = game.Game(game_dict)
         g_id = game_dict['_id']
@@ -29,8 +30,11 @@ def calculate_game_stats(games, game_stats):
         supply = game_dict[keys.SUPPLY]
 
         for p in get_game_stat_entries(game_val, g_id, date, supply):
-            game_stats.save(p)
-            
+            game_stats.save(p, w=1)
+            added += 1
+    log.debug("Done analyzing game statistics, inserted %d", added)
+    return added
+
 
 def get_game_stat_entries(game_val, g_id, date, supply):
     ret = []
