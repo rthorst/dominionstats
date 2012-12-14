@@ -18,6 +18,10 @@ import utils
 
 log = get_task_logger(__name__)
 
+# TODO: These should be pulled from a config file
+PARSE_GAMES_CHUNK_SIZE = 100
+CALC_GOALS_CHUNK_SIZE = 100
+SUMMARIZE_GAMES_CHUNK_SIZE = 2000
 
 
 @celery.task
@@ -82,7 +86,7 @@ def parse_days(days):
 
         game_count += games_to_parse.count()
         log.info('%s games to parse in %s', games_to_parse.count(), day)
-        for chunk in utils.segments([x['_id'] for x in games_to_parse], 100):
+        for chunk in utils.segments([x['_id'] for x in games_to_parse], PARSE_GAMES_CHUNK_SIZE):
             parse_games.delay(chunk, day)
 
     return game_count
@@ -144,7 +148,7 @@ def calc_goals_for_days(days):
 
         chunk = []
         for game in games_to_process:
-            if len(chunk) >= 100:
+            if len(chunk) >= CALC_GOALS_CHUNK_SIZE:
                 calc_goals.delay(chunk, day)
                 chunk = []
 
@@ -233,7 +237,7 @@ def summarize_game_stats_for_days(days):
 
         chunk = []
         for game in games_to_process:
-            if len(chunk) >= 1000:
+            if len(chunk) >= SUMMARIZE_GAMES_CHUNK_SIZE:
                 summarize_games.delay(chunk, day)
                 chunk = []
 
