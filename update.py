@@ -30,15 +30,23 @@ def summarize_task_status(c):
                                                    detail=str(c))
 
 
-def watch_and_log(signature, log_interval=15):
+def watch_and_log(signature, log_interval=15, timeout=600):
     """Invoke the celery task via the passed signature, wait for it an
-    all its children to complete, and log progress along the way."""
+    all its children to complete, and log progress along the way.
+
+    log_interval: number of seconds between checking and logging the
+    status
+
+    timeout: number of seconds after which to return, when there have
+    been no subtask status updates"""
     task_name = signature.task
     log.info("Calling background task %s", task_name)
 
     async_result = signature.apply_async()
 
     all_done = False
+    last_status_summary = None
+    last_status_update = time.time()
     while not all_done:
         # Wait for the log_interval, then check the status
         time.sleep(log_interval)
@@ -52,9 +60,22 @@ def watch_and_log(signature, log_interval=15):
                 c[child.state] += 1
             all_done = True
         except celery.exceptions.IncompleteStream:
-            log.info("Waiting for %s: %s", task_name, summarize_task_status(c))
+            status_summary = summarize_task_status(c)
+            log.info("Waiting for %s: %s", task_name, status_summary)
 
-    log.info("Done with background task %s: %s", task_name, summarize_task_status(c))
+            # Check on timeout condition
+            if (last_status_summary is not None
+                and status_summary == last_status_summary
+                and (time.time() - last_status_update) > timeout):
+                break
+            else:
+                last_status_summary = status_summary
+                last_status_update = time.time()
+
+    if all_done:
+        log.info("Done with background task %s: %s", task_name, summarize_task_status(c))
+    else:
+        log.warning("Returning due to timeout during background task %s: %s", task_name, summarize_task_status(c))
     return async_result
 
 
@@ -66,7 +87,7 @@ def main(parsed_args):
     log.info("Starting scrape for raw games")
     for date in utils.daterange(datetime.date(2010, 10, 15),
                                 datetime.date.today(), reverse=True):
-        log.info("Scraping for %s", date)
+        log.info("Invoking scrape_raw_games async task for %s", date)
         async_result = watch_and_log(background.tasks.scrape_raw_games.s(date))
         inserted = async_result.get()
 
@@ -84,7 +105,7 @@ def main(parsed_args):
     log.info("Starting search for goals acheived")
     for date in utils.daterange(datetime.date(2010, 10, 15),
                                 datetime.date.today(), reverse=True):
-        log.info("Searching for goals on %s", date)
+        log.info("Invoking calc_goals_for_days async task for %s", date)
         async_result = watch_and_log(background.tasks.calc_goals_for_days.s([date]))
         inserted = async_result.get()
 
@@ -96,7 +117,7 @@ def main(parsed_args):
     log.info("Starting game_stats summarization")
     for date in utils.daterange(datetime.date(2010, 10, 15),
                                 datetime.date.today(), reverse=True):
-        log.info("Summarizing games on %s", date)
+        log.info("Invoking summarize_game_stats_for_days async task for %s", date)
         async_result = watch_and_log(background.tasks.summarize_game_stats_for_days.s([date]))
         inserted = async_result.get()
 
