@@ -145,6 +145,8 @@ def main(parsed_args):
     log.info("Loading the leaderboard")
     load_leaderboard.main()
 
+    log.info("Done with the update.py process")
+
 
 if __name__ == '__main__':
     parser = utils.incremental_max_parser()
