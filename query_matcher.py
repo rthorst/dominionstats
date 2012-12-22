@@ -156,8 +156,10 @@ class QueryMatcher(object):
         if 'p2_name' in args:
             self._add_name(args['p2_name'])
         if 'kingdom' in args:
-            self.kingdom_restrict = [card_info.sane_title(k)
-                                     for k in args['kingdom'].split(',')]
+            self.kingdom_restrict = []
+            for k in args['kingdom'].split(','):
+                card = dominioncards.get_card(k)
+                self.kingdom_restrict.append(card.index)
 
         self.db_query = {}
         if self.players_restrict:
