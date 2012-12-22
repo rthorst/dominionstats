@@ -626,8 +626,10 @@ class OptimalCardRatios(object):
         card_list = sorted(set(dominioncards.all_cards()) - 
                            set(dominioncards.TOURNAMENT_WINNINGS))
 
-        card_x = str(dominioncards.get_card(query_dict.get('card_x', 'Minion')))
-        card_y = str(dominioncards.get_card(query_dict.get('card_y', 'Chapel')))
+        card_x_card = dominioncards.get_card(query_dict.get('card_x', 'Minion'))
+        card_y_card = dominioncards.get_card(query_dict.get('card_y', 'Chapel'))
+        card_x = str(card_x_card)
+        card_y = str(card_y_card)
 
         if card_x < card_y:
             db_id = card_x + ':' + card_y
@@ -659,7 +661,7 @@ class OptimalCardRatios(object):
 
         render = web.template.render('')
         return render.optimal_card_ratios_template(
-            card_list, card_x, card_y, final_table, progressive_table)
+            card_list, card_x_card, card_y_card, final_table, progressive_table)
 
     @staticmethod
     def getHtmlTableForStats(stats, swap_x_and_y, 
