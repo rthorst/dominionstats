@@ -38,7 +38,8 @@ def main(parsed_args):
     log.info('all_goals %s', all_goals)
     for goal_name in all_goals:
         log.info("Working on %s", goal_name)
-        found_goals_cursor = goal_db.find({'goals.goal_name': goal_name})
+        found_goals_cursor = goal_db.find({'goals.goal_name': goal_name},
+                                          {'goals.player': 1, '_id': 0})
         total = found_goals_cursor.count()
         log.info("Found %d instances of %s", total, goal_name)
 
