@@ -32,18 +32,18 @@ table td {
     <select name="card_x">
     $for card in card_list:
         $if card == card_x:
-            <option selected>$card</option>
+            <option selected>$card.singular</option>
         $else:
-            <option>$card</option>
+            <option>$card.singular</option>
     </select>
 
     <label for="card">Y-axis card:</label>
     <select name="card_y">
     $for card in card_list:
         $if card == card_y:
-            <option selected>$card</option>
+            <option selected>$card.singular</option>
         $else:
-            <option>$card</option>
+            <option>$card.singular</option>
     </select>
 
     <input type="submit" value="Go">

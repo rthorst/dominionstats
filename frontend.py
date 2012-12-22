@@ -626,8 +626,8 @@ class OptimalCardRatios(object):
         card_list = sorted(set(dominioncards.all_cards()) - 
                            set(dominioncards.TOURNAMENT_WINNINGS))
 
-        card_x = query_dict.get('card_x', 'Minion')
-        card_y = query_dict.get('card_y', 'Gold')
+        card_x = str(dominioncards.get_card(query_dict.get('card_x', 'Minion')))
+        card_y = str(dominioncards.get_card(query_dict.get('card_y', 'Chapel')))
 
         if card_x < card_y:
             db_id = card_x + ':' + card_y

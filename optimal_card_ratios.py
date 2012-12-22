@@ -7,6 +7,7 @@ import time
 from game import Game
 from primitive_util import PrimitiveConversion, ConvertibleDefaultDict
 from stats import MeanVarStat
+import dominioncards
 import dominionstats.utils.log
 import incremental_scanner
 import utils
@@ -71,7 +72,11 @@ class CardRatioTracker:
     """
     def __init__(self, supply):
         self.card_counts = {}
-        for card in [u'Estate', u'Duchy', u'Province', u'Curse', u'Copper', u'Silver', u'Gold'] + supply:
+
+        for card in [dominioncards.Estate, dominioncards.Duchy,
+                     dominioncards.Province, dominioncards.Curse,
+                     dominioncards.Copper, dominioncards.Silver,
+                     dominioncards.Gold] + supply:
             self.card_counts[card] = 0
 
     def get_card_ratios(self):
@@ -105,8 +110,8 @@ class ProgressiveCardRatioTracker(CardRatioTracker):
     """
     def __init__(self, supply):
         CardRatioTracker.__init__(self, supply)
-        self.card_counts[u'Estate'] = 3
-        self.card_counts[u'Copper'] = 7
+        self.card_counts[dominioncards.Estate] = 3
+        self.card_counts[dominioncards.Copper] = 7
         self.ratios = self.get_card_ratios()
 
     def adjust_card_count(self, card, adjustment):
