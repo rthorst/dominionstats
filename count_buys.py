@@ -68,7 +68,8 @@ class DeckBuyStats(primitive_util.ConvertibleDefaultDict,
     tell the combined story.
     """
     def __init__(self):
-        primitive_util.ConvertibleDefaultDict.__init__(self, value_type=BuyStat, key_type=dominioncards.get_card)
+        primitive_util.ConvertibleDefaultDict.__init__(self, value_type=BuyStat,
+                                                       key_type=dominioncards.get_card)
 
 def accum_buy_stats(games_stream, accum_stats, 
                     acceptable_deck_filter=lambda game, name: True,
@@ -82,7 +83,6 @@ def accum_buy_stats(games_stream, accum_stats,
     """
     for idx, game_val in enumerate(games_stream):
         counted_game_len = False
-        every_set_cards = dominioncards.EVERY_SET_CARDS
 
         for changes in game_val.deck_changes_per_player():
             if not acceptable_deck_filter(game_val, changes.name):
@@ -95,7 +95,7 @@ def accum_buy_stats(games_stream, accum_stats,
                     getattr(accum_stats[card], category).add_outcome(
                         win_points)
                         
-                    if category in [GAINS, BUYS]:
+                    if category in ['gains', 'buys']:
                         any_gained.add(card)
 
             for card in any_gained:
@@ -149,7 +149,7 @@ def do_scan(scanner, games_col, accum_stats, max_games):
     accum_buy_stats(analysis_util.games_stream(scanner, games_col),
                     accum_stats, max_games=max_games)
 
-def main(args):
+def main(parsed_args):
     """ Scan and update buy data"""
     start = time.time()
     db = utils.get_mongo_database()
@@ -161,18 +161,18 @@ def main(args):
     scanner = incremental_scanner.IncrementalScanner(BUYS_COL_NAME, output_db)
     buy_collection = output_db[BUYS_COL_NAME]
 
-    if not args.incremental:
+    if not parsed_args.incremental:
         log.warning('resetting scanner and db')
         scanner.reset()
         buy_collection.drop()
 
     start_size = scanner.get_num_games()
     log.info("Starting run: %s", scanner.status_msg())
-    do_scan(scanner, games, overall_stats, args.max_games)
+    do_scan(scanner, games, overall_stats, parsed_args.max_games)
     log.info("Ending run: %s", scanner.status_msg())
     end_size = scanner.get_num_games()
 
-    if args.incremental:
+    if parsed_args.incremental:
         existing_overall_data = DeckBuyStats()
         utils.read_object_from_db(existing_overall_data, buy_collection, '')
         overall_stats.merge(existing_overall_data)
