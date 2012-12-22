@@ -1,23 +1,29 @@
+# -*- coding: utf-8 -*-
+
+"""Object and classes representing the various cards of Dominion.
+"""
+
 import csv
 import os
 
-_cardlist_reader = csv.DictReader(open(
-        os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), 'card_info/card_list.csv')))
-_CARDS = {}
-_INDEXED = {}
+# Module-level logging instance
+import logging
+log = logging.getLogger(__name__)
+log.addHandler(logging.NullHandler())
 
-def int_or_no_int(string, default):
-    """ Returns value of string if the value is unambiguous, otherwise the default"""
+# TODO: Look at moving this to utils.py
+def int_or_default(string, default):
+    """Returns the integer value of string if the value is
+    unambiguous, otherwise the default"""
     try:
         return int(string)
-    except ValueError, e:
+    except ValueError:
         return default
 
-def PythonifyName(name):
-    return ''.join([n for n in name if n not in [' ', "'", '-']])
-
-class Card: 
+class Card(object):
+    """Card object. Instances of this class, initialized by this
+    module, know about card characteristics and rules.
+    """
     def __init__(self, cardlist_row):
         for key, value in cardlist_row.iteritems():
             prop = str.lower(key)
@@ -25,12 +31,11 @@ class Card:
 
         # Optimize performance by cleaning up loaded values now,
         # instead of in the getter during each call.
-        self.vp = int_or_no_int(self.vp, 0)
-        self.coins = int_or_no_int(self.coins, 0)
-        self.trash = int_or_no_int(self.trash, 1)
-        self.actions = int_or_no_int(self.actions, 1)
+        self.vp = int_or_default(self.vp, 0)
+        self.coins = int_or_default(self.coins, 0)
+        self.trash = int_or_default(self.trash, 1)
+        self.actions = int_or_default(self.actions, 1)
         self.index = int(self.index)
-
 
     def pluralize(self, freq):
         return self.singular if freq == 1 else self.plural
@@ -95,32 +100,65 @@ class Card:
                 'Copper': 60
                 }.get(card_name, 10)
 
-def _init():
-    for cardlist_row in _cardlist_reader:
-        singular = cardlist_row['Singular']
-        plural = cardlist_row['Plural']
-        c = Card(cardlist_row)
-        _CARDS[singular] = c
-        _CARDS[plural] = c
-        _CARDS[c.__repr__()] = c      # Enable lookup by __repr__()
-        _INDEXED[c.index] = c
 
-_init()
-
-def all_cards():
-    return _INDEXED.values()
-
-for init_card in all_cards():
-    pname = PythonifyName(init_card.singular)
-    vars()[ pname ] = init_card
+_CARDS = {}
+"""dict containing all card objects, indexed by various string
+representations (singular, plural, and __repr__()"""
 
 def get_card(name):
-    """ Look up a card by its name """
+    """Look up a card by its name."""
     return _CARDS[name]
+
+_INDEXED = {}
+"""dict containing all card objects, indexed by the `Index` column
+value in the card_list.csv file."""
 
 def index_to_card(index):
     """ Look up a card by its index """
     return _INDEXED[index]
+
+def indexes(cards):
+    """ Return a list of index for the passed list of cards """
+    return [card.index for card in cards]
+
+
+
+def pythonify_card_name(name):
+    """Helper function to convert a card name into a valid Python
+    object name"""
+    return ''.join([n for n in name if n not in [' ', "'", '-']])
+
+
+_namespace = vars()
+def _init():
+    """Initialize the library of cards"""
+
+    # TODO: Look at using pkg_resources to find this file, so it will
+    # work if stored in an egg
+    _cardlist_reader = csv.DictReader(open(
+            os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), 'card_info/card_list.csv')))
+
+    global _namespace
+    for cardlist_row in _cardlist_reader:
+        singular = cardlist_row['Singular']
+        c = Card(cardlist_row)
+        _CARDS[singular] = c
+        _CARDS[cardlist_row['Plural']] = c
+        _CARDS[c.__repr__()] = c      # Enable lookup by __repr__()
+        _INDEXED[c.index] = c
+
+        pname = pythonify_card_name(singular)
+        _namespace[pname] = c
+
+# Initialize the module
+_init()
+
+
+# Methods to return sets of card objects
+
+def all_cards():
+    return _INDEXED.values()
 
 TOURNAMENT_WINNINGS = [Princess, Diadem, Followers, TrustySteed, BagofGold]
 
@@ -128,12 +166,12 @@ EVERY_SET_CARDS = [Estate, Duchy, Province, Copper, Silver, Gold, Curse]
 
 
 def opening_cards():
+    """Returns the set of cards that can be bought on an opening turn.
+
+    This includes only cards costing between 0 and 5 coin."""
     return sorted([card for card in all_cards()
             if card.cost in ('0', '2', '3', '4', '5')])
 
-def indexes(cards):
-    """ Return a list of index for the passed list of cards """
-    return [card.index for card in cards]
 
 import collections
 def get_expansion_weight(supply):
