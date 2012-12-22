@@ -68,7 +68,7 @@ class DeckBuyStats(primitive_util.ConvertibleDefaultDict,
     tell the combined story.
     """
     def __init__(self):
-        primitive_util.ConvertibleDefaultDict.__init__(self, BuyStat)
+        primitive_util.ConvertibleDefaultDict.__init__(self, value_type=BuyStat, key_type=dominioncards.get_card)
 
 def accum_buy_stats(games_stream, accum_stats, 
                     acceptable_deck_filter=lambda game, name: True,
