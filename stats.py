@@ -37,11 +37,15 @@ class MeanVarStat(primitive_util.ListSlotPrimitiveConversion,
         return self.freq
 
     def mean(self):
-        return self.sum / self.freq
+        try:
+            result = self.sum / self.freq
+        except ZeroDivisionError:
+            result = float('inf')
+        return result
 
     def variance(self):
         if self.freq <= 1:
-            return 1e10
+            return float('inf')
         return (((self.sum_sq) - ((self.sum) ** 2) / (self.freq)) /
                 (self.freq - 1))
 
@@ -69,7 +73,7 @@ class MeanVarStat(primitive_util.ListSlotPrimitiveConversion,
         return DiffStat(self, o)
 
     def render_interval(self, factor=2, sig_digits=2):
-        if self.sample_std_dev() >= 10000:
+        if self.sample_std_dev() == float('inf'):
             return u'-'
         fmt = u'%.' + unicode(sig_digits) + u'f'
         fmt = fmt + u' ± ' + fmt
@@ -102,7 +106,7 @@ class DiffStat(object):
         return self.mvs1.freq
 
     def render_interval(self, factor=2, sig_digits=2):
-        if self.sample_std_dev() >= 10000:
+        if self.sample_std_dev() == float('inf'):
             return u'-'
         return u'%.2f ± %.2f' % (self.mean(), factor * self.sample_std_dev())
         

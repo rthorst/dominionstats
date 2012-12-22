@@ -37,6 +37,16 @@ class DominionCardsTest(unittest.TestCase):
         self.assertNotIn(dominioncards.Bank, openings)
 
 
+    def test_initialization(self):
+        """Test various ways of initializing card objects
+        """
+        card = dominioncards.get_card('Estate')
+        self.assertEquals(card.singular, 'Estate')
+
+
+        card = dominioncards.get_card('Card(Estate)')
+        self.assertEquals(card.singular, 'Estate')
+
 
 if __name__ == '__main__':
     unittest.main()

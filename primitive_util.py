@@ -129,17 +129,3 @@ class ConvertibleDefaultDict(collections.defaultdict, PrimitiveConversion):
                 val = v
             self[self.key_type(k)] = val
 
-if __name__ == '__main__':
-    import pymongo
-    c = pymongo.Connection()
-    db = c.test
-    coll = db.prim
-    prim_a['_id'] = ''
-    coll.save(prim_a, safe='true')
-
-    a_from_db = list(coll.find())[0]
-    new_a = A()
-    new_a.from_primitive_object(a_from_db)
-    assert new_a.foo == a.foo
-    assert new_a.bar == a.bar
-

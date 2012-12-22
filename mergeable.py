@@ -1,13 +1,13 @@
 """ A mixin to allow merging two objects in an additive fashion.
 
-Given an arbitraryly nested object whose leaf objects consist of numbers,
+Given an arbitrarily nested object whose leaf objects consist of numbers,
 provide a merge() operation that sums the numbers when the access paths to the
 leaves are the same and otherwise does a union.
 
 From another angle, support a kind of 'vector addition' for messy, complicated
 objects. """
 
-# I't s quite possible that this is too abstract/clever.
+# It's quite possible that this is too abstract/clever.
 class MergeableObjectImpl(object):
     def merge(self, other):
         access_func = self._access_func

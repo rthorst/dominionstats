@@ -95,7 +95,7 @@ $def with (cards, player_data=None)
         <tbody>
           $for card_name, buy_data in cards.iteritems():
             <tr>
-              <td>$card_name</td>
+              <td>$card_name.singular</td>
               $ game_denom = float(buy_data.available.frequency() or 1)
               $code:
                  def Norm(val, digits=2):

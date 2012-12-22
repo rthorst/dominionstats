@@ -24,5 +24,14 @@ class RandomVariableStat(unittest.TestCase):
         self.assertEquals(b.frequency(), 2)
 
 
+class EmptySets(unittest.TestCase):
+    def test_no_occurrences(self):
+        d = stats.MeanVarStat()
+        self.assertEquals(d.mean(), float('inf'))
+        self.assertEquals(d.variance(), float('inf'))
+        self.assertEquals(d.std_dev(), float('inf'))
+        self.assertEquals(d.sample_std_dev(), float('inf'))
+
+
 if __name__ == '__main__':
     unittest.main()
