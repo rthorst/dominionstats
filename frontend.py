@@ -575,7 +575,7 @@ class SupplyWinApi(object):
                     small_gain_stat = SmallGainStat()
                     small_gain_stat.from_primitive_object(db_val['vals'])
                     def name_getter(ind_str):
-                        return card_info.card_names()[int(ind_str)]
+                        return dominioncards.index_to_card(ind_str).singular
                     card_name = name_getter(int(target_ind))
                     condition = map(name_getter, interaction_tuple)
                     stat_with_context = {'card_name': card_name,
