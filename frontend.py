@@ -193,7 +193,7 @@ def standard_heading(title):
     <link href='http://fonts.googleapis.com/css?family=Terminal+Dosis' rel='stylesheet' type='text/css'>
   </head>
   <body>
-    <a href="http://councilroom.mccllstr.com"><h1>CouncilRoom.McCllstr.com</h1></a>""" % title
+    <a href="http://councilroom.com"><h1>CouncilRoom.com</h1></a>""" % title
 
 def compkey(*args):
     return ".".join(args)

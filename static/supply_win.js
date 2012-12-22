@@ -7,7 +7,7 @@ var developer_id = "rrenaud";
 var full_path_to_councilroom = "";
 
 if (!have_local_server_instance) {
-  full_path_to_councilroom = "http://councilroom.mccllstr.com/";
+  full_path_to_councilroom = "http://councilroom.com/";
 // Change this if you aren't running a server locally, so you'll
 }
 
