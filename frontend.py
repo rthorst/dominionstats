@@ -543,7 +543,7 @@ class GoalsPage(object):
         return ret
 
 class SupplyWinApi(object):
-    def str_card_index(self, card_name):
+    def str_card_index(self, card):
         return str(card.index)
 
     def interaction_card_index_tuples(self, query_dict):
