@@ -26,6 +26,7 @@ INDEXES = {
         ],
     'goals': [
         'goals.player',
+        'goals.goal_name',
         ],
     }
 

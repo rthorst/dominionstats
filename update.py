@@ -12,6 +12,7 @@ import analyze
 import background.tasks
 import count_buys
 import dominionstats.utils.log
+import goal_stats
 import load_leaderboard
 import optimal_card_ratios
 import run_trueskill
@@ -136,6 +137,10 @@ def main(parsed_args):
     # Invoke the optimal_card_ratios script
     log.info("Calculating optimal card ratios")
     optimal_card_ratios.main(parsed_args)
+
+    # Invoke the goal_stats script
+    log.info("Calculating goal stats")
+    goal_stats.main(parsed_args)
 
     # Invoke the scrape_leaderboard script
     log.info("Scraping the leaderboard")
