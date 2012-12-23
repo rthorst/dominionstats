@@ -182,7 +182,9 @@ def main(args):
     for ind, game in enumerate(
         utils.progress_meter(scanner.scan(games, {}))):
         if not db_tracker:
+            log.debug("Initializing db tracker manager")
             db_tracker = DBCardRatioTrackerManager(collection, args.incremental)
+            log.debug("DB tracker manager initialized")
 
         result = process_game(Game(game))
         for final_ratio_dict, progressive_ratio_dict, win_points in result:
@@ -207,6 +209,6 @@ def main(args):
 
 if __name__ == '__main__':
     parser = utils.incremental_max_parser()
-    args = parser.parse_args()
-    dominionstats.utils.log.initialize_logging(args.debug)
-    main(args)
+    outer_args = parser.parse_args()
+    dominionstats.utils.log.initialize_logging(outer_args.debug)
+    main(outer_args)
