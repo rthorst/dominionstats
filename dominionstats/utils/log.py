@@ -13,6 +13,10 @@ def initialize_logging(debug=True):
 
     root_logger = logging.getLogger()
 
+    if root_logger.handlers:
+        # Handlers already present, don't add more or change config
+        return
+
     if debug:
         root_logger.setLevel(logging.DEBUG)
     else:
