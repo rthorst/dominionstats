@@ -1,4 +1,4 @@
-var keyed_card_info = {};
+var keyed_repr_info = {};
 
 // This snippet is from
 // http://stackoverflow.com/questions/769701/is-there-a-way-to-detect-when-an-html-element-is-hidden-from-view
@@ -34,7 +34,7 @@ function WinProbExtractor(player, game_state) {
 function MakeSeriesForPlayer(player_name, extractor) {
   var data_list = [];
   var output_per_turn_ct = [];  // make it so p1 and p2 turn x don't overdraw.
-  var num_players = game.players.length;
+  var num_players = game.P.length;
   for (var i = 0; i < game.game_states.length; ++i) {
     // We could do something fancy/complicated with poss/outpost turns,
     // but it's probably not worth it.
@@ -56,17 +56,17 @@ function MakeSeriesForPlayer(player_name, extractor) {
 
 function MakeSeriesForPlayers(extractor) {
   var point_lists = [];
-  for (var i = 0; i < game.players.length; ++i) {
-    point_lists.push(MakeSeriesForPlayer(game.players[i], extractor));
+  for (var i = 0; i < game.P.length; ++i) {
+    point_lists.push(MakeSeriesForPlayer(game.P[i], extractor));
   }
   return point_lists;
 }
 
 function DecorateGame() {
-  game.decks.sort(function(a, b) { return a.order - b.order; });
+  game.D.sort(function(a, b) { return a.order - b.order; });
 
   for (var i = 0; i < card_list.length; ++i) {
-    keyed_card_info[card_list[i].Singular] = card_list[i];
+    keyed_repr_info['Card(' + card_list[i].Singular + ')'] = card_list[i];
   }
 
   $('#game-display').css({position: 'fixed', background: '#ffffff',
@@ -116,14 +116,14 @@ function RenderCardFreqLine(freqs, cards) {
   for (var i = 0; i < cards.length; ++i) {
     if (!first) ret += ', ';
     first = false;
-    ret += freqs[cards[i]] + ' ' + cards[i];
+    ret += freqs[cards[i]] + ' ' + keyed_repr_info[cards[i]].Singular;
   }
   return ret;
 }
 
 function SortCardsByCost(cards) {
   function Cost(card) {
-    var cost = keyed_card_info[card]['Cost'];
+    var cost = keyed_repr_info[card]['Cost'];
     if (cost[0] == 'P') {  // Pretend potions are worth 2.5 coins
       cost = parseInt(cost[1]) + 2.5;
     }
@@ -152,7 +152,7 @@ function RenderCardFreqs(card_freqs) {
   var vp = [], actions = [], coins = [];
   for (var i = 0; i < cards_by_cost.length; ++i) {
     var card = cards_by_cost[i];
-    var card_inf = keyed_card_info[card];
+    var card_inf = keyed_repr_info[card];
     if (card_inf['Victory'] == '1' || card == 'Curse') vp.push(card);
     else if (card_inf['Action'] == '1') actions.push(card);
     else coins.push(card);
@@ -165,13 +165,15 @@ function RenderCardFreqs(card_freqs) {
 
 function RenderGameState(state_ind) {
   var state = game.game_states[state_ind];
-  var rendered = RenderCardFreqs(state.supply);
+  var rendered = 'At the start of <b>' + state.display_label + '</b><br>\n';
 
-  rendered += state.display_label + '<br>\n';
+  rendered += '<u>Supply:</u><br>\n';
+  rendered += RenderCardFreqs(state.supply);
 
-  for (var i = 0; i < game.decks.length; ++i) {
-    var name = game.decks[i].name;
-    rendered += name + ': ' + state.scores[name] + ' points : ' +
+  rendered += '<u>Player Statuses:</u><br>\n';
+  for (var i = 0; i < game.D.length; ++i) {
+    var name = game.D[i].N;
+    rendered += name + ': ' + state.scores[name] + ' points; Deck: ' +
       RenderCardFreqLine(state.player_decks[name]) + '<br>';
   }
   return rendered;
