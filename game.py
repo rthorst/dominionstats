@@ -479,13 +479,13 @@ class GameState(object):
             scores[name] = self.player_score(name)
 
         ret = {
-            SUPPLY: self.supply.to_primitive_object(),
+            'supply': self.supply.to_primitive_object(),
             'player_decks': self.player_decks.to_primitive_object(),
             'scores': scores,
             'label': self.turn_label(),
             'display_label': self.turn_label(for_display=True),
             'player': self.cur_turn.player.name() if self.cur_turn else '',
-            MONEY: self.cur_turn.money() if self.cur_turn else 0,
+            'money': self.cur_turn.money() if self.cur_turn else 0,
             'turn_no': self.cur_turn.turn_no if self.cur_turn else
               self.game.get_turns()[-1].turn_no + 1
             }
