@@ -76,5 +76,45 @@ class GoalTest(unittest.TestCase):
                                 u'Wolphmaniac',
                                 'DoublePileDriver')
 
+    def test_bom(self):
+        """Test the BOM goal."""
+        self.validate_goal_for('game-20110901-055435-5a8e3666.html',
+                               u'Squiddy',
+                               'BOM')
+
+    def test_bomminator(self):
+        """Test the BOMMinator goal."""
+        self.validate_goal_for('game-20110913-052150-e00be3ae.html',
+                               u'Squiddy',
+                               'BOMMinator')
+        self.validate_goal_for('game-20110913-052150-e00be3ae.html',
+                               u'Squiddy',
+                               'BOM')
+
+    def test_one_trick_pony(self):
+        """Test the OneTrickPony goal."""
+        self.validate_goal_for('game-20120625-114828-af02f875.html',
+                               u'WanderingWinder',
+                               'OneTrickPony')
+
+    def test_mr_green_genes(self):
+        """Test the MrGreenGenes goal."""
+        self.validate_goal_for('game-20130104-075510-644e1cc8.html',
+                               u'cyncat',
+                               'MrGreenGenes')
+
+    def test_pile_driver(self):
+        """Test the PileDriver goal."""
+        self.validate_goal_for('game-20130103-151915-05ceaf87.html',
+                               u'Ptolemy I',
+                               'PileDriver')
+
+    def test_triple_pile_driver(self):
+        """Test the TriplePileDriver goal."""
+        self.validate_goal_for('game-20121231-142658-fc8f047a.html',
+                               u'dominion cartel',
+                               'TriplePileDriver')
+
+
 if __name__ == '__main__':
     unittest.main()

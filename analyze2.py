@@ -79,7 +79,7 @@ def accumulate_card_stats(games_stream, stats_accumulator, max_games=-1):
     for game in games_stream:
         detected_events = detect_events(game)
 
-        per_player_accum = game.cards_accumalated_per_player().iteritems()
+        per_player_accum = game.cards_gained_per_player().iteritems()[game.BOUGHT]
         for player, accum_dict in per_player_accum:
             avail = analysis_util.available_cards(game, accum_dict.keys())
             win_points = game.get_player_deck(player).WinPoints()

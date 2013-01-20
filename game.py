@@ -7,14 +7,18 @@ players in the game or other games in the collection belongs here.
 
 import collections
 import itertools
-import pprint
 
-from dominioncards import index_to_card, EVERY_SET_CARDS, get_card
+from dominioncards import index_to_card, EVERY_SET_CARDS
 from keys import *
 from primitive_util import ConvertibleDefaultDict
 import dominioncards
 
 WIN, LOSS, TIE = range(3)
+
+# Array indexes for the return value from Game.cards_gained_per_player()
+BOUGHT=0           # Player bought or gained in own turn
+GAINED=1           # Player bought or gained in any turn
+
 
 class PlayerDeckChange(object):
     " This represents a change to a players deck in response to a game event."
@@ -158,7 +162,7 @@ class Turn(object):
         setattr(my_change, 'returns', self.returns)
         my_change.vp_tokens += self.vp_tokens
 
-        for opp_name, change in self.opp_info.iteritems():
+        for change in self.opp_info.itervalues():
             ret.append(change)
 
         return ret
@@ -310,8 +314,8 @@ class Game(object):
         num_players = len(set(pd.name() for pd in self.get_player_decks()))
         if num_players < len(self.get_player_decks()): return True
 
-        total_accumed_by_players = self.cards_accumalated_per_player()
-        for player_name, accumed_dict in total_accumed_by_players.iteritems():
+        total_accumed_by_players = self.cards_gained_per_player()[BOUGHT]
+        for accumed_dict in total_accumed_by_players.itervalues():
             if sum(accumed_dict.itervalues()) < 5:
                 return True
 
@@ -343,22 +347,32 @@ class Game(object):
                 ret[accumed_card] += 1
         return ret
 
-    def cards_accumalated_per_player(self):
-        """ Return a dict of dict of counts by player name and then card.
+    def cards_gained_per_player(self):
+        """Returns a summary of the final cards held by players.
 
-        This only keeps track of cards accumulated on a given players turn.
+        Structure is an array of dict of dicts, containing how the
+        cards were acquired (game.BOUGHT and game.GAINED), then player
+        name and card.
+
+        This keeps track of cards accumulated on a player's turn and
+        those gained during the turns of other players.
         """
-        if 'card_accum_cache' in self.__dict__:
-            return self.card_accum_cache
-        ret = dict((pd.name(), collections.defaultdict(int)) for
-        pd in self.get_player_decks())
+        if 'card_gained_cache' in self.__dict__:
+            return self.card_gained_cache
+        ret = [None] * 2
+        ret[BOUGHT] = dict((pd.name(), collections.defaultdict(int)) for
+                           pd in self.get_player_decks())
+        ret[GAINED] = dict((pd.name(), collections.defaultdict(int)) for
+                           pd in self.get_player_decks())
+
         for turn in self.get_turns():
             for accumed_card in turn.player_accumulates():
-                ret[turn.get_player().name()][accumed_card] += 1
+                ret[BOUGHT][turn.get_player().name()][accumed_card] += 1
+                ret[GAINED][turn.get_player().name()][accumed_card] += 1
             for name, change in turn.get_opp_info().iteritems():
                 for card in change.accumulates():
-                    ret[name][card] += 1
-        self.card_accum_cache = ret
+                    ret[GAINED][name][card] += 1
+        self.card_gained_cache = ret
         return ret
 
     def deck_changes_per_player(self):
