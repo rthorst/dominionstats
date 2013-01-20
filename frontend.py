@@ -441,8 +441,9 @@ class GamePage(object):
             return 'could not find game ' + game_id
         contents = bz2.decompress(rawgame['text']).decode('utf-8')
 
-        body_err_msg = ('<body><b>Error annotating game, tell ' 
-                        'rrenaud@gmail.com!</b>')
+        body_err_msg = ('<body><b>Error annotating game, please send the details of this message to the '
+                        '<a href="mailto:councilroom-dev@googlegroups.com?Subject=Game%20Annotation%20Error">'
+                        'Council Room Developers</a></b>')
         try:
             return annotate_game.annotate_game(contents, game_id, debug)
         except parse_game.BogusGameError, b:

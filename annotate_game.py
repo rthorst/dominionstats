@@ -91,8 +91,8 @@ def annotate_game(contents, game_id, debug=False):
     output_buf = StringIO.StringIO()
     if not parse_game.check_game_sanity(game_val, output_buf):
         ret += 'Parsing error, data mismatch, '
-        ret += '''<a href="game?game_id=%s&debug=1">be a hero, find the 
-bug</a> and tell rrenaud@gmail.com<br>''' % game_id
+        ret += '<a href="game?game_id=%s&debug=1">be a hero, find the ' % game_id
+        ret += 'bug</a> and tell the <a href="mailto:councilroom-dev@googlegroups.com?Subject=Game%20Annotation%20Error"> Council Room Developers</a><br>'
         ret += output_buf.getvalue().replace('\n', '<br>\n')
 
     cur_turn_ind = 0
