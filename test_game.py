@@ -1,11 +1,19 @@
 #!/usr/bin/python
 
+import unittest
+import codecs
+
 from keys import *
 import dominioncards
-import codecs
 import game
 import parse_game
-import unittest
+
+
+def get_test_game(game_id):
+    """Return the parsed Game for the passed game id"""
+    return game.Game(parse_game.parse_game( \
+            codecs.open('testing/testdata/'+game_id, encoding='utf-8').read()))
+
 
 class ScoreDeckTest(unittest.TestCase):
     def test_gardens(self):
@@ -49,8 +57,7 @@ class WinLossTieTest(unittest.TestCase):
         self.assertEquals(game.LOSS, g.win_loss_tie('p3', 'p1'))
 
 class GameStateTest(unittest.TestCase):
-    outpost_game = game.Game(parse_game.parse_game( \
-            open('testing/testdata/game-20101015-094051-95e0a59e.html', 'r').read()))
+    outpost_game = get_test_game('game-20101015-094051-95e0a59e.html')
 
     def _get_turn_labels(self, game_state_it):
         return [game_state_it.turn_label() for t in game_state_it]
@@ -70,12 +77,10 @@ class GameStateTest(unittest.TestCase):
 
 class PlayerDeckTest(unittest.TestCase):
 
-    outpost_game = game.Game(parse_game.parse_game( \
-            open('testing/testdata/game-20101015-094051-95e0a59e.html', 'r').read()))
-
-    deck_changes_game = game.Game(parse_game.parse_game( \
-            open('testing/testdata/game-20101015-024842-a866e78a.html', 'r').read()))
-
+    outpost_game = get_test_game('game-20101015-094051-95e0a59e.html')
+    deck_changes_game = get_test_game('game-20101015-024842-a866e78a.html')
+    accum_game = get_test_game('game-20130111-164348-84fd128e.html')
+    accum2_game = get_test_game('game-20121201-103128-e6e30146.html')
 
     def test_deck_composition(self):
         last_state = None
@@ -104,6 +109,22 @@ class PlayerDeckTest(unittest.TestCase):
         for changes in self.deck_changes_game.deck_changes_per_player():
             win_points = self.deck_changes_game.get_player_deck(changes.name).WinPoints()
 
+    def test_card_accum_by_self(self):
+        accum_results = self.accum_game.cards_gained_per_player()
+        player_bought = accum_results[game.BOUGHT][u'Wolphmaniac']
+        self.assertEquals(player_bought[dominioncards.Spy], 10)
+        self.assertEquals(player_bought[dominioncards.Curse], 10)
+        self.assertEquals(player_bought[dominioncards.Goons], 7)
+        self.assertEquals(player_bought[dominioncards.City], 7)
+        self.assertEquals(player_bought[dominioncards.Quarry], 3)
+
+    def test_card_accum_by_any(self):
+        """Confirms the difference between buying and being given cards"""
+        accum_results = self.accum2_game.cards_gained_per_player()
+        player_bought = accum_results[game.BOUGHT][u'Varsinor']
+        player_gained = accum_results[game.GAINED][u'Varsinor']
+        self.assertEquals(player_bought[dominioncards.Curse], 0)
+        self.assertEquals(player_gained[dominioncards.Curse], 10)
 
 
 class ParsedGameStructureTest(unittest.TestCase):
@@ -114,14 +135,15 @@ class ParsedGameStructureTest(unittest.TestCase):
         """ Test vetoes with names containing dots.
         """
 
-        test_game = game.Game(parse_game.parse_game( \
-                codecs.open('testing/testdata/game-20120415-072057-6d356cf1.html', encoding='utf-8').read()))
+        test_game = get_test_game('game-20120415-072057-6d356cf1.html')
         last_state = None
         game_state_iterator = test_game.game_state_iterator()
         for game_state in game_state_iterator:
             last_state = game_state
-        self.assertEquals(test_game.vetoes[str(test_game.all_player_names().index(u'nrggirl'))], int(dominioncards.PirateShip.index))
-        self.assertEquals(test_game.vetoes[str(test_game.all_player_names().index(u'Mr.Penskee'))], int(dominioncards.Masquerade.index))
+        self.assertEquals(test_game.vetoes[str(test_game.all_player_names().index(u'nrggirl'))],
+                          int(dominioncards.PirateShip.index))
+        self.assertEquals(test_game.vetoes[str(test_game.all_player_names().index(u'Mr.Penskee'))],
+                          int(dominioncards.Masquerade.index))
 
 
 if __name__ == '__main__':

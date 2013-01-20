@@ -7,14 +7,18 @@ players in the game or other games in the collection belongs here.
 
 import collections
 import itertools
-import pprint
 
-from dominioncards import index_to_card, EVERY_SET_CARDS, get_card
+from dominioncards import index_to_card, EVERY_SET_CARDS
 from keys import *
 from primitive_util import ConvertibleDefaultDict
 import dominioncards
 
 WIN, LOSS, TIE = range(3)
+
+# Array indexes for the return value from Game.cards_gained_per_player()
+BOUGHT=0           # Player bought or gained in own turn
+GAINED=1           # Player bought or gained in any turn
+
 
 class PlayerDeckChange(object):
     " This represents a change to a players deck in response to a game event."
@@ -50,6 +54,9 @@ class PlayerDeckChange(object):
                 s.append(cat + '(' + ','.join(map(str, j)) + ')')
         return s
 
+    def accumulates(self):
+        return self.buys + self.gains
+
 
 
 def turn_decode(turn_dict, field):
@@ -66,7 +73,19 @@ class Turn(object):
         self.trashes = turn_decode(turn_dict, TRASHES)
         self.turn_no = turn_no
         self.poss_no = poss_no
-        self.turn_dict = turn_dict
+        self.is_outpost = OUTPOST in turn_dict
+        self.money = turn_dict.get(MONEY, 0)
+        self.vp_tokens = turn_dict.get(VP_TOKENS, 0)
+
+        self.opp_info = {}
+        for opp_index, info_dict in turn_dict.get(OPP, {}).iteritems():
+            opp_name = self.game_dict[PLAYERS][int(opp_index)]
+            change = PlayerDeckChange(opp_name)
+            getattr(change, 'gains' ).extend(turn_decode(info_dict, GAINS))
+            getattr(change, 'trashes').extend(turn_decode(info_dict, TRASHES))
+            getattr(change, 'returns').extend(turn_decode(info_dict, RETURNS))
+            change.vp_tokens += info_dict.get(VP_TOKENS, 0)
+            self.opp_info[opp_name] = change
 
     def __repr__(self):
         return "{classname}(player={player}, turn/pos={turn_no}/{poss_no}, plays={plays_list})".format( \
@@ -105,8 +124,11 @@ class Turn(object):
     def get_poss_no(self):
         return self.poss_no
 
+    def get_opp_info(self):
+        return self.opp_info
+
     def turn_label(self, for_anchor=False, for_display=False):
-        if OUTPOST in self.turn_dict:
+        if self.is_outpost:
             fmt = u'%(pname)s-%(show)soutpost-turn-%(turn_no)d'
         elif self.poss_no:
             fmt = u'%(pname)s-%(show)sposs-turn-%(turn_no)d-%(poss_no)d'
@@ -128,7 +150,7 @@ class Turn(object):
         return ret
 
     def money(self):
-        return self.turn_dict.get(MONEY, 0)
+        return self.money
 
     def deck_changes(self):
         ret = []
@@ -138,16 +160,9 @@ class Turn(object):
         setattr(my_change, 'buys' , self.buys)
         setattr(my_change, 'trashes', self.trashes)
         setattr(my_change, 'returns', self.returns)
-        my_change.vp_tokens += self.turn_dict.get(VP_TOKENS, 0)
+        my_change.vp_tokens += self.vp_tokens
 
-        opp_info = self.turn_dict.get(OPP, {})
-        for opp_index, info_dict in opp_info.iteritems():
-            opp_name = self.game_dict[PLAYERS][int(opp_index)]
-            change = PlayerDeckChange(opp_name)
-            getattr(change, 'gains' ).extend(turn_decode(info_dict, GAINS))
-            getattr(change, 'trashes').extend(turn_decode(info_dict, TRASHES))
-            getattr(change, 'returns').extend(turn_decode(info_dict, RETURNS))
-            change.vp_tokens += info_dict.get(VP_TOKENS, 0)
+        for change in self.opp_info.itervalues():
             ret.append(change)
 
         return ret
@@ -299,8 +314,8 @@ class Game(object):
         num_players = len(set(pd.name() for pd in self.get_player_decks()))
         if num_players < len(self.get_player_decks()): return True
 
-        total_accumed_by_players = self.cards_accumalated_per_player()
-        for player_name, accumed_dict in total_accumed_by_players.iteritems():
+        total_accumed_by_players = self.cards_gained_per_player()[BOUGHT]
+        for accumed_dict in total_accumed_by_players.itervalues():
             if sum(accumed_dict.itervalues()) < 5:
                 return True
 
@@ -332,19 +347,32 @@ class Game(object):
                 ret[accumed_card] += 1
         return ret
 
-    def cards_accumalated_per_player(self):
-        """ Return a dict of dict of counts by player name and then card.
+    def cards_gained_per_player(self):
+        """Returns a summary of the final cards held by players.
 
-        This only keeps track of cards accumulated on a given players turn.
+        Structure is an array of dict of dicts, containing how the
+        cards were acquired (game.BOUGHT and game.GAINED), then player
+        name and card.
+
+        This keeps track of cards accumulated on a player's turn and
+        those gained during the turns of other players.
         """
-        if 'card_accum_cache' in self.__dict__:
-            return self.card_accum_cache
-        ret = dict((pd.name(), collections.defaultdict(int)) for
-        pd in self.get_player_decks())
+        if 'card_gained_cache' in self.__dict__:
+            return self.card_gained_cache
+        ret = [None] * 2
+        ret[BOUGHT] = dict((pd.name(), collections.defaultdict(int)) for
+                           pd in self.get_player_decks())
+        ret[GAINED] = dict((pd.name(), collections.defaultdict(int)) for
+                           pd in self.get_player_decks())
+
         for turn in self.get_turns():
             for accumed_card in turn.player_accumulates():
-                ret[turn.get_player().name()][accumed_card] += 1
-        self.card_accum_cache = ret
+                ret[BOUGHT][turn.get_player().name()][accumed_card] += 1
+                ret[GAINED][turn.get_player().name()][accumed_card] += 1
+            for name, change in turn.get_opp_info().iteritems():
+                for card in change.accumulates():
+                    ret[GAINED][name][card] += 1
+        self.card_gained_cache = ret
         return ret
 
     def deck_changes_per_player(self):

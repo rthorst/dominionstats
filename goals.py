@@ -4,12 +4,10 @@ import collections
 import logging
 import operator
 
-from keys import TRASHES
 import dominioncards
 import dominionstats.utils.log
 import game
 import incremental_scanner
-import name_merger
 import utils
 
 
@@ -36,7 +34,7 @@ def achievement(player, reason, sort_key=None):
 def CheckMatchBOM(g):
     """Bought only money and Victory."""
     ret = []
-    cards_per_player = g.cards_accumalated_per_player()
+    cards_per_player = g.cards_gained_per_player()[game.BOUGHT]
     for player, card_list in cards_per_player.iteritems():
         treasures = []
         bad = False
@@ -81,7 +79,7 @@ def CheckMatchGolfer(g):
 def CollectedAllCopies(g):
     """Return a dict mapping a player to a list of all the card
        names that the player gained all the copies of"""
-    accumed_per_player = g.cards_accumalated_per_player()
+    accumed_per_player = g.cards_gained_per_player()[game.GAINED]
     gain_map = collections.defaultdict(list)
     game_size = len(g.get_player_decks())
 
@@ -102,7 +100,7 @@ def CheckMatchPileDriver(g):
                 if card == dominioncards.Curse:
                     continue
                 ret.append(
-                    achievement(player, 'Gained all copies of %s (and won)' % card.singular, card))
+                    achievement(player, 'Gained all copies of %s (and won)' % card.singular, card.index))
     return ret
 
 def CheckMatchPurplePileDriver(g):
@@ -112,11 +110,10 @@ def CheckMatchPurplePileDriver(g):
 
     for player, piles_gained in gain_map.iteritems():
         if g.get_player_deck(player).WinPoints() > 1.0:
-            if len(piles_gained)==1:
-                card = piles_gained[0]
+            for card in piles_gained:
                 if card == dominioncards.Curse:
                     ret.append(
-                        achievement(player, 'Gained all the curses (and won)', card))
+                        achievement(player, 'Gained all the curses (and won)'))
     return ret
 
 def CheckMatchDoublePileDriver(g):
@@ -129,7 +126,7 @@ def CheckMatchDoublePileDriver(g):
             if len(piles_gained)==2:
                 ret.append(
                     achievement(player, 'Gained all copies of %s AND %s (and won)' % (
-                            piles_gained[0], piles_gained[1]), piles_gained))
+                            piles_gained[0].singular, piles_gained[1].singular), [c.index for c in piles_gained]))
     return ret
 
 def CheckMatchTriplePileDriver(g):
@@ -142,7 +139,7 @@ def CheckMatchTriplePileDriver(g):
             if len(piles_gained)==3:
                 ret.append(
                     achievement(player, 'Gained all copies of %s, %s AND %s (and won)' % (
-                            piles_gained[0], piles_gained[1], piles_gained[2]), piles_gained))
+                            piles_gained[0].singular, piles_gained[1].singular, piles_gained[2].singular), [c.index for c in piles_gained]))
     return ret
 
 GroupFuncs([CheckMatchPileDriver, CheckMatchDoublePileDriver, CheckMatchTriplePileDriver], 'piledriver')
@@ -151,7 +148,7 @@ def CheckMatchOneTrickPony(g):
     """Bought only one type of action"""
     if g.any_resigned():
         return []
-    accumed_per_player = g.cards_accumalated_per_player()
+    accumed_per_player = g.cards_gained_per_player()[game.BOUGHT]
     ret = []
     for player, card_dict in accumed_per_player.iteritems():
         if g.get_player_deck(player).WinPoints() > 1.0:
@@ -171,7 +168,7 @@ def CheckMatchOneTrickPony(g):
 
 def CheckMatchMrGreenGenes(g):
     """Bought 6 differently named Victory cards"""
-    accumed_per_player = g.cards_accumalated_per_player()
+    accumed_per_player = g.cards_gained_per_player()[game.BOUGHT]
     ret = []
     for player, card_dict in accumed_per_player.iteritems():
         victory_quants = [(c, q) for c, q in card_dict.iteritems() if
@@ -600,8 +597,7 @@ def CheckMatchOscarTheGrouch(g):
     """Trash more than 7 cards in one turn"""
     ret = []
     for turn in g.get_turns():
-	#FIXME: Update Turn Object to have Trashes Member
-        trashes = len(turn.turn_dict.get(TRASHES,[]))
+        trashes = len(turn.trashes)
         if trashes >= 7:
             ret.append(achievement(turn.player.name(),
                                    "Trashed %d cards in one turn" % trashes,
@@ -878,6 +874,6 @@ if __name__ == '__main__':
         '--goals', metavar='goal_name', nargs='+',
         help=('If set, check only the goals specified for all of ' +
               'the games that have already been scanned'))
-    args = parser.parse_args()
-    dominionstats.utils.log.initialize_logging(args.debug)
-    main(args)
+    parsed_args = parser.parse_args()
+    dominionstats.utils.log.initialize_logging(parsed_args.debug)
+    main(parsed_args)
