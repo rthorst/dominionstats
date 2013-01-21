@@ -149,9 +149,6 @@ class Turn(object):
             ret = ret.replace(' ', '-')
         return ret
 
-    def money(self):
-        return self.money
-
     def deck_changes(self):
         ret = []
         my_change = PlayerDeckChange(self.player.name())
@@ -513,7 +510,7 @@ class GameState(object):
             'label': self.turn_label(),
             'display_label': self.turn_label(for_display=True),
             'player': self.cur_turn.player.name() if self.cur_turn else '',
-            'money': self.cur_turn.money() if self.cur_turn else 0,
+            'money': self.cur_turn.money if self.cur_turn else 0,
             'turn_no': self.cur_turn.turn_no if self.cur_turn else
               self.game.get_turns()[-1].turn_no + 1
             }

@@ -146,5 +146,22 @@ class ParsedGameStructureTest(unittest.TestCase):
                           int(dominioncards.Masquerade.index))
 
 
+class GameStateTest(unittest.TestCase):
+    def test_encode_game_state(self):
+        game_val = get_test_game('game-20120415-072057-6d356cf1.html')
+
+        states = []
+        for idx, game_state in enumerate(game_val.game_state_iterator()):
+            encoded = game_state.encode_game_state()
+            states.append(encoded)
+
+        self.assertEquals(states[0]['money'], 4)
+        self.assertEquals(states[1]['money'], 4)
+        self.assertEquals(states[4]['money'], 4)
+        self.assertEquals(states[5]['money'], 5)
+        self.assertEquals(states[17]['money'], 3)
+        self.assertEquals(states[18]['money'], 7)
+
+
 if __name__ == '__main__':
     unittest.main()
