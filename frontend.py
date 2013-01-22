@@ -547,13 +547,14 @@ class GoalsPage(object):
         return ret
 
 class SupplyWinApi(object):
-    def str_card_index(self, card):
+    def str_card_index(self, card_name):
+        card = dominioncards.get_card(card_name)
         return str(card.index)
 
     def interaction_card_index_tuples(self, query_dict):
-        cards = query_dict.get('interaction', '').split(',')
-        cards = [c.strip() for c in cards if c]  # remove empty strings
-        indexes = sorted(map(self.str_card_index, cards), reverse=True)
+        card_name_list = query_dict.get('interaction', '').split(',')
+        card_names = [c.strip() for c in card_name_list if c]  # remove empty strings
+        indexes = sorted(map(self.str_card_index, card_names), reverse=True)
 
         # Singleton tuples are weird, but they make the fetching logic simpler.
         card_tuples = list(itertools.combinations(indexes, 1))
