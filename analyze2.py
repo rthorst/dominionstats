@@ -42,12 +42,12 @@ event_detectors = [(g[:-len(events_func_label)], eval(g))
                    for g in locals().keys() if g.endswith(events_func_label)]
 
 
-def detect_events(game):
+def detect_events(game_obj):
     """ Return a dict of lists, where the keys are event names, and the
-    values are events of those type that occured in game."""
+    values are events of those type that occured in game_obj."""
     ret = collections.defaultdict(list)
     for event_detector_name, detector in event_detectors:
-        for event in detector(game):
+        for event in detector(game_obj):
             ret[event_detector_name].append(event)
     return ret
 
@@ -67,18 +67,27 @@ class EventAccumulator:
 
     def update_db(self, mongo_db_inst):
         for event_type_name, stats_dict in self.event_stats.iteritems():
+            log.debug('Updating database for event type %s, %d stats',
+                      event_type_name, len(stats_dict))
             mongo_collection = mongo_db_inst[event_type_name]
+            inserts = 0
+            updates = 0
             for full_key, gain_stats_obj in sorted(stats_dict.iteritems()):
                 existing_raw_obj = mongo_collection.find_one(
                     {'_id': full_key})
                 if existing_raw_obj:
+                    updates += 1
                     existing_stat = SmallGainStat()
                     existing_stat.from_primitive_object(
                         existing_raw_obj['vals'])
                     gain_stats_obj.merge(existing_stat)
+                else:
+                    inserts += 1
                 key_wrap_obj = {'vals': gain_stats_obj.to_primitive_object()}
                 utils.write_object_to_db(key_wrap_obj, mongo_collection,
                                          full_key)
+            log.debug('Database update results for %s: %d inserts, %d updates',
+                      event_type_name, inserts, updates)
 
 def accumulate_card_stats(games_stream, stats_accumulator, max_games=-1):
     for game_obj in games_stream:
@@ -120,7 +129,9 @@ def main(args):
     accumulate_card_stats(games_stream, accumulator, args.max_games)
 
     log.info('saving to database')
+    log.debug('saving accumulated stats')
     accumulator.update_db(db)
+    log.info('saving the game scanner state')
     scanner.save()
     log.info("Ending run: %s", scanner.status_msg())
 
