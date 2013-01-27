@@ -2,19 +2,24 @@
 
 from __future__ import division
 
-import os
-
-import analysis_util
-import dominioncards
-from game import Game
-import incremental_scanner
-import pymongo
 import collections
-import simplejson as json
+import logging
 
 from small_gain_stat import SmallGainStat
+import analysis_util
+import dominionstats.utils.log
+import game
+import incremental_scanner
 import utils
 
+# Module-level logging instance
+log = logging.getLogger(__name__)
+log.addHandler(logging.NullHandler())
+
+# The following functions that end in `_events` will scan a game
+# object and yield a string that describes an event. These events are
+# populated into the MongoDB into collections of the same name, minus
+# the `_events` suffix.
 
 def card_supply_events(game_obj):
     yield ''
@@ -27,7 +32,7 @@ def card_supply_events(game_obj):
                 yield c1_index + ',' + c2_index
 
 def month_events(game_obj):
-    yield Game.get_date_from_id(game_obj.get_id())[:6]
+    yield game.Game.get_date_from_id(game_obj.get_id())[:6]
 
 def game_size_events(game_obj):
     yield str(len(game_obj.get_player_decks()))
@@ -35,6 +40,7 @@ def game_size_events(game_obj):
 events_func_label = '_events'
 event_detectors = [(g[:-len(events_func_label)], eval(g))
                    for g in locals().keys() if g.endswith(events_func_label)]
+
 
 def detect_events(game):
     """ Return a dict of lists, where the keys are event names, and the
@@ -75,14 +81,13 @@ class EventAccumulator:
                                          full_key)
 
 def accumulate_card_stats(games_stream, stats_accumulator, max_games=-1):
-    ct = 0
-    for game in games_stream:
-        detected_events = detect_events(game)
+    for game_obj in games_stream:
+        detected_events = detect_events(game_obj)
 
-        per_player_accum = game.cards_gained_per_player().iteritems()[game.BOUGHT]
+        per_player_accum = game_obj.cards_gained_per_player()[game.BOUGHT].iteritems()
         for player, accum_dict in per_player_accum:
-            avail = analysis_util.available_cards(game, accum_dict.keys())
-            win_points = game.get_player_deck(player).WinPoints()
+            avail = analysis_util.available_cards(game_obj, accum_dict.keys())
+            win_points = game_obj.get_player_deck(player).WinPoints()
             for card in avail:
                 count = accum_dict.get(card, 0)
                 small_gain_stat = SmallGainStat()
@@ -99,29 +104,29 @@ def accumulate_card_stats(games_stream, stats_accumulator, max_games=-1):
         if max_games == 0:
             break
 
-def main():
-    args = utils.incremental_max_parser().parse_args()
-
-    c = pymongo.Connection()
-    db = c.test
+def main(args):
+    db = utils.get_mongo_database()
     scanner = incremental_scanner.IncrementalScanner('analyze2', db)
 
     if not args.incremental:
+        log.warning('resetting scanner and db')
         scanner.reset()
         for collection_name, _ in event_detectors:
             db[collection_name].drop()
 
-    print scanner.status_msg()
-    games_stream = analysis_util.games_stream(scanner, c.test.games)
+    log.info("Starting run: %s", scanner.status_msg())
+    games_stream = analysis_util.games_stream(scanner, db.games)
     accumulator = EventAccumulator()
     accumulate_card_stats(games_stream, accumulator, args.max_games)
 
-    print 'saving to database'
+    log.info('saving to database')
     accumulator.update_db(db)
     scanner.save()
-    print scanner.status_msg()
-        
+    log.info("Ending run: %s", scanner.status_msg())
+
 
 if __name__ == '__main__':
-    main()
-            
+    parser = utils.incremental_max_parser()
+    parsed_args = parser.parse_args()
+    dominionstats.utils.log.initialize_logging(parsed_args.debug)
+    main(parsed_args)
