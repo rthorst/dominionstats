@@ -3,6 +3,12 @@
 import unittest
 import frontend
 
+# TODO: This can't be tested until we split the data retrieval
+# function out of GET... I had this in a local copy at one point when
+# I created this test, but I apparently didn't check it in, so marking
+# this as "skip" for now.
+
+@unittest.skip("Needs implementation")
 class PopularBuyPage(unittest.TestCase):
     def test_retrieve_data(self):
         page = frontend.PopularBuyPage()
@@ -18,33 +24,94 @@ class PopularBuyPage(unittest.TestCase):
 
 
 class SupplyWinApi(unittest.TestCase):
-    def test_parts_of_GET(self):
+    def test_retrieve_1_by_1(self):
+        """Simple test with 1 target, 1 interaction, and unconditional stats"""
         swa = frontend.SupplyWinApi()
         query_dict = dict(
             dev="rrenaud",
-            targets="Council Room,Embassy,Envoy,Library,Margrave,Menagerie,Nobles,Rabble,Smithy,Torturer",
-            interaction="Farming Village,Fishing Village,Hamlet,Mining Village,Native Village,Shanty Town,Village,Walled Village,Worker's Village",
+            targets="Council Room",
+            interaction="Farming Village",
             unconditional="true",
             )
 
-        # query_dict supports the following options.
-        # targets: optional comma separated list of card names that want 
-        #   stats for, if empty/not given, use all of them
-        # interaction: optional comma separated list of cards that we want to
-        #   condition the target stats on.
-        # nested: optional param, if given present, also get second order
-        #   contional stats.
-        # unconditional: opt param, if present, also get unconditional stats.
-        targets = query_dict.get('targets', '').split(',')
-        if sum(len(t) for t in targets) == 0:
-            targets = dominioncards.all_cards()
+        card_stats = swa.retrieve_data(query_dict)
 
-        target_inds = map(swa.str_card_index, targets)
-        interaction_tuples = swa.interaction_card_index_tuples(query_dict)
-        card_stats = swa.fetch_conditional_stats(target_inds, 
-                                                  interaction_tuples)
+        self.assertEquals(len(card_stats), 2)
+
+        self.assertEquals(card_stats[0]['card_name'], 'Council Room')
+        self.assertEquals(card_stats[0]['condition'][0], 'Farming Village')
+
+        self.assertEquals(card_stats[1]['card_name'], 'Council Room')
+        self.assertEquals(len(card_stats[1]['condition']), 0)
+
         json = swa.readable_json_card_stats(card_stats)
+        self.assertEquals(json[0:14], '[{"card_name":')
 
+    def test_retrieve_1_by_all(self):
+        """Simple test with 1 target, empty interaction list, and unconditional stats"""
+        swa = frontend.SupplyWinApi()
+        query_dict = dict(
+            dev="rrenaud",
+            targets="Council Room",
+            interaction="",
+            unconditional="true",
+            )
+
+        card_stats = swa.retrieve_data(query_dict)
+
+        self.assertEquals(len(card_stats), 1)
+
+        self.assertEquals(card_stats[0]['card_name'], 'Council Room')
+        self.assertEquals(len(card_stats[0]['condition']), 0)
+
+        json = swa.readable_json_card_stats(card_stats)
+        self.assertEquals(json[0:14], '[{"card_name":')
+
+    def test_retrieve_all_by_bank(self):
+        """Simple test with no target (def to all), Bank interaction, and unconditional stats"""
+        swa = frontend.SupplyWinApi()
+        query_dict = dict(
+            dev="rrenaud",
+            targets="",
+            interaction="Bank",
+            unconditional="true",
+            )
+
+        card_stats = swa.retrieve_data(query_dict)
+
+        # Gets 288 entries back, because one for each of the 144
+        # cards, plus the unconditioned version of each
+        self.assertEquals(len(card_stats), 288)
+
+        self.assertEquals(card_stats[0]['card_name'], 'Adventurer')
+
+        json = swa.readable_json_card_stats(card_stats)
+        self.assertEquals(json[0:14], '[{"card_name":')
+
+    def test_retrieve_all_by_bag_of_gold(self):
+        """Simple test with no target (def to all), Bag of Gold interaction, and unconditional stats.
+
+        Note that Bag of Gold appears in the Cornucopia deck, which
+        was published in 2011. The test database needs games where
+        this card has been played before these tests will pass."""
+        swa = frontend.SupplyWinApi()
+        query_dict = dict(
+            dev="rrenaud",
+            targets="",
+            interaction="Bag of Gold",
+            unconditional="true",
+            )
+
+        card_stats = swa.retrieve_data(query_dict)
+
+        # Gets 288 entries back, because one for each of the 144
+        # cards, plus the unconditioned version of each
+        self.assertEquals(len(card_stats), 288)
+
+        self.assertEquals(card_stats[0]['card_name'], 'Adventurer')
+
+        json = swa.readable_json_card_stats(card_stats)
+        self.assertEquals(json[0:14], '[{"card_name":')
 
 
 if __name__ == '__main__':
