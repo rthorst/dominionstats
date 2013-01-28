@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
 import bz2
-import codecs
 import collections
 import itertools
 import math
 import operator
-import os
-import pprint
-import urllib
 import urlparse
 
 import pymongo
