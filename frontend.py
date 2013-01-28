@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
 import bz2
-import codecs
 import collections
 import itertools
 import math
 import operator
-import os
-import pprint
-import urllib
 import urlparse
 
 import pymongo
@@ -547,13 +543,14 @@ class GoalsPage(object):
         return ret
 
 class SupplyWinApi(object):
-    def str_card_index(self, card):
+    def str_card_index(self, card_name):
+        card = dominioncards.get_card(card_name)
         return str(card.index)
 
     def interaction_card_index_tuples(self, query_dict):
-        cards = query_dict.get('interaction', '').split(',')
-        cards = [c.strip() for c in cards if c]  # remove empty strings
-        indexes = sorted(map(self.str_card_index, cards), reverse=True)
+        card_name_list = query_dict.get('interaction', '').split(',')
+        card_names = [c.strip() for c in card_name_list if c]  # remove empty strings
+        indexes = sorted(map(self.str_card_index, card_names), reverse=True)
 
         # Singleton tuples are weird, but they make the fetching logic simpler.
         card_tuples = list(itertools.combinations(indexes, 1))
@@ -579,8 +576,8 @@ class SupplyWinApi(object):
                     small_gain_stat = SmallGainStat()
                     small_gain_stat.from_primitive_object(db_val['vals'])
                     def name_getter(ind_str):
-                        return dominioncards.index_to_card(ind_str).singular
-                    card_name = name_getter(int(target_ind))
+                        return dominioncards.index_to_card(int(ind_str)).singular
+                    card_name = name_getter(target_ind)
                     condition = map(name_getter, interaction_tuple)
                     stat_with_context = {'card_name': card_name,
                                          'condition': condition,
@@ -595,26 +592,41 @@ class SupplyWinApi(object):
                                           to_readable_primitive_object())
         return json.dumps(card_stats)
 
+    def retrieve_data(self, query_dict):
+        """Extraction of the data retrieval logic from GET
+
+        Done to make it a little easier to test
+
+        query_dict supports the following options:
+
+          targets: optional comma separated list of card names that
+            want stats for, if empty/not given, use all of them
+
+          interaction: optional comma separated list of cards that we
+            want to condition the target stats on.
+
+          nested: optional param, if given present, also get second
+            order contional stats.
+
+          unconditional: opt param, if present, also get unconditional
+            stats.
+        """
+        targets = query_dict.get('targets', '').split(',')
+        if sum(len(t) for t in targets) > 0:
+            target_inds = map(self.str_card_index, targets)
+        else:
+            target_inds = [str(card.index) for card in dominioncards.all_cards()]
+            
+        interaction_tuples = self.interaction_card_index_tuples(query_dict)
+        card_stats = self.fetch_conditional_stats(target_inds, 
+                                                  interaction_tuples)
+        return card_stats
+
     def GET(self):
         web.header("Content-Type", "text/html; charset=utf-8")
         web.header("Access-Control-Allow-Origin", "*")
         query_dict = dict(urlparse.parse_qsl(web.ctx.env['QUERY_STRING']))
-        # query_dict supports the following options.
-        # targets: optional comma separated list of card names that want 
-        #   stats for, if empty/not given, use all of them
-        # interaction: optional comma separated list of cards that we want to
-        #   condition the target stats on.
-        # nested: optional param, if given present, also get second order
-        #   contional stats.
-        # unconditional: opt param, if present, also get unconditional stats.
-        targets = query_dict.get('targets', '').split(',')
-        if sum(len(t) for t in targets) == 0:
-            targets = dominioncards.all_cards()
-            
-        target_inds = map(self.str_card_index, targets)
-        interaction_tuples = self.interaction_card_index_tuples(query_dict)
-        card_stats = self.fetch_conditional_stats(target_inds, 
-                                                  interaction_tuples)
+        card_stats = self.retrieve_data(query_dict)
         return self.readable_json_card_stats(card_stats)
 
 class SupplyWinPage(object):
