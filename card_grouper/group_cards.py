@@ -11,7 +11,13 @@ from stats import MeanVarStat
 import card_info
 import itertools
 import numpy as np
+
+# Set matplotlib to use a non-interactive backend. This must be done
+# before importing pylab.
+import matplotlib
+matplotlib.use('Agg')
 import pylab
+
 import scipy.cluster
 import scipy.cluster.hierarchy 
 import scipy.spatial.distance as distance

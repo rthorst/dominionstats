@@ -11,3 +11,5 @@ pymongo
 numpy
 scipy
 boto
+scikit-learn
+matplotlib
