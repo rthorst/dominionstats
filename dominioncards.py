@@ -186,7 +186,7 @@ def opening_cards():
 
     This includes only cards costing between 0 and 5 coin."""
     return sorted([card for card in all_cards()
-            if card.cost in ('0', '2', '3', '4', '5')])
+            if card.cost in ('0','1', '2', '3', '4', '5')])
 
 
 import collections
