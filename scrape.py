@@ -16,6 +16,7 @@ import time
 import urllib
 import utils
 import re
+import tarfile
 
 # if the size of the game log is less than this assume we got an error page
 SMALL_FILE_SIZE = 5000 
@@ -102,18 +103,15 @@ def download_date(str_date, cur_date, saved_games_bundle):
 
 def bundle_goko_games(cur_date, games, saved_games_bundle):
     directory_name = tempfile.mkdtemp()
+    bundle = tarfile.open(saved_games_bundle,'w:bz2')
+    if DEBUG:
+        print len(games), " games to download..."
     for cur_game in games:
         url = GokoSingleGameUrl(cur_date, cur_game)
         game_text = urllib.urlopen(url).read()
-        open(os.path.join(directory_name,cur_game),'w').write(game_text)
-
-    try:
-        subprocess.check_call(["tar", "-cjf", saved_games_bundle, "-C" ,
-                               directory_name] + games)
-    except subprocess.CalledProcessError, e:  
-        # Not handling this, just re-raise
-        logging.warning("Unexpected return from tar compressing goko output >>{msg}<<".format(msg=e.output))
-        raise
+        open(os.path.join(directory_name,cur_game),'a').write(game_text)
+        bundle.add(os.path.join(directory_name,cur_game))
+    bundle.close();
     shutil.rmtree(directory_name)
 
 def unzip_date(directory, filename):
