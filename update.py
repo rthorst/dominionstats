@@ -83,11 +83,12 @@ def watch_and_log(signature, log_interval=15, timeout=600):
 def main(parsed_args):
     """Primary update cycle"""
 
-    # Scrape and load the data from isotropic, proceeding from the
-    # current day backwards, until no games are inserted
+    # Scrape and load the data from goko, proceeding from the
+    # previous day backwards, until no games are inserted
     log.info("Starting scrape for raw games")
+    yesterday = datetime.date.today() - datetime.timedelta(days=1)
     for date in utils.daterange(datetime.date(2010, 10, 15),
-                                datetime.date.today(), reverse=True):
+                                yesterday, reverse=True):
         log.info("Invoking scrape_raw_games async task for %s", date)
         async_result = watch_and_log(background.tasks.scrape_raw_games.s(date))
         inserted = async_result.get()
