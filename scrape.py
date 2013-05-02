@@ -20,6 +20,11 @@ import re
 # if the size of the game log is less than this assume we got an error page
 SMALL_FILE_SIZE = 5000 
 
+# Modifying default start date to be the first recorded goko log
+#default_startdate = datetime.date(2010, 10, 15)
+default_startdate = datetime.date(2013, 04, 01)
+
+
 DEBUG = True
 
 GOOD = 0
@@ -225,9 +230,11 @@ def scrape_games():
 
     args = parser.parse_args()
     last_month = ''
+    
+    yesterday = datetime.date.today() - datetime.timedelta(days=1)
+    #Goko updates logs in real time; wait a day so the list is finalized.
 
-    for cur_date in utils.daterange(datetime.date(2010, 10, 15), 
-                                    datetime.date.today()):
+    for cur_date in utils.daterange(default_startdate, yesterday):
         str_date = time.strftime("%Y%m%d", cur_date.timetuple())
         if not utils.includes_day(args, str_date):
             if DEBUG:
