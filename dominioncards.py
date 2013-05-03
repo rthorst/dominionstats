@@ -58,6 +58,12 @@ class Card(object):
     def is_attack(self):
         return self.attack == '1'
 
+    def is_shelter(self):
+        return self.shelter == '1'
+
+    def is_knight(self):
+        return self.knight == '1'
+
     def vp_per_card(self):
         return self.vp
 
@@ -186,7 +192,8 @@ def opening_cards():
 
     This includes only cards costing between 0 and 5 coin."""
     return sorted([card for card in all_cards()
-            if card.cost in ('0','1', '2', '3', '4', '5')])
+            if (card.cost in ('0','1', '2', '3', '4', '5') and 
+                not card.is_shelter())])
 
 
 import collections
