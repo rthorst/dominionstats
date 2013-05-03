@@ -102,16 +102,21 @@ def download_date(str_date, cur_date, saved_games_bundle):
     return False
 
 def bundle_goko_games(cur_date, games, saved_games_bundle):
-    directory_name = tempfile.mkdtemp()
     bundle = tarfile.open(saved_games_bundle,'w:bz2')
+
+    orig_dir = os.getcwd()
+    directory_name = tempfile.mkdtemp()
+    os.chdir(directory_name)
+
     if DEBUG:
         print len(games), " games to download..."
     for cur_game in games:
         url = GokoSingleGameUrl(cur_date, cur_game)
         game_text = urllib.urlopen(url).read()
-        open(os.path.join(directory_name,cur_game),'a').write(game_text)
-        bundle.add(os.path.join(directory_name,cur_game))
+        open(cur_game,'a').write(game_text)
+        bundle.add(cur_game)
     bundle.close();
+    os.chdir(orig_dir)
     shutil.rmtree(directory_name)
 
 def unzip_date(directory, filename):
@@ -152,6 +157,7 @@ def repackage_archive(filename):
     # Extract the existing file into a temporary folder
     directory_name = tempfile.mkdtemp()
     source_filename = os.path.abspath(filename)
+    
     try:
         subprocess.check_call(["tar", "--auto-compress", "-C", directory_name,
                                "-xf", source_filename])
@@ -160,36 +166,29 @@ def repackage_archive(filename):
         logging.warning("Unexpected return from tar >>{msg}<<".format(msg=e.output))
         raise
 
-    # Compress all the game*.html files
+    # Compress all the game*.html log*txt files. 
+    # Individually, so the argument list doesn't explode from huge numbers of 
+    # goko logs. 
     os.chdir(directory_name)
     game_files = glob.glob("game*.html")+glob.glob("log*.txt")
-    if len(game_files) > 0:
+    dest_filename = repackage_filename(source_filename)
+
+    repackaged_archive = tarfile.open(dest_filename,'w')
+
+    for cur_game in game_files:
         try:
-            subprocess.check_call(["bzip2"] + game_files)
+            subprocess.check_call(["bzip2", cur_game])
         except subprocess.CalledProcessError, e:  #(retcode, cmd, output=output)
             # Not handling this yet, just re-raise
-            logging.warning("Unexpected return from bzip >>{msg}<<".format(msg=e.output))
+            logging.warning("Unexpected return from bzip or tar >>{msg}<<".format(msg=e.output))
+            os.chdir(orig_dir)
+            shutil.rmtree(directory_name)
             raise
-    else:
-        os.chdir(orig_dir)
-        os.removedirs(directory_name)
-        return
+        repackaged_archive.add(cur_game+'.bz2')
 
-    # Tar the results back to the directory where the original file
-    # came from
-    dest_filename = repackage_filename(source_filename)
-    game_files = glob.glob("game*.html.bz2")+glob.glob("log*.txt.bz2")
-    try:
-        subprocess.check_call(["tar", "--remove", "-cf", dest_filename+".part"] + game_files)
-    except subprocess.CalledProcessError, e:  #(retcode, cmd, output=output)
-        # Not handling this yet, just re-raise
-        logging.warning("Unexpected return from tar >>{msg}<<".format(msg=e.output))
-        raise
-
-    os.rename(dest_filename + ".part", dest_filename)
+    repackaged_archive.close();
     os.chdir(orig_dir)
-    os.removedirs(directory_name)
-
+    shutil.rmtree(directory_name)
 
 def scrape_date(str_date, cur_date, passive=False):
     #directory = str_date
