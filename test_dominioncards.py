@@ -8,7 +8,7 @@ import dominioncards
 class DominionCardsTest(unittest.TestCase):
     def test_openings(self):
         openings = dominioncards.opening_cards()
-        self.assertEquals(len(openings), 188)
+        self.assertEquals(len(openings), 189)
 
         # Valid opening cards
 
