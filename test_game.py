@@ -21,6 +21,11 @@ class ScoreDeckTest(unittest.TestCase):
         self.assertEquals(game.score_deck({dominioncards.Gardens: 2, dominioncards.Copper: 8}), 2)
         self.assertEquals(game.score_deck({dominioncards.Gardens: 2, dominioncards.Copper: 7}), 0)
 
+    def test_feodum(self):
+        self.assertEquals(game.score_deck({dominioncards.Feodum: 1, dominioncards.Silver: 9}), 3)
+        self.assertEquals(game.score_deck({dominioncards.Feodum: 2, dominioncards.Silver: 8}), 4)
+        self.assertEquals(game.score_deck({dominioncards.Feodum: 2, dominioncards.Silver: 2}), 0)
+
     def test_fairgrounds(self):
         self.assertEquals(game.score_deck({dominioncards.Fairgrounds: 1,
                                            dominioncards.Copper: 1,
@@ -30,6 +35,7 @@ class ScoreDeckTest(unittest.TestCase):
 
     def test_duke(self):
         self.assertEquals(game.score_deck({dominioncards.Duke: 2, dominioncards.Duchy: 2}), 10)
+
 
     def test_simple(self):
         self.assertEquals(game.score_deck({

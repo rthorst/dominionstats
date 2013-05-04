@@ -433,6 +433,8 @@ class Game(object):
 def score_deck(deck_comp):
     """ Given a dict of cards (as card.Card) and frequency, return the score. """
     ret = 0
+    if dominioncards.Feodum in deck_comp:
+        ret += score_feodum(deck_comp)
     if dominioncards.Gardens in deck_comp:
         ret += score_gardens(deck_comp)
     if dominioncards.Duke in deck_comp:
@@ -448,6 +450,9 @@ def score_deck(deck_comp):
         ret += cardinst.vp * deck_comp[cardinst]
 
     return ret
+
+def score_feodum(deck_comp):
+    return deck_comp[dominioncards.Feodum] * deck_comp.get(dominioncards.Silver, 0)/3
 
 def score_gardens(deck_comp):
     deck_size = sum(deck_comp.itervalues())
