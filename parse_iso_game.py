@@ -590,7 +590,7 @@ def parse_turn(turn_blob, names_list):
                 targ_list = targ_obj[targ_obj['buy_or_gain']]
                 non_silver_ind = len(targ_list) - 1
                 while (non_silver_ind >= 0 and
-                       targ_list[non_silver_ind] == 'Silver'):
+                       targ_list[non_silver_ind] == get_card('Silver')):
                     non_silver_ind -= 1
                 # This shouldn't work when there is no non-silver, but then
                 # non_silver_ind == -1 if there is no non-silver,

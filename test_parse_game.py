@@ -1125,7 +1125,7 @@ class ValidateIsoNamesTest(unittest.TestCase):
 
 class ParseIsoGameTest(unittest.TestCase):
     def test_iso_parse_game(self):
-        parsed_game = parse_iso_game.parse_game(u"""<html><head><link rel="stylesheet" href="/dom/client.css"><title>Dominion Game #2083</title></head><body><pre>Alenia wins!
+        parsed_game = parse_game.parse_game(u"""<html><head><link rel="stylesheet" href="/dom/client.css"><title>Dominion Game #2083</title></head><body><pre>Alenia wins!
 All <span class=card-victory>Provinces</span> are gone.
 
 cards in supply: <span cardname="Coppersmith" class=card-none>Coppersmith</span>, <span cardname="Expand" class=card-none>Expand</span>, <span cardname="Gardens" class=card-victory>Gardens</span>, <span cardname="Mining Village" class=card-none>Mining Village</span>, <span cardname="Nobles" class=card-victory-action>Nobles</span>, <span cardname="Outpost" class=card-duration>Outpost</span>, <span cardname="Pearl Diver" class=card-none>Pearl Diver</span>, <span cardname="Thief" class=card-none>Thief</span>, <span cardname="Throne Room" class=card-none>Throne Room</span>, and <span cardname="Worker's Village" class=card-none>Worker's Village</span>
@@ -1315,7 +1315,7 @@ Leeko plays 2 <span class=card-treasure>Coppers</span>.
 <span class=card-none>Bazaars</span>, <span class=card-none>Laboratories</span>, and <span class=card-curse>Curses</span> are all gone.
 Leeko wins!
 </pre></body></html> """
-        parsed_game = parse_iso_game.parse_game(game_contents)
+        parsed_game = parse_game.parse_game(game_contents)
         leeko_deck = parsed_game[DECKS][0]
         self.assertEquals(leeko_deck[NAME], 'Leeko')
         michiel_deck = parsed_game[DECKS][1]
@@ -1382,13 +1382,13 @@ Arsenic03 buys a <span class=card-none>Wishing Well</span>.
 <span class=card-victory-treasure>Harems</span>, <span class=card-none>Wishing Wells</span>, and <span class=card-victory>Duchies</span> are all gone.
 Arsenic03 wins!
 </pre></body></html>"""
-        parsed_game = parse_iso_game.parse_game(game_contents)
+        parsed_game = parse_game.parse_game(game_contents)
         veto_dict = parsed_game[VETO]
         assert_equal_card_lists([veto_dict['1']], ["Tactician"])
         assert_equal_card_lists([veto_dict['0']], ["Fool's Gold"])
 
         game_contents = codecs.open('testing/testdata/game-20120120-122852-2861266d.html', encoding='utf-8').read()
-        parsed_game = parse_iso_game.parse_game(game_contents)
+        parsed_game = parse_game.parse_game(game_contents)
         # Name 'Slow connection - sorry' is normed down to 'Slow connectionsorry'
         self.assertEquals(parsed_game[PLAYERS], [u'Slow connectionsorry', u'richard', u'Kazantzakis'])
         veto_dict = parsed_game[VETO]
@@ -1398,7 +1398,7 @@ Arsenic03 wins!
 
         # The following game had the string "away" in a user's name, which was getting normalized away
         game_contents = codecs.open('testing/testdata/game-20120122-190607-28dac253.html', encoding='utf-8').read()
-        parsed_game = parse_iso_game.parse_game(game_contents)
+        parsed_game = parse_game.parse_game(game_contents)
         self.assertEquals(parsed_game[PLAYERS], [u'carraway', u'Dad Frog', u'Lanaro'])
         veto_dict = parsed_game[VETO]
         assert_equal_card_lists([veto_dict['0']], ["Chancellor"])
@@ -1415,7 +1415,7 @@ Arsenic03 wins!
         # down to "Celicath".
 
         game_contents = codecs.open('testing/testdata/game-20101015-024842-a866e78a.html', encoding='utf-8').read()
-        parsed_game = parse_iso_game.parse_game(game_contents)
+        parsed_game = parse_game.parse_game(game_contents)
         self.assertEquals(parsed_game[PLAYERS], [u'Celicath', u'tafkal'])
         self.assertEquals(parsed_game[DECKS][0][NAME], u'Celicath')
         self.assertEquals(parsed_game[DECKS][1][NAME], u'tafkal')
