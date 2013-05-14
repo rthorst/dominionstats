@@ -452,7 +452,7 @@ def score_deck(deck_comp):
     return ret
 
 def score_feodum(deck_comp):
-    return deck_comp[dominioncards.Feodum] * deck_comp.get(dominioncards.Silver, 0)/3
+    return deck_comp[dominioncards.Feodum] * (deck_comp.get(dominioncards.Silver, 0)/3)
 
 def score_gardens(deck_comp):
     deck_size = sum(deck_comp.itervalues())
