@@ -683,6 +683,7 @@ def parse_game(game_str, dubious_check = False):
       game_end: List of cards exhausted that caused the game to end.
       resigned: True iff some player in the game resigned..
       start_decks: 7coppers and 3estates for all iso logs.
+      rating_system: 'isotropic' for all iso logs.
     """
     game_str = game_str.replace('&mdash;', '---')
 
@@ -692,6 +693,7 @@ def parse_game(game_str, dubious_check = False):
     except ValueError, exception:
         raise parse_common.ParsingError('Failed to split sections')
     game_dict = parse_header(header_str)
+    game_dict[RATING_SYSTEM] = 'isotropic'
     decks = parse_decks(decks_blob)
     game_dict[DECKS] = decks
     validate_names(decks)

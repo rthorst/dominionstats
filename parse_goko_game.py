@@ -29,42 +29,47 @@ import simplejson as json
 import utils
 import parse_common
 
+RATING_SYSTEM_RE = re.compile('^Rating system: (.*)$')
 GAME_OVER_RE = re.compile('^------------ Game Over ------------$')
-EMPTY_LINE_RE = re.compile('^$')
-ENDGAME_POINTS_RE = re.compile('^.* - victory point chips: (\d+)$')
-ENDGAME_VP_CHIP_RE = re.compile('^.* - total victory points: (\d+)$')
-START_TURN_RE = re.compile('^---------- (.*) turn (.*) (\[possessed\] )? ----------$')
+EMPTY_LINE_RE = re.compile('^\s+$')
+ENDGAME_VP_CHIP_RE = re.compile('^.* - victory point chips: (\d+)$')
+ENDGAME_POINTS_RE = re.compile('^.* - total victory points: (\d+)$')
+START_TURN_RE = re.compile('^---------- (.*): turn (.*) (\[possessed\] )?----------$')
 VP_CHIPS_RE = re.compile('receives (\d+) victory point chips')
 HYPHEN_SPLIT_RE = re.compile('^(.*?) - (.*)$')
 COMMA_SPLIT_RE = re.compile(', ')
 NUMBER_CARD_RE = re.compile('\s*(\d+) (.*)')
 BANE_RE = re.compile('^Bane card: (.*)$')
-PLAYER_AND_START_DECK_RE = re.compile('^(.*) - starting cards: (.*), (.*), (.*), (.*), (.*), (.*), (.*), (.*), (.*), (.*)$')
-TAKES_COINS_RE = re.compile(' takes (\d+) coin')
+PLAYER_AND_START_DECK_RE = re.compile('^(.*) - starting cards: (.*)$')
+TAKES_COINS_RE = re.compile('takes (\d+) coin')
 
-KW_PLACE = ' place: '
-KW_CARDS = ' cards: '
-KW_PLAYS = ' plays '
-KW_GAINS = ' gains '
-KW_RESIGNED = ' resigned '
-KW_REVEALS = ' reveals: ' 
-KW_DISCARDS = ' discards '
-KW_PLACES = ' places '
-KW_BUYS = ' buys '
-KW_GAINS = ' gains ' 
-KW_DRAWS = ' draws ' 
-KW_TRASHES = ' trashes ' 
-KW_SHUFFLES = ' shuffles deck '
-KW_PLACES = ' places ' 
-KW_DURATION = ' duration '
-KW_SETS_ASIDE = ' sets aside ' 
-KW_TAKES_SET_ASIDE = ' takes set aside cards: '
-KW_CHOOSES = ' chooses '
-KW_CHOOSES_TWO_COINS = ' chooses '
-KW_RETURNS = ' returns ' 
-KW_PIRATE_COIN = ' receives a pirate coin, now has '
-KW_VP_CHIPS = ' victory point chips'
-KW_TAKES = ' takes ' 
+KW_PLACE = 'place: '
+KW_CARDS = 'cards: '
+KW_PLAYS = 'plays '
+KW_GAINS = 'gains '
+KW_RECEIVES = 'receives '
+KW_RESIGNED = 'resigned'
+KW_QUIT = 'quit'
+KW_REVEALS_C = 'reveals: ' 
+KW_REVEALS = 'reveals ' 
+KW_DISCARDS = 'discards '
+KW_DISCARDS_C = 'discards: '
+KW_PLACES = 'places '
+KW_BUYS = 'buys '
+KW_GAINS = 'gains ' 
+KW_DRAWS = 'draws ' 
+KW_TRASHES = 'trashes ' 
+KW_SHUFFLES = 'shuffles deck'
+KW_PLACES = 'places ' 
+KW_DURATION = 'duration '
+KW_SETS_ASIDE = 'sets aside ' 
+KW_TAKES_SET_ASIDE = 'takes set aside cards: '
+KW_CHOOSES = 'chooses '
+KW_CHOOSES_TWO_COINS = 'chooses two coins'
+KW_RETURNS = 'returns ' 
+KW_PIRATE_COIN = 'receives a pirate coin, now has '
+KW_VP_CHIPS = 'victory point chips'
+KW_TAKES = 'takes ' 
 
 KEYWORDS = [locals()[w] for w in dict(locals()) if w.startswith('KW_')]
 
@@ -73,9 +78,8 @@ def parse_player_start_decks(log_lines):
     start_match = PLAYER_AND_START_DECK_RE.match(log_lines[0])
     while start_match:
         line=log_lines.pop(0)
-        start_match_groups = start_match.groups()
-        name = start_match_groups.pop(0)
-        start_deck = [get_card(c) for c in start_match_groups]
+        name = start_match.group(1)
+        start_deck = indexes(capture_cards(start_match.group(2)))
         start_decks.append({NAME:name, START_DECK:start_deck})
 
         start_match = PLAYER_AND_START_DECK_RE.match(log_lines[0])
@@ -84,7 +88,7 @@ def parse_player_start_decks(log_lines):
 def parse_supply(log_lines):
     line = log_lines.pop(0)
     supply_cards_text = line.split(', ')
-    supply_cards_text[0].replace('Supply cards: ','')
+    supply_cards_text[0] = supply_cards_text[0].replace('Supply cards: ','')
     supply_cards = []
     for card_name in supply_cards_text:
         try:
@@ -92,14 +96,13 @@ def parse_supply(log_lines):
         except KeyError, exception:
             raise parse_common.ParsingError('%s is not a card in the supply!'
                                             % card_name)
-        supply_cards.append(card)
+        supply_cards.append(card.index)
 
     bane_match = BANE_RE.match(log_lines[0])
     if bane_match:
         try:
             bane_card = get_card(bane_match.groups()[0])
             log_lines.pop(0)
-            supply_cards.append(bane_card)
         except KeyError, exception:
             raise parse_common.ParsingError('%s is not a valid bane!'
                                             % card_name)
@@ -119,17 +122,25 @@ def parse_header(log_lines):
     # next - supply
     supply_cards = parse_supply(log_lines)
 
+    # optionally, may say the game type. Old logs won't have this.
+    rating_system_match = RATING_SYSTEM_RE.match(log_lines[0])
+    if rating_system_match:
+        rating_system = rating_system_match.group(1)
+    else:
+        rating_system = 'unknown'
+
     # Next N lines will give me the N players and their start decks
     start_decks = parse_player_start_decks(log_lines) 
     names_list = [d[NAME] for d in start_decks]
 
     # next 2N lines are the players shuffling their decks
     # and drawing their starting hands. Then one blank line. 
-    lines = log_lines.pop(len(names_list)*2+1)
-    assert (EMPTY_LINE_RE.match(lines[-1]))
-    return {START_DECKS:start_decks, PLAYERS:names_list, SUPPLY:supply_cards}
+    log_lines[0:(len(names_list)*2+1)] = []
 
-def validate_names(game_dict):
+    return {START_DECKS:start_decks, PLAYERS:names_list, SUPPLY:supply_cards,
+            RATING_SYSTEM:rating_system}
+
+def validate_names(game_dict, dubious_check):
     """ Raise an exception for names that might screw up the parsing.
     This should happen in less than 1% of real games, but it's just easier
     to punt on annoying inputs that to make sure we get them right.
@@ -138,10 +149,12 @@ def validate_names(game_dict):
     used_names = set()
     for name in names:
         if name in used_names:
+            # unrecoverable!
             raise parse_common.BogusGameError('Duplicate name %s' % name)
         used_names.add(name)
 
-    if len(names) <= 1:
+    if len(names) <= 1 and dubious_check:
+        # that's recoverable, so only raise error if checking dubious
         raise parse_common.BogusGameError('only one player')
 
 
@@ -152,7 +165,7 @@ def capture_cards(line, return_dict=False):
     returns: list of the card objects, eg, [Silver, Copper, Copper, Copper]
     """
     for kw in KEYWORDS:
-        line.replace(kw, '')
+        line=line.replace(kw, '')
 
     if return_dict:
         cards = {}
@@ -162,7 +175,7 @@ def capture_cards(line, return_dict=False):
     for sect in card_sections:
         multiple = NUMBER_CARD_RE.match(sect)
         if multiple:
-            mult = multiple.group(1)
+            mult = int(multiple.group(1))
             sect = multiple.group(2)
         else:
             mult = 1
@@ -201,6 +214,20 @@ def parse_turn(log_lines):
         if n in d:
             del d[n]
 
+    def fix_buys_and_gains(buys, gains):
+        """Goko reports each buy and gain separately. This is correct, but
+        having everything compatible with iso stats would be nice! So, here
+        I 'fix' buys and gains so things which are bought and gained are 
+        only reported once, in 'buys', and things which are bought but not
+        gained (such as due to trader) are not listed.
+        """
+        new_buys = []
+        for buy in buys:
+            if buy in gains:
+                gains.remove(buy)
+                new_buys.append(buy)
+        return (new_buys, gains)
+
     ret = {PLAYS: [], RETURNS: [], GAINS: [], TRASHES: [], BUYS: []}
     durations = []
     turn_money = 0
@@ -216,7 +243,7 @@ def parse_turn(log_lines):
         # detect line which starts the turn, parse out turn number and player name
         if turn_start:
             ret[NAME] = turn_start.group(1)
-            ret[NUMBER] = turn_start.group(2)
+            ret[NUMBER] = int(turn_start.group(2))
             if turn_start.group(3):
                 ret[POSSESSION] = True
             else:
@@ -226,12 +253,17 @@ def parse_turn(log_lines):
         # empty line ends the turn, clean up and return
         if EMPTY_LINE_RE.match(line):
             # Current goko log bug - does not report 1 VP from Bishop
-            vp_tokens += ret[PLAYS].count(dominioncards.BISHOP)
+            vp_tokens += ret[PLAYS].count(dominioncards.Bishop)
 
-            ret[BUYS] = indexes(ret[BUYS])
+            money = parse_common.count_money(ret[PLAYS], True) + \
+                    turn_money + parse_common.count_money(durations, True)
+
+            (buys, gains) = fix_buys_and_gains(ret[BUYS], ret[GAINS])
+
+            ret[BUYS] = indexes(buys)
             ret[PLAYS] = indexes(ret[PLAYS])
             ret[RETURNS] = indexes(ret[RETURNS])
-            ret[GAINS] = indexes(ret[GAINS])
+            ret[GAINS] = indexes(gains)
             ret[TRASHES] = indexes(ret[TRASHES])
             durations = indexes(durations)
             for opp in opp_turn_info.keys():
@@ -245,10 +277,8 @@ def parse_turn(log_lines):
                     else:
                         d[k] = indexes(v)
 
-            ret.update({MONEY: parse_common.count_money(plays, True) + turn_money 
-                               + parse_common.count_money(durations, True),
-                        VP_TOKENS: vp_tokens, PIRATE_TOKENS: ps_tokens, 
-                        OPP: dict(opp_turn_info)})
+            ret.update({MONEY:money, VP_TOKENS: vp_tokens, 
+                        PIRATE_TOKENS: ps_tokens, OPP: dict(opp_turn_info)})
             return ret
 
         player_and_rest = HYPHEN_SPLIT_RE.match(line)
@@ -271,7 +301,7 @@ def parse_turn(log_lines):
             if active_player == ret[NAME]:
                 ret[GAINS].extend(capture_cards(action_taken))
             else:
-                opp[active_player][GAINS].extend(capture_cards(action_taken))
+                opp_turn_info[active_player][GAINS].extend(capture_cards(action_taken))
             continue
 
         # Some old Goko logs mis-attribute pirate ship trashing. I'm not 
@@ -282,7 +312,7 @@ def parse_turn(log_lines):
                 if not ret[POSSESSION]:
                     ret[TRASHES].extend(capture_cards(action_taken))
             else:
-                opp[active_player][TRASHES].extend(capture_cards(action_taken))
+                opp_turn_info[active_player][TRASHES].extend(capture_cards(action_taken))
             continue
 
         if KW_DURATION in action_taken:
@@ -304,18 +334,21 @@ def parse_turn(log_lines):
 
         match = TAKES_COINS_RE.match(action_taken)
         if match:
-            turn_money += match.group(1)
+            turn_money += int(match.group(1))
             continue
 
         if (KW_REVEALS in action_taken or 
-           KW_DISCARDS in action_taken or 
-           KW_DRAWS in action_taken or 
-           KW_PLACES in action_taken or 
-           KW_CHOOSES in action_taken or
-           KW_SETS_ASIDE in action_taken or 
-           KW_TAKES in action_taken or
-           KW_TAKES_SET_ASIDE in action_taken or 
-           KW_SHUFFLES in action_taken):
+            KW_REVEALS_C in action_taken or 
+            KW_RECEIVES in action_taken or 
+            KW_DISCARDS in action_taken or 
+            KW_DISCARDS_C in action_taken or 
+            KW_DRAWS in action_taken or 
+            KW_PLACES in action_taken or 
+            KW_CHOOSES in action_taken or
+            KW_SETS_ASIDE in action_taken or 
+            KW_TAKES in action_taken or
+            KW_TAKES_SET_ASIDE in action_taken or 
+            KW_SHUFFLES in action_taken):
             # List of things that could be tracked if we chose to track them
             continue
 
@@ -338,15 +371,15 @@ def parse_turns(log_lines):
     previous_name = '' # for Possession
     while not GAME_OVER_RE.match(log_lines[0]):
         turn = parse_turn(log_lines)
-        if turn[POSSESSED]:
+        if turn[POSSESSION]:
             turn['pname'] = previous_name
         elif(len(turns) > 0 and turn[NAME] == turns[-1][NAME] and 
-           not turn[POSSESSED] and not turns[-1][POSSESSED]):
+           not turn[POSSESSION] and not turns[-1][POSSESSION]):
             turn[OUTPOST] = True
-            previous_name = turns[NAME]
+            previous_name = turn[NAME]
         else:
             turn['turn_no'] = True
-            previous_name = turns[NAME]
+            previous_name = turn[NAME]
         turns.append(turn)
 
     log_lines.pop(0)
@@ -354,7 +387,7 @@ def parse_turns(log_lines):
 
 
 
-def associate_turns_with_owner(game_dict, turns):
+def associate_turns_with_owner(game_dict, turns, dubious_check):
     """ Move each turn in turns to be a member of the corresponding player
     in game_dict.
 
@@ -375,7 +408,8 @@ def associate_turns_with_owner(game_dict, turns):
             order_ct += 1
         del turn[NAME]
 
-    if order_ct != len(game_dict[DECKS]):
+    if order_ct != len(game_dict[DECKS]) and dubious_check:
+        # This may be okay! Only raise if dubious_check
         raise parse_common.BogusGameError('Did not find turns for all players')
 
 def parse_endgame(log_lines):
@@ -395,7 +429,7 @@ def parse_endgame(log_lines):
         hyphen_split_match = HYPHEN_SPLIT_RE.match(line)
         name = hyphen_split_match.group(1)
 
-        if KW_RESIGNED in hyphen_split_match.group(2):
+        if KW_RESIGNED in hyphen_split_match.group(2) or KW_QUIT in hyphen_split_match.group(2):
             resigned = True
             line = log_lines.pop(0)
             hyphen_split_match = HYPHEN_SPLIT_RE.match(line)
@@ -418,6 +452,10 @@ def parse_endgame(log_lines):
         log_lines.pop(0)
         # blank line
         log_lines.pop(0)
+
+        # Handle resignations here; give fake -1 point
+        if resigned:
+            total_vp = -1
 
         decks.append({NAME: name, POINTS: total_vp, RESIGNED: resigned,
                       DECK: deck_comp, VP_TOKENS: vp_tokens})
@@ -447,11 +485,11 @@ def parse_game(game_str, dubious_check = False):
     game_dict = parse_header(log_lines)
     # start_decks, players, and supply are now set
 
-    validate_names(game_dict)
+    validate_names(game_dict, dubious_check)
     game_dict[VETO] = {}
 
     turns = parse_turns(log_lines)
-    decks = parse_endgame(game_dict, log_lines)
+    decks = parse_endgame(log_lines)
     game_dict[DECKS] = decks
-    associate_turns_with_owner(game_dict, turns)
+    associate_turns_with_owner(game_dict, turns, dubious_check)
     return game_dict

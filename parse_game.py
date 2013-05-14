@@ -73,11 +73,12 @@ def parse_game(game_str, dubious_check = False):
       game_end: List of cards exhausted that caused the game to end.
       resigned: True iff some player in the game resigned..
       start_decks: A list of initial player decks. 
+      rating_type: how the game was rated. 
     """
 
     if ISO_LOG_RE.match(game_str):
         game_dict = parse_iso_game.parse_game(game_str, dubious_check)
-    elif GOKO_lOG_RE.match(game_str):
+    elif GOKO_LOG_RE.match(game_str):
         game_dict = parse_goko_game.parse_game(game_str, dubious_check)
         
 
