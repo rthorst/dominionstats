@@ -1178,8 +1178,18 @@ class ParseGokoGameTest(unittest.TestCase):
         self.assertTrue(False)
 
     def test_goko_possessed_trashing(self):
-        # Not done
-        self.assertTrue(False)
+        # Game with Possession, Golem, Bishop, Trading Post. 
+        game_contents = codecs.open('testing/testdata/log.50a6c1abe4b03214bb7822e9.1365829398920.txt', encoding='utf-8').read()
+        parsed_game=parse_game.parse_game(game_contents)
+        self.assertTrue(parsed_game[DECKS][1][TURNS][26][POSSESSION])
+        self.assertEqual(parsed_game[DECKS][1][TURNS][26][VP_TOKENS], 2)
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][26][TRASHES],[])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][26][GAINS],[])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][26][OPP]['michaeljb'][GAINS],["Pawn"])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][26][OPP]['michaeljb'][TRASHES],["Estate"])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][18][GAINS],[])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][18][TRASHES],[])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][18][OPP]['michaeljb'][GAINS],["Silver"])
 
     def test_goko_multi_card_trashing(self):
         # Trashing more than one card at a time with chapel
