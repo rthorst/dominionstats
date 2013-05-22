@@ -1356,18 +1356,7 @@ class ParseGokoGameTest(unittest.TestCase):
         #Diadem
         #Fool's Gold
         #Spice Merchant (tested elsewhere)
-        self.assertTrue(False)
-
-    def test_goko_delayed_variable_coin_cards(self):
-        # Cards that give payoffs delayed to the next line and not announced
-        # via coins: moneylender, baron, ironworks, minion, mining village, 
-        # tribute, salvager, vault, tournament, harvest, trusty steed
-        # poor house, storeroom, count, 
-        self.assertTrue(False)
-
-    def test_goko_returning_spoils_with_counterfeit(self):
-        # Spoils needs to get returned to the spoils pile, only once when 
-        # counterfeited
+        #Count
         self.assertTrue(False)
 
     def test_goko_trashing_fortress(self):
@@ -1379,7 +1368,7 @@ class ParseGokoGameTest(unittest.TestCase):
         # or if it's a Fortress? Or a Feast, or an Embargo? 
         self.assertTrue(False)
 
-    def test_goko_trashing_bom_as_nothing(self):
+    def test_goko_bom_as_nothing(self):
         # What happens when Band of Misfits is unplayable? 
         self.assertTrue(False)
 
