@@ -1175,72 +1175,328 @@ class ParseGokoGameTest(unittest.TestCase):
 
     def test_goko_possession_outpost_shenanigans(self):
         # Not done
-        print " "
+        self.assertTrue(False)
 
     def test_goko_possessed_trashing(self):
         # Not done
-        print " "
+        self.assertTrue(False)
 
     def test_goko_multi_card_trashing(self):
         # Trashing more than one card at a time with chapel
         game_contents = codecs.open('testing/testdata/log.5191c02ce4b0ce5189dc951a.1368506756212.txt', encoding='utf-8').read()
         parsed_game=parse_game.parse_game(game_contents)
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][2][TRASHES], 
+                                ['Estate','Copper','Copper','Copper'])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][3][TRASHES], 
+                                ['Copper','Copper','Copper'])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][4][TRASHES], 
+                                ['Estate','Estate','Copper','Copper'])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][5][TRASHES], 
+                                ['Estate','Copper','Bureaucrat', 'Estate'])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][8][TRASHES], 
+                                ['Copper','Copper','Curse', 'Copper'])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][10][TRASHES], 
+                                ['Curse', 'Estate'])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][11][TRASHES], 
+                                ['Curse'])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][15][TRASHES], 
+                                ['Curse', 'Curse'])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][16][TRASHES], 
+                                ['Curse', 'Copper', 'Copper'])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][19][TRASHES], 
+                                ['Curse','Curse'])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][20][TRASHES], 
+                                ['Curse','Curse'])
 
-    def test_goko_watchtower_border_village_mountebank(self):
+    def test_goko_watchtower_border_village_mountebank_marauder_spoils(self):
         # Watchtower test - reacting to a junking attack, buying, and gaining
-        print " "
+        # Also has spoils which get returned. And Noble Brigand. 
+        game_contents = codecs.open('testing/testdata/log.50612a9b51c36e573294bfd0.1368579645597.txt', encoding='utf-8').read()
+        parsed_game=parse_game.parse_game(game_contents)
+        self.assertEqual(parsed_game[RATING_SYSTEM], 'unrated')
+        self.assertEqual(parsed_game[DECKS][0][NAME], 'ftl')
+        self.assertEqual(parsed_game[DECKS][1][NAME], 'Lord Bottington')
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][5][OPP]['Lord Bottington'][GAINS], ["Curse", "Copper", "Ruined Library"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][5][GAINS], ["Spoils", "Watchtower"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][5][BUYS], ["Border Village"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][6][RETURNS], ["Spoils"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][9][BUYS], ["Estate"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][9][TRASHES], ["Estate"])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][15][OPP]['ftl'][GAINS], ["Ruined Library"])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][15][OPP]['ftl'][TRASHES], ["Ruined Library"])
+        self.assertEqual(parsed_game[DECKS][0][TURNS][21][MONEY], 12)
 
-    def test_goko_spoils(self):
+    def test_goko_counterfeit_spoils(self):
         # Spoils doesn't SAY it gets returned to the supply...  needs to be
-        # manually adjusted. 
-        print " "
+        # manually adjusted. This is tough with Counterfeit. 
+        # Oh, and there's a Rogue here. 
+        game_contents = codecs.open('testing/testdata/log.51500f81e4b0b989d044f1f8.1364838799465.txt', encoding='utf-8').read()
+        parsed_game=parse_game.parse_game(game_contents, False)
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][10][RETURNS],
+                                ["Spoils"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][12][RETURNS],
+                                ["Spoils"])
 
     def test_goko_ambassador_lighthouse(self):
         # Test ambassador and lighthouse
-        print " "
+        game_contents = codecs.open('testing/testdata/log.51532c8ce4b083ccc5b0febe.1364825843533.txt', encoding='utf-8').read()
+        parsed_game=parse_game.parse_game(game_contents, False)
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][4][RETURNS],
+                                ["Copper","Copper"])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][7][RETURNS], [])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][7][OPP]["Hurtig"][GAINS], ["Copper"])
+        self.assertEqual(parsed_game[DECKS][0][TURNS][3][MONEY],4)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][4][MONEY],5)
 
     def test_goko_multiplayer_quitter(self):
         # What happens if someone quits in a multiplayer game? 
         game_contents = codecs.open('testing/testdata/log.51919af0e4b0d001ef25b885.1368496912009.txt', encoding='utf-8').read()
         parsed_game=parse_game.parse_game(game_contents)
+        self.assertEquals(parsed_game[DECKS][0][WIN_POINTS], 2.0)
+        self.assertEquals(parsed_game[DECKS][1][WIN_POINTS], 2.0)
+        self.assertEquals(parsed_game[DECKS][2][WIN_POINTS], 0.0)
+        self.assertEquals(parsed_game[DECKS][3][WIN_POINTS], 0.0)
+        self.assertEquals(parsed_game[DECKS][0][NAME], 'Defender Bot')
+        self.assertEquals(parsed_game[DECKS][1][NAME], 'Banker Bot')
+        self.assertEquals(parsed_game[DECKS][2][NAME], 'Villager Bot')
+        self.assertEquals(parsed_game[DECKS][3][NAME], 'guest2666.0000')
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][2][PLAYS], 
+                                ['Copper', 'Copper','Copper','Copper'])
+
 
     def test_goko_outpost(self):
-        # Tests outpost - simple case, no weirdness with possession. 
+        # Tests outpost - simpler case, no weirdness with possession. 
         # Also has durations and embargo and smugglers. 
+        # And different start decks!
         game_contents = codecs.open('testing/testdata/log.5154cd91e4b0a260b599ab6b.1364855887188.txt', encoding='utf-8').read()
         parsed_game=parse_game.parse_game(game_contents)
+        assert_equal_card_lists(parsed_game[START_DECKS][0][START_DECK], 
+                                ["Silver", "Silver", "Silver", 
+                                 "Silver", "Silver", "Silver",
+                                 "Duchy", "Duchy", "Duchy", "Estate"])
+        assert_equal_card_lists(parsed_game[START_DECKS][1][START_DECK], 
+                                ["Copper", "Copper", "Silver", 
+                                 "Silver", "Silver", "Silver",
+                                 "Silver", "Duchy", "Duchy", "Province"])
+        self.assertTrue(parsed_game[DECKS][2][TURNS][3][OUTPOST])
+        self.assertTrue(parsed_game[DECKS][2][TURNS][5][OUTPOST])
+        self.assertTrue(parsed_game[DECKS][0][TURNS][5][OUTPOST])
+        self.assertTrue(parsed_game[DECKS][2][TURNS][8][OUTPOST])
+        self.assertTrue(parsed_game[DECKS][2][TURNS][11][OUTPOST])
+        self.assertTrue(parsed_game[DECKS][0][TURNS][9][OUTPOST])
+        self.assertFalse(OUTPOST in parsed_game[DECKS][0][TURNS][0])
 
-    def test_goko_possession(self):
-        # Tests possession - simple case, no weirdness with outpost or TR. 
+    def test_goko_possession_forager(self):
+        # Tests possession - simple case, no weirdness with outpost or TR.
+        # Has forager.
         game_contents = codecs.open('testing/testdata/log.514b28bee4b0b79c883b5a60.1364852529283.txt', encoding='utf-8').read()
         parsed_game=parse_game.parse_game(game_contents)
+        assert_equal_card_lists(parsed_game[SUPPLY],
+                          ["Vineyard",
+                           "Forager",
+                           "Lookout",
+                           "Navigator",
+                           "Procession",
+                           "Festival",
+                           "Mine",
+                           "Stables",
+                           "Nobles",
+                           "Possession",
+                           "Copper",
+                           "Silver",
+                           "Gold",
+                           "Estate",
+                           "Duchy",
+                           "Province",
+                           "Curse",
+                           "Potion"])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][3][PLAYS], 
+                                ["Navigator", "Copper", "Copper"])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][6][PLAYS], 
+                                ["Procession", "Navigator", "Navigator", 
+                                 "Copper", "Copper"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][9][PLAYS], 
+                                ["Stables", "Festival", "Forager", 
+                                 "Forager", "Potion"])
+        self.assertEqual(parsed_game[DECKS][0][TURNS][9][MONEY], 5)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][14]['pname'], 
+                         'Hazardous_Lazarus')
+        self.assertEqual(parsed_game[DECKS][0][TURNS][14][GAINS], [])
+        self.assertEqual(parsed_game[DECKS][0][TURNS][14][TRASHES], [])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][14][OPP]['Hazardous_Lazarus'][GAINS], ["Navigator", "Gold"])
+
+    def test_goko_forager_last_play_of_turn(self):
+        # Forager coin-counting despite being played at odd times
+        self.assertTrue(False)
+
+    def test_goko_forager_rogue(self):
+        # Forager coin-counting after rogue steals its trashed treasures
+        self.assertTrue(False)
+
+    def test_goko_variable_coin_cards(self):
+        # Cards that give variable payoffs:
+        #These cards give a VARIABLE VALUE when played depending on choices by the player or the game state. This is not reported directly on goko. 
+        #Moneylender - depending on whether you trash copper or not.     
+        #Pawn - choice
+        #Secret chamber - discard for coins
+        #Steward - depends on choice
+        #Baron - depends
+        #Ironworks
+        #Mining Village (tested elsewhere)
+        #Minion
+        #Tribute
+        #Pirate ship (tested elsewhere)
+        #Salvager    
+        #Trade Route
+        #City
+        #Vault
+        #Bank
+        #Tournament
+        #Harvest
+        #Diadem
+        #Fool's Gold
+        #Spice Merchant (tested elsewhere)
+        self.assertTrue(False)
+
+    def test_goko_delayed_variable_coin_cards(self):
+        # Cards that give payoffs delayed to the next line and not announced
+        # via coins: moneylender, baron, ironworks, minion, mining village, 
+        # tribute, salvager, vault, tournament, harvest, trusty steed
+        # poor house, storeroom, count, 
+        self.assertTrue(False)
+
+    def test_goko_returning_spoils_with_counterfeit(self):
+        # Spoils needs to get returned to the spoils pile, only once when 
+        # counterfeited
+        self.assertTrue(False)
+
+    def test_goko_trashing_fortress(self):
+        # Make sure fortress doesn't count as getting trashed
+        self.assertTrue(False)
+
+    def test_goko_trashing_bom_as_things(self):
+        # What happens when Band of Misfits is a mining village?
+        # or if it's a Fortress? Or a Feast, or an Embargo? 
+        self.assertTrue(False)
+
+    def test_goko_trashing_bom_as_nothing(self):
+        # What happens when Band of Misfits is unplayable? 
+        self.assertTrue(False)
+
+    def test_goko_mining_village_trashing(self):
+        # Try trashing mining village with watchtower, forager, chapel, etc.
+        self.assertTrue(False)
+
+
 
     def test_goko_embargo_nv_watchtower_workshop_island(self):
         # Tets embargo tokens, native village, watchtower's abilities, also
         # gains without buying via workshop. 
         game_contents = codecs.open('testing/testdata/log.5139e809e4b05fa06a3117e7.1364835851103.txt', encoding='utf-8').read()
         parsed_game=parse_game.parse_game(game_contents)
+        self.assertEqual(parsed_game[DECKS][0][NAME], 'Ali Iskandar Othman')
+        self.assertEqual(parsed_game[DECKS][1][NAME], 'konichiwa')
+        self.assertEqual(parsed_game[DECKS][2][NAME], 'dikdik')
+        self.assertEqual(parsed_game[DECKS][3][NAME], 'sandyttc')
+        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][2][TRASHES],
+                                ['Embargo'])
+        self.assertEqual(parsed_game[DECKS][2][TURNS][2][MONEY],5)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][4][MONEY],1)
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][4][BUYS],
+                                ['Witch'])
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][4][GAINS],
+                                ['Curse'])
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][4][TRASHES],
+                                ['Curse'])
+        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][7][PLAYS], 
+                                ['Witch','Copper','Copper'])
+        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][7][OPP]['sandyttc'][GAINS], ['Curse']) 
+        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][7][OPP]['sandyttc'][TRASHES], ['Curse']) 
+        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][7][OPP]['konichiwa'][GAINS], ['Curse']) 
+        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][7][OPP]['konichiwa'][TRASHES], ['Curse']) 
+        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][7][OPP]['Ali Iskandar Othman'][GAINS], ['Curse']) 
+        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][7][OPP]['Ali Iskandar Othman'][TRASHES], ['Curse']) 
+        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][8][PLAYS], 
+                                ['Embargo', 'Silver', 'Copper'])
+        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][8][TRASHES], 
+                                ['Embargo', 'Curse','Curse'])
+        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][8][GAINS], 
+                                ['Curse','Curse'])
+        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][8][BUYS], 
+                                ['Laboratory'])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][9][BUYS], 
+                                ['Watchtower'])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][9][GAINS], 
+                                ['Pirate Ship'])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][9][PLAYS], 
+                                ['Workshop', 'Copper','Copper','Copper'])
+        self.assertEqual(parsed_game[DECKS][0][TURNS][24][MONEY],9)
+
 
     def test_goko_contraband_steward_catacombs_bom(self):
         # Tests catacombs' "look at", Steward's options, Contraband's choices
-        # Band of Misfits, Nomad Camp. 
+        # Band of Misfits, Nomad Camp, Bishop, Mining Village. 
         game_contents = codecs.open('testing/testdata/log.512c5679e4b0feac797bf37f.1364868216483.txt', encoding='utf-8').read()
         parsed_game=parse_game.parse_game(game_contents)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][6][VP_TOKENS],2)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][6][MONEY],4)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][23][MONEY], 12)
 
     def test_goko_trader_and_spice_merchant(self):
         # Tests trader's would-gain (on Cache!) and Spice Merchant's choices
         game_contents = codecs.open('testing/testdata/log.512c1423e4b0feac797beef6.1364833567277.txt', encoding='utf-8').read()
         parsed_game=parse_game.parse_game(game_contents)
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][2][GAINS],
+                                ["Copper","Copper"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][2][BUYS],
+                                ["Cache"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][3][TRASHES],
+                                ["Copper"])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][3][TRASHES],
+                                ["Estate"])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][3][GAINS],
+                                ["Silver","Silver"])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][3][BUYS],
+                                ["Silver"])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][8][GAINS],
+                                ["Silver","Silver"])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][8][BUYS],
+                                ["Cache"])
+        self.assertEqual(parsed_game[DECKS][1][TURNS][10][MONEY],5)
 
     def test_goko_junking_attacks(self):
-        # Tests swindler and marauder, in addition to death cart and procession
+        # Tests swindler and death cart and procession
         game_contents = codecs.open('testing/testdata/log.512c07c0e4b0c02658fec563.1364840138250.txt', encoding='utf-8').read()
         parsed_game=parse_game.parse_game(game_contents)
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][1][BUYS],
+                                ["Death Cart"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][1][GAINS],
+                                ["Ruined Village", "Ruined Library"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][6][OPP]["Warlord Bot"][TRASHES], ["Cutpurse"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][6][OPP]["Warlord Bot"][GAINS], ["Pirate Ship"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][6][GAINS],
+                                ["Ruined Library", "Ruined Village"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][6][BUYS],
+                                ["Death Cart"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][6][PLAYS],
+                                ["Swindler", "Copper","Copper"])
+        self.assertEqual(parsed_game[DECKS][1][TURNS][13][MONEY], 6)
+        self.assertEqual(parsed_game[DECKS][1][TURNS][25][MONEY], 10)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][14][MONEY], 8)
 
     def test_goko_vp_chip_cards(self):
         # Tests monument, goons, bishop, as well as scrying pool's spy ability
         game_contents = codecs.open('testing/testdata/log.50612a9b51c36e573294bfd0.1368044241913.txt', encoding='utf-8').read()
         parsed_game=parse_game.parse_game(game_contents)
+        self.assertEqual(parsed_game[DECKS][1][TURNS][5][VP_TOKENS], 1)
+        self.assertEqual(parsed_game[DECKS][1][TURNS][6][VP_TOKENS], 1)
+        self.assertEqual(parsed_game[DECKS][1][TURNS][8][VP_TOKENS], 2)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][9][VP_TOKENS], 2)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][16][VP_TOKENS], 61)
+        self.assertEqual(parsed_game[DECKS][0][POINTS], 124)
+        self.assertEqual(parsed_game[DECKS][0][VP_TOKENS], 124)
+        self.assertEqual(parsed_game[DECKS][1][POINTS], 25)
+        self.assertEqual(parsed_game[DECKS][1][VP_TOKENS], 16)
 
     def test_goko_pirate_ship_market_square(self):
         # Tests pirate ship as well as Market Square reactions with 

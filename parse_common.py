@@ -93,7 +93,8 @@ def count_money(plays, typeGoko = False):
     This does not include money from cards like Steward or Bank, but does
     count Copper. 
     
-    Counts as much as it can from Goko...
+    Counts as much as it can from Goko. Forager has to be dealt with elsewhere,
+    since this function can't possibly know the current state of the trash. 
 
     plays: list of cards.
     """
@@ -110,7 +111,7 @@ def count_money(plays, typeGoko = False):
             money += 1 + coppersmith_ct
         elif card == dominioncards.Bank and typeGoko:
             money += treasures
-        elif card.is_treasure():
+        elif card.is_treasure() or typeGoko:
             money += card.money_value()
     return money
 

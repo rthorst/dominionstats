@@ -40,7 +40,8 @@ def assign_win_points(game_dict):
     def win_tuple(deck_dict):
         """ Return tuple ordered by increasing final standing. """
         # negate turns so that max() behaves; points good, turns bad.
-        num_normal_turns = sum(not (POSSESSION in t or OUTPOST in t)
+        num_normal_turns = sum(not ( (POSSESSION in t and t[POSSESSION]) or \
+                                     (OUTPOST in t and t[OUTPOST]))
                                for t in deck_dict[TURNS])
         return (deck_dict[POINTS], -num_normal_turns)
 
