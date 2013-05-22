@@ -42,11 +42,13 @@ NUMBER_CARD_RE = re.compile('\s*(\d+) (.*)')
 BANE_RE = re.compile('^Bane card: (.*)$')
 PLAYER_AND_START_DECK_RE = re.compile('^(.*) - starting cards: (.*)$')
 TAKES_COINS_RE = re.compile('takes (\d+) coin')
+RECEIVES_COINS_RE = re.compile('receives (\d+) coin')
 
 KW_APPLIED = 'applied ' #applied Watchtower to place X on top of the deck
 KW_TO_THE_SUPPLY = ' to the Supply'
 KW_PLACE = 'place: '
 KW_CARDS = 'cards: '
+KW_CARDS_IN_DISCARDS = 'cards in discards'
 KW_PLAYS = 'plays '
 KW_LOOKS_AT = 'looks at '
 KW_GAINS = 'gains '
@@ -453,6 +455,13 @@ def parse_turn(log_lines, trash_pile):
             trashing_mv_would_give_2 = False
             continue
 
+        match = RECEIVES_COINS_RE.match(action_taken)
+        if match:
+            turn_money += int(match.group(1))
+            thieving_from_trash = False
+            trashing_mv_would_give_2 = False
+            continue
+
         # All remaining actions should be captured; the next few statements
         # are those which are not logged in any way (though they could be!)
 
@@ -466,6 +475,7 @@ def parse_turn(log_lines, trash_pile):
             KW_TAKES in action_taken or
             KW_EMBARGOES in action_taken or 
             KW_NAMES in action_taken or 
+            KW_CARDS_IN_DISCARDS in action_taken or
             KW_TAKES_SET_ASIDE in action_taken):
             thieving_from_trash = False
             trashing_mv_would_give_2 = False

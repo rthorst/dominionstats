@@ -1345,7 +1345,7 @@ class ParseGokoGameTest(unittest.TestCase):
 
     def test_goko_variable_coin_cards(self):
         # Cards that give variable payoffs:
-        #These cards give a VARIABLE VALUE when played depending on choices by the player or the game state. This is not reported directly on goko. 
+        #These cards give a VARIABLE VALUE when played depending on choices by the player or the game state. These are the ones not reported directly on goko.
         #Moneylender - depending on whether you trash copper or not.     
         #Pawn - choice
         #Secret chamber - discard for coins
@@ -1355,7 +1355,6 @@ class ParseGokoGameTest(unittest.TestCase):
         #Mining Village (tested elsewhere)
         #Minion
         #Tribute
-        #Pirate ship (tested elsewhere)
         #Salvager    
         #Trade Route
         #City
@@ -1367,6 +1366,7 @@ class ParseGokoGameTest(unittest.TestCase):
         #Fool's Gold
         #Spice Merchant (tested elsewhere)
         #Count
+        #Ironmonger
         self.assertTrue(False)
 
     def test_goko_trashing_fortress(self):
@@ -1383,10 +1383,31 @@ class ParseGokoGameTest(unittest.TestCase):
         self.assertTrue(False)
 
     def test_goko_mining_village_trashing(self):
-        # Try trashing mining village with watchtower, forager, chapel, etc.
-        self.assertTrue(False)
+        # Try trashing mining village - with something else like Forge.
+        # Also has Pstone! 
+        game_contents = codecs.open('testing/testdata/log.5158c673e4b0ee7f08a5981a.1364826012999.txt', encoding='utf-8').read()
+        parsed_game=parse_game.parse_game(game_contents)
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][19][TRASHES],
+                               ["Mining Village", "Monument", "Mining Village"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][19][GAINS],
+                               ["Province"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][19][BUYS],
+                               ["Duchy"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][19][PLAYS],
+                               ["Mining Village", "Forge", "Highway",
+                                "Mining Village"])
+        self.assertEqual(parsed_game[DECKS][0][TURNS][19][MONEY],4)
 
-
+        game_contents = codecs.open('testing/testdata/log.5133cb09e4b07f4f5210613a.1364876441937.txt', encoding='utf-8').read()
+        parsed_game=parse_game.parse_game(game_contents)
+        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][21][TRASHES],
+                                ["Mining Village", "Mining Village", 
+                                 "Mining Village", "Curse"])
+        self.assertEqual(parsed_game[DECKS][2][TURNS][21][MONEY],4)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][17][MONEY],8)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][23][MONEY],8)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][25][MONEY],8)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][26][MONEY],8)
 
     def test_goko_embargo_nv_watchtower_workshop_island(self):
         # Tets embargo tokens, native village, watchtower's abilities, also
