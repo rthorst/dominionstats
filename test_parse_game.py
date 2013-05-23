@@ -1174,8 +1174,31 @@ class ParseGokoGameTest(unittest.TestCase):
         self.assertEquals(parsed_game[DECKS][1][ORDER], 1)
 
     def test_goko_possession_outpost_shenanigans(self):
-        # Not done
-        self.assertTrue(False)
+        # Possession+golem+outpost insanity! 
+        game_contents = codecs.open('testing/testdata/log.50612a9b51c36e573294bfd0.1369284870596.txt', encoding='utf-8').read()
+        parsed_game=parse_game.parse_game(game_contents)
+        self.assertEquals(parsed_game[DECKS][0][WIN_POINTS], 1.5)
+        self.assertEquals(parsed_game[DECKS][1][WIN_POINTS], 1.5)
+        self.assertEquals(parsed_game[DECKS][2][WIN_POINTS], 0.0)
+        self.assertEquals(parsed_game[DECKS][0][NAME], 'ftl')
+        self.assertEquals(parsed_game[DECKS][1][NAME], 'guest5451')
+        self.assertEquals(parsed_game[DECKS][2][NAME], 'Guest_979018')
+
+        n_turns_possessed = 0
+        n_turns_outpost = 0
+        n_turns_normal = 0
+        for t in parsed_game[DECKS][0][TURNS]:
+            if OUTPOST in t and t[OUTPOST]:
+                n_turns_outpost = n_turns_outpost + 1
+            if POSSESSION in t and t[POSSESSION]:
+                n_turns_possessed = n_turns_possessed + 1
+                self.assertEqual(t['pname'], 'guest5451')
+            if 'turn_no' in t and t['turn_no']:
+                n_turns_normal = n_turns_normal + 1
+
+        self.assertEqual(n_turns_possessed, 22)
+        self.assertEqual(n_turns_outpost, 4)
+        self.assertEqual(n_turns_normal, 13)
 
     def test_goko_possessed_trashing(self):
         # Game with Possession, Golem, Bishop, Trading Post. 
