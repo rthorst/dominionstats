@@ -1360,7 +1360,9 @@ class ParseGokoGameTest(unittest.TestCase):
 
     def test_goko_forager_last_play_of_turn(self):
         # Forager coin-counting despite being played at odd times
-        self.assertTrue(False)
+        game_contents = codecs.open('testing/testdata/log.50612a9b51c36e573294bfd0.1369385726617.txt', encoding='utf-8').read()
+        parsed_game=parse_game.parse_game(game_contents)
+        self.assertEqual(parsed_game[DECKS][1][TURNS][41][MONEY], 2)
 
     def test_goko_forager_rogue(self):
         # Forager coin-counting after rogue steals its trashed treasures
@@ -1413,6 +1415,20 @@ class ParseGokoGameTest(unittest.TestCase):
         assert_equal_card_lists(parsed_game[DECKS][2][TURNS][16][GAINS],
                                 ["Province"]) 
 
+    def test_goko_masquerade(self):
+        game_contents = codecs.open('testing/testdata/log.50bbfdf8e4b07d338bca0e67.1364827084306.txt', encoding='utf-8').read()
+        parsed_game=parse_game.parse_game(game_contents)
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][4][PASSES],
+                                ['Copper'])
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][4][OPP]['Conqueror Bot'][PASSES], ['Copper'])
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][4][OPP]['Warlord Bot'][PASSES], ['Estate'])
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][4][OPP]['Kerry Monroe'][PASSES], ['Estate'])
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][11][PASSES],
+                                ['Copper'])
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][11][OPP]['Conqueror Bot'][PASSES], ['Fortress'])
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][11][OPP]['Warlord Bot'][PASSES], ['Copper'])
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][11][OPP]['Kerry Monroe'][PASSES], ['Copper'])
+
     def test_goko_trashing_bom_as_things(self):
         # What happens when Band of Misfits is a mining village?
         # or if it's a Fortress? Or a Feast, or an Embargo? 
@@ -1420,7 +1436,12 @@ class ParseGokoGameTest(unittest.TestCase):
 
     def test_goko_bom_as_nothing(self):
         # What happens when Band of Misfits is unplayable? 
-        self.assertTrue(False)
+        # Nothing particularly difficult to parse, as it turns out. 
+        # Still a worthy test case. 
+        game_contents = codecs.open('testing/testdata/log.50612a9b51c36e573294bfd0.1369375420361.txt', encoding='utf-8').read()
+        parsed_game=parse_game.parse_game(game_contents)
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][5][PLAYS],
+                                ['Band of Misfits','Silver','Copper'])
 
     def test_goko_mining_village_trashing(self):
         # Try trashing mining village - with something else like Forge.

@@ -65,6 +65,7 @@ KW_BUYS = 'buys '
 KW_GAINS = 'gains ' 
 KW_DRAWS = 'draws ' 
 KW_TRASHES = 'trashes ' 
+KW_PASSES = 'passes ' 
 KW_SHUFFLES = 'shuffles deck'
 KW_PLACES = 'places ' 
 KW_DURATION = 'duration '
@@ -239,7 +240,7 @@ def parse_turn(log_lines, trash_pile):
                 new_buys.append(buy)
         return (new_buys, gains)
 
-    ret = {PLAYS: [], RETURNS: [], GAINS: [], TRASHES: [], BUYS: []}
+    ret = {PLAYS: [], RETURNS: [], GAINS: [], TRASHES: [], BUYS: [], PASSES: []}
     durations = []
     turn_money = 0
     vp_tokens = 0
@@ -260,7 +261,7 @@ def parse_turn(log_lines, trash_pile):
     trashing_mv_would_give_2 = False 
 
     opp_turn_info = collections.defaultdict(lambda: {GAINS: [], BUYS: [],
-                                                     TRASHES: []})
+                                                     TRASHES: [], PASSES: []})
     while True:
         line = log_lines.pop(0)
         print(line)
@@ -295,6 +296,7 @@ def parse_turn(log_lines, trash_pile):
             ret[RETURNS] = indexes(ret[RETURNS])
             ret[GAINS] = indexes(gains)
             ret[TRASHES] = indexes(ret[TRASHES])
+            ret[PASSES] = indexes(ret[PASSES])
             durations = indexes(durations)
             for opp in opp_turn_info.keys():
                 _delete_if_exists(opp_turn_info[opp], 'buy_or_gain')
@@ -403,7 +405,7 @@ def parse_turn(log_lines, trash_pile):
 
         # Some old Goko logs mis-attribute pirate ship trashing. I'm not 
         # going to special-case all the various goko bugs that have since been
-        # fixed, though. 
+        # fixed, though. So there will be bugs with some PS logs.
         if KW_TRASHES in action_taken:
             trashed = capture_cards(action_taken)
             while dominioncards.Fortress in trashed:
@@ -426,43 +428,62 @@ def parse_turn(log_lines, trash_pile):
             trashing_mv_would_give_2 = False
             continue
 
+        if (KW_DRAWS in action_taken):
+            thieving_from_trash = False
+            continue
+
+        if (KW_REVEALS in action_taken or 
+            KW_REVEALS_C in action_taken or 
+            KW_APPLIED in action_taken or 
+            KW_APPLIES_WHEN_TRASHED in action_taken or 
+            KW_DISCARDS in action_taken or 
+            KW_DISCARDS_C in action_taken or 
+            (KW_CHOOSES in action_taken and not 
+             KW_CHOOSES_TWO_COINS in action_taken)):
+            trashing_mv_would_give_2 = False
+            continue
+            
+        if (KW_SHUFFLES in action_taken):
+            continue
+
+        # All remaining keywords indicate that both taking cards from trash
+        # via noble brigand or thief is over, and also that a trashed mv
+        # would not give coins.
+        thieving_from_trash = False
+        trashing_mv_would_give_2 = False
+
+        if KW_PASSES in action_taken:
+            if active_player == ret[NAME]:
+                ret[PASSES].extend(capture_cards(action_taken))
+            else:
+                opp_turn_info[active_player][PASSES].extend(capture_cards(action_taken))
+            continue
+
         if KW_DURATION in action_taken:
             durations.extend(capture_cards(action_taken))
-            thieving_from_trash = False
-            trashing_mv_would_give_2 = False
             continue
 
         if KW_CHOOSES_TWO_COINS in action_taken:
             turn_money += 2
-            thieving_from_trash = False
-            trashing_mv_would_give_2 = False
             continue
 
         if KW_PIRATE_COIN in action_taken:
             ps_tokens += 1
-            thieving_from_trash = False
-            trashing_mv_would_give_2 = False
             continue
 
         if KW_VP_CHIPS in action_taken:
             vp_chips_match = VP_CHIPS_RE.match(action_taken)
             vp_tokens += int(vp_chips_match.group(1))
-            thieving_from_trash = False
-            trashing_mv_would_give_2 = False
             continue
 
         match = TAKES_COINS_RE.match(action_taken)
         if match:
             turn_money += int(match.group(1))
-            thieving_from_trash = False
-            trashing_mv_would_give_2 = False
             continue
 
         match = RECEIVES_COINS_RE.match(action_taken)
         if match:
             turn_money += int(match.group(1))
-            thieving_from_trash = False
-            trashing_mv_would_give_2 = False
             continue
 
         # All remaining actions should be captured; the next few statements
@@ -480,28 +501,7 @@ def parse_turn(log_lines, trash_pile):
             KW_NAMES in action_taken or 
             KW_CARDS_IN_DISCARDS in action_taken or
             KW_TAKES_SET_ASIDE in action_taken):
-            thieving_from_trash = False
-            trashing_mv_would_give_2 = False
             continue
-
-        if (KW_DRAWS in action_taken):
-            thieving_from_trash = False
-            continue
-
-        if (KW_REVEALS in action_taken or 
-            KW_REVEALS_C in action_taken or 
-            KW_APPLIED in action_taken or 
-            KW_APPLIES_WHEN_TRASHED in action_taken or 
-            KW_DISCARDS in action_taken or 
-            KW_DISCARDS_C in action_taken or 
-            KW_CHOOSES in action_taken):
-            trashing_mv_would_give_2 = False
-            continue
-
-            
-        if (KW_SHUFFLES in action_taken):
-            continue
-
 
         raise parse_common.BogusGameError('Line did not match any keywords!')
 
