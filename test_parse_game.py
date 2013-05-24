@@ -1364,7 +1364,17 @@ class ParseGokoGameTest(unittest.TestCase):
 
     def test_goko_forager_rogue(self):
         # Forager coin-counting after rogue steals its trashed treasures
-        self.assertTrue(False)
+        game_contents = codecs.open('testing/testdata/log.50f5dcbde4b03946044c889a.1364837024406.txt', encoding='utf-8').read()
+        parsed_game=parse_game.parse_game(game_contents)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][2][MONEY],5)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][4][MONEY],6)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][6][MONEY],6)
+        self.assertEqual(parsed_game[DECKS][2][TURNS][8][MONEY],5)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][9][MONEY],7)
+        self.assertEqual(parsed_game[DECKS][2][TURNS][9][MONEY],8)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][10][MONEY],6)
+        self.assertEqual(parsed_game[DECKS][2][TURNS][16][MONEY],5)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][17][MONEY],4)
 
     def test_goko_variable_coin_cards(self):
         # Cards that give variable payoffs:
@@ -1394,7 +1404,14 @@ class ParseGokoGameTest(unittest.TestCase):
 
     def test_goko_trashing_fortress(self):
         # Make sure fortress doesn't count as getting trashed
-        self.assertTrue(False)
+        game_contents = codecs.open('testing/testdata/log.50d9be02e4b0a3565c3644d5.1364832440947.txt', encoding='utf-8').read()
+        parsed_game=parse_game.parse_game(game_contents)
+        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][16][PLAYS], 
+                                ["Fortress","Margrave","Fortress","Margrave",
+                                 "Forge"])
+        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][16][TRASHES],[]) 
+        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][16][GAINS],
+                                ["Province"]) 
 
     def test_goko_trashing_bom_as_things(self):
         # What happens when Band of Misfits is a mining village?
@@ -1483,7 +1500,7 @@ class ParseGokoGameTest(unittest.TestCase):
         parsed_game=parse_game.parse_game(game_contents)
         self.assertEqual(parsed_game[DECKS][0][TURNS][6][VP_TOKENS],2)
         self.assertEqual(parsed_game[DECKS][0][TURNS][6][MONEY],4)
-        self.assertEqual(parsed_game[DECKS][0][TURNS][23][MONEY], 12)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][23][MONEY], 10)
 
     def test_goko_trader_and_spice_merchant(self):
         # Tests trader's would-gain (on Cache!) and Spice Merchant's choices

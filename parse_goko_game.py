@@ -45,6 +45,7 @@ TAKES_COINS_RE = re.compile('takes (\d+) coin')
 RECEIVES_COINS_RE = re.compile('receives (\d+) coin')
 
 KW_APPLIED = 'applied ' #applied Watchtower to place X on top of the deck
+KW_APPLIES_WHEN_TRASHED = "applies the 'when you trash ability' of "
 KW_TO_THE_SUPPLY = ' to the Supply'
 KW_PLACE = 'place: '
 KW_CARDS = 'cards: '
@@ -252,7 +253,7 @@ def parse_turn(log_lines, trash_pile):
 
     # Keeps track of the trash, for forager value
     thieving_from_trash = False 
-    thieved_cards = []
+    #thieved_cards = [] # I belive that tracking this is not necessary. Keeping it for now because I'm not entirely sure. 
 
     # Trashing a mining village CAN give $2. If I see a "trashed MV" line, does
     # it give me money? Yes, if the last thing played was an MV!
@@ -357,7 +358,7 @@ def parse_turn(log_lines, trash_pile):
                         play == dominioncards.Rogue:
                     thieving_from_trash = True
                     counterfeiting_spoils = False
-                    thieved_cards = []
+                    #thieved_cards = []
                 elif play == dominioncards.MiningVillage:
                     trashing_mv_would_give_2 = True
                     counterfeiting_spoils = False
@@ -375,7 +376,7 @@ def parse_turn(log_lines, trash_pile):
 
             if dominioncards.NobleBrigand in buys:
                  thieving_from_trash = True
-                 thieved_cards = []
+                 #thieved_cards = []
             continue
 
         if KW_RETURNS in action_taken:
@@ -389,11 +390,13 @@ def parse_turn(log_lines, trash_pile):
             gained = capture_cards(action_taken)
             if active_player == ret[NAME]:
                 ret[GAINS].extend(gained)
+                if dominioncards.NobleBrigand in ret[GAINS]:
+                    thieving_from_trash = False
                 if(thieving_from_trash):
                     for c in gained:
-                        if c in thieved_cards:
-                            trash_pile.remove(c)
-                            thieved_cards.remove(c)
+                        #if c in thieved_cards:
+                        trash_pile.remove(c)
+                        #thieved_cards.remove(c)
             else:
                 opp_turn_info[active_player][GAINS].extend(gained)
             continue
@@ -417,8 +420,8 @@ def parse_turn(log_lines, trash_pile):
             else:
                 opp_turn_info[active_player][TRASHES].extend(trashed)
                 trash_pile.extend(trashed)
-                if thieving_from_trash:
-                    thieved_cards.extend(trashed)
+                #if thieving_from_trash:
+                    #thieved_cards.extend(trashed)
 
             trashing_mv_would_give_2 = False
             continue
@@ -488,6 +491,7 @@ def parse_turn(log_lines, trash_pile):
         if (KW_REVEALS in action_taken or 
             KW_REVEALS_C in action_taken or 
             KW_APPLIED in action_taken or 
+            KW_APPLIES_WHEN_TRASHED in action_taken or 
             KW_DISCARDS in action_taken or 
             KW_DISCARDS_C in action_taken or 
             KW_CHOOSES in action_taken):
