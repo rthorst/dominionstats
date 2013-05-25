@@ -90,23 +90,32 @@ def delete_keys_with_empty_vals(dict_obj):
 def count_money(plays, typeGoko = False):
     """ Return the value of the money from playing cards in plays.
 
-    This does not include money from cards like Steward or Bank, but does
-    count Copper. 
+    For iso, This does not include money from cards like Steward or Bank, but
+    does count Copper. 
     
-    Counts as much as it can from Goko. Forager has to be dealt with elsewhere,
-    since this function can't possibly know the current state of the trash. 
+    Counts as much as it can from Goko. Does not count cards that depend on the
+    game state or on choices (Forager, Harvest, etc.) Does count everything
+    with a fixed value or a value that depends only on the sequence of plays
+    (Bank, FG, etc.). 
 
     plays: list of cards.
     """
     coppersmith_ct = 0
     money = 0
     treasures = 0
+    fg_active = False
     for card in plays:
         if card.is_treasure():
             treasures += 1
 
         if card == dominioncards.Coppersmith:
             coppersmith_ct += 1
+        elif card == dominioncards.FoolsGold:
+            if fg_active:
+                money += 4
+            else:
+                money += 1
+            fg_active = True
         elif card == dominioncards.Copper:
             money += 1 + coppersmith_ct
         elif card == dominioncards.Bank and typeGoko:

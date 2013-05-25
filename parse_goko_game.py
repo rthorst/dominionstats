@@ -216,11 +216,26 @@ def parse_turn(log_lines, trash_pile):
     gains: List of cards gained.
     trashes: List of cards trashed.
     returns: List of cards returned.
+    passes: List of cards passed with Masquerade.
     ps_tokens: Number of pirate ship tokens gained.
     vp_tokens: Number of victory point tokens gained.
     money: Amount of money available during entire buy phase.
     opp: Dict keyed by opponent index in names_list, containing dicts with trashes/gains.
     """
+    # Need special accounting for: 
+    # Moneylender (did I trash a copper?)
+    # Baron (did I discard an estate?)
+    # Salvager (did I trash something? What did it cost?)
+    # Harvest (how many cards did I reveal? What were they?)
+    # Secret Chamber/Vault/Storeroom: how many did I discard?
+    # Ironworks/Ironmonger: did I gain a treasure? 
+    # Trade Route: what has been gained?
+    # City: what has been gained? 
+    # Tribute: what was revealed?
+    # Tournament: did opponent reveal a province?
+    # Mercenary:  did you trash cards? 
+    # Diadem - requires action tracking. So much work for one card!   
+    # Poor house! 
 
     def _delete_if_exists(d, n):
         if n in d:

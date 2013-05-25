@@ -1378,31 +1378,89 @@ class ParseGokoGameTest(unittest.TestCase):
         self.assertEqual(parsed_game[DECKS][2][TURNS][16][MONEY],5)
         self.assertEqual(parsed_game[DECKS][0][TURNS][17][MONEY],4)
 
-    def test_goko_variable_coin_cards(self):
+    def test_goko_variable_coin_cards_part_1(self):
         # Cards that give variable payoffs:
-        #These cards give a VARIABLE VALUE when played depending on choices by the player or the game state. These are the ones not reported directly on goko.
-        #Moneylender - depending on whether you trash copper or not.     
-        #Pawn - choice
-        #Secret chamber - discard for coins
-        #Steward - depends on choice
-        #Baron - depends
-        #Ironworks
-        #Mining Village (tested elsewhere)
+        # These cards give a VARIABLE VALUE when played depending on choices by
+        # the player or the game state. 
+        game_contents = codecs.open('testing/testdata/log.50612a9b51c36e573294bfd0.1369424447034.txt', encoding='utf-8').read()
+        parsed_game=parse_game.parse_game(game_contents)
+        #Moneylender:
+        self.assertEqual(parsed_game[DECKS][0][TURNS][6][MONEY], 4)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][10][MONEY], 0)
+        #Pawn 
+        self.assertEqual(parsed_game[DECKS][0][TURNS][4][MONEY], 5)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][7][MONEY], 3)
+        #Steward 
+        self.assertEqual(parsed_game[DECKS][0][TURNS][14][MONEY], 3)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][18][MONEY], 5)
+        #Baron 
+        self.assertEqual(parsed_game[DECKS][0][TURNS][18][MONEY], 2)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][22][MONEY], 7)
         #Minion
-        #Tribute
+        self.assertEqual(parsed_game[DECKS][0][TURNS][23][MONEY], 0)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][8][MONEY], 5)
+
         #Salvager    
-        #Trade Route
-        #City
-        #Vault
-        #Bank
-        #Tournament
+        self.assertEqual(parsed_game[DECKS][0][TURNS][24][MONEY], 14)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][7][MONEY], 3)
+
         #Harvest
-        #Diadem
+        self.assertEqual(parsed_game[DECKS][0][TURNS][11][MONEY], 5)
+
         #Fool's Gold
-        #Spice Merchant (tested elsewhere)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][14][MONEY], 5)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][20][MONEY], 8)
+
         #Count
+        self.assertEqual(parsed_game[DECKS][0][TURNS][21][MONEY], 12)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][23][MONEY], 0)
+
+        #Bank
+        self.assertEqual(parsed_game[DECKS][0][TURNS][23][MONEY], 14)
+
+    def test_goko_variable_coin_cards_part_2(self):
+        # More variable-value tests
+        game_contents = codecs.open('testing/testdata/log.50612a9b51c36e573294bfd0.1369437968246.txt', encoding='utf-8').read()
+        parsed_game=parse_game.parse_game(game_contents)
+
+        #Secret chamber 
+        self.assertEqual(parsed_game[DECKS][1][TURNS][12][MONEy], 4)
+
+        #Ironworks
+        self.assertEqual(parsed_game[DECKS][0][TURNS][9][MONEY], 6)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][13][MONEY], 6)
+
+        #Tribute
+        self.assertEqual(parsed_game[DECKS][0][TURNS][4][MONEY], 7)
+
+        #Trade Route
+        self.assertEqual(parsed_game[DECKS][0][TURNS][6][MONEY], 3)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][8][MONEY], 5)
+
+        #Vault
+        self.assertEqual(parsed_game[DECKS][1][TURNS][4][MONEY], 6)
+
         #Ironmonger
-        self.assertTrue(False)
+        self.assertEqual(parsed_game[DECKS][1][TURNS][3][MONEY], 5)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][7][MONEY], 5)
+
+        #Poor House
+        self.assertEqual(parsed_game[DECKS][0][TURNS][7][MONEY], 6)
+
+        # Storeroom
+        self.assertEqual(parsed_game[DECKS][1][TURNS][8][MONEY], 6)
+
+        #City
+        self.assertEqual(parsed_game[DECKS][0][TURNS][11][MONEY], 5)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][18][MONEY], 8)
+
+        #Tournament
+        self.assertEqual(parsed_game[DECKS][0][TURNS][7][MONEY], 5)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][8][MONEY], 5)
+
+        #Diadem. 
+        self.assertEqual(parsed_game[DECKS][0][TURNS][16][MONEY], 8)
+
 
     def test_goko_trashing_fortress(self):
         # Make sure fortress doesn't count as getting trashed
