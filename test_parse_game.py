@@ -1424,7 +1424,7 @@ class ParseGokoGameTest(unittest.TestCase):
         parsed_game=parse_game.parse_game(game_contents)
 
         #Secret chamber 
-        self.assertEqual(parsed_game[DECKS][1][TURNS][12][MONEy], 4)
+        self.assertEqual(parsed_game[DECKS][1][TURNS][12][MONEY], 4)
 
         #Ironworks
         self.assertEqual(parsed_game[DECKS][0][TURNS][9][MONEY], 6)

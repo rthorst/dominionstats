@@ -80,6 +80,10 @@ KW_PIRATE_COIN = 'receives a pirate coin, now has '
 KW_VP_CHIPS = 'victory point chips'
 KW_TAKES = 'takes ' 
 
+ACTION_PHASE = 'ap'
+BUY_PHASE = 'bp'
+CLEANUP_PHASE = 'cp'
+
 KEYWORDS = [locals()[w] for w in dict(locals()) if w.startswith('KW_')]
 
 def parse_player_start_decks(log_lines):
@@ -261,31 +265,25 @@ def parse_turn(log_lines, trash_pile):
     vp_tokens = 0
     ps_tokens = 0
 
-    # Lots of stuff happens that goko doesn't report explicitly.
-    wait_for_Forager_trashing = 0 # Forager trashing cards needs to give $
-    
-    # Spoils gets returned when played! Except when played twice via counterfeit
-    counterfeiting_spoils = False 
-
-    # Keeps track of the trash, for forager value
-    thieving_from_trash = False 
-    #thieved_cards = [] # I belive that tracking this is not necessary. Keeping it for now because I'm not entirely sure. 
-
-    # Trashing a mining village CAN give $2. If I see a "trashed MV" line, does
-    # it give me money? Yes, if the last thing played was an MV!
-    trashing_mv_would_give_2 = False 
+    # Keep track of last play, and whether it is still 'active' 
+    # for stuff like trashing copper to Moneylender, gaining cards from the
+    # trash, etc. Card effects which last more than one line. 
+    last_play = None
+    current_phase = None
+    done_resolving = True
 
     opp_turn_info = collections.defaultdict(lambda: {GAINS: [], BUYS: [],
                                                      TRASHES: [], PASSES: []})
     while True:
         line = log_lines.pop(0)
-        print(line)
+        print(line) # Remove prior to production! This is for large-scale debugging. 
         turn_start = START_TURN_RE.match(line)
 
         # detect line which starts the turn, parse out turn number and player name
         if turn_start:
             ret[NAME] = turn_start.group(1)
             ret[NUMBER] = int(turn_start.group(2))
+            current_phase = ACTION_PHASE
             if turn_start.group(3):
                 ret[POSSESSION] = True
             else:
@@ -297,9 +295,8 @@ def parse_turn(log_lines, trash_pile):
             # Current goko log bug - does not report 1 VP from Bishop
             vp_tokens += ret[PLAYS].count(dominioncards.Bishop)
 
-            if wait_for_Forager_trashing >= 1:
+            if last_play == dominioncards.Forager and not done_resolving:
                 turn_money += sum([d.is_treasure() for d in set(trash_pile)])
-                wait_for_Forager_trashing = 0
 
             money = parse_common.count_money(ret[PLAYS], True) + \
                     turn_money + parse_common.count_money(durations, True)
@@ -328,92 +325,106 @@ def parse_turn(log_lines, trash_pile):
                         PIRATE_TOKENS: ps_tokens, OPP: dict(opp_turn_info)})
             return ret
 
-        # Have to count money from forager trashing two lines *after* 
-        # Forager is played, since the trash happens after the play. 
-        if wait_for_Forager_trashing == 2:
-            wait_for_Forager_trashing = 1
-        elif wait_for_Forager_trashing == 1:
-            turn_money += sum([d.is_treasure() for d in set(trash_pile)])
-            wait_for_Forager_trashing = 0
 
 
         player_and_rest = HYPHEN_SPLIT_RE.match(line)
         active_player = player_and_rest.group(1)
         action_taken = player_and_rest.group(2)
 
+        # Card-specific processing:
+        # Will need to add Stash options whenever stash is implemented
+        if (last_play == dominioncards.Forager and not done_resolving and
+           not (KW_TRASHES in action_taken)):
+            turn_money += sum([d.is_treasure() for d in set(trash_pile)])
+            done_resolving = True
+        elif (last_play == dominioncards.MiningVillage and 
+              not (KW_SHUFFLES in action_taken) and
+              not (KW_DRAWS in action_taken) and
+              not (KW_TRASHES in action_taken)):
+            done_resolving = True
+        elif (last_play == dominioncards.Counterfeit and 
+              (not (KW_PLAYS in action_taken) or
+              not (dominioncards.Spoils in capture_cards(action_taken)))):
+            done_resolving = True
+        elif (last_play == dominioncards.Thief and 
+              not (KW_TRASHES in action_taken) and
+              not (KW_SHUFFLES in action_taken) and 
+              not (KW_REVEALS in action_taken) and 
+              not (KW_REVEALS_C in action_taken) and 
+              not (KW_DISCARDS in action_taken) and 
+              not (KW_DISCARDS_C in action_taken) and 
+              not (KW_GAINS in action_taken)):
+            done_resolving = True
+        elif (last_play == dominioncards.NobleBrigand and 
+              KW_GAINS in action_taken and 
+              dominioncards.NobleBrigand in capture_cards(action_taken)):
+            done_resolving = True
+        elif (last_play == dominioncards.NobleBrigand and 
+              not (KW_TRASHES in action_taken) and
+              not (KW_SHUFFLES in action_taken) and 
+              not (KW_REVEALS in action_taken) and 
+              not (KW_REVEALS_C in action_taken) and 
+              not (KW_DISCARDS in action_taken) and 
+              not (KW_DISCARDS_C in action_taken) and 
+              not (KW_GAINS in action_taken)):
+            done_resolving = True
+        elif (last_play == dominioncards.Rogue and 
+              not (KW_GAINS in action_taken)):
+            done_resolving = True
+        elif (last_play == dominioncards.Graverobber and 
+              not (KW_GAINS in action_taken)):
+            done_resolving = True
+
         if KW_PLAYS in action_taken:
-            thieving_from_trash = False
-            trashing_mv_would_give_2 = False 
             played = capture_cards(action_taken)
             ret[PLAYS].extend(played)
 
             # special cases - actions that don't get reported in the log 
             for play in played: 
-                if play == dominioncards.Forager:
-                    # Have to special-case forager money, it depends on the
-                    # trash pile AFTER the next trashing event! Have to wait
-                    # for it.  And clean up this variable if there was nothing
-                    # in hand to trash and so the forager-trash never happens.
-                    # This counter counts down how many lines to wait for the
-                    # potential trashing event. 
-                    if wait_for_Forager_trashing >= 1:
-                        turn_money += sum([d.is_treasure()\
-                                           for d in set(trash_pile)])
-                    wait_for_Forager_trashing = 2
-                    counterfeiting_spoils = False
-                elif play == dominioncards.Counterfeit:
+                if play.is_treasure():
+                    phase = BUY_PHASE
+                if (play == dominioncards.Spoils and 
+                    last_play == dominioncards.Counterfeit and 
+                    not done_resolving):
                     counterfeiting_spoils = True
                 elif play == dominioncards.Spoils:
                     # Spoils always get returned on play...
                     # ...unless it's Counterfeited. 
-                    if not counterfeiting_spoils:
+                    # Technically, this clause will be incorrect if someone
+                    # plays a counterfeit, selects no treasure to counterfeit, 
+                    # and then just plays a spoils. 
+                    if (last_play != dominioncards.Counterfeit or 
+                        done_resolving):
                         ret[RETURNS].append(play)
-                    else:
-                        counterfeiting_spoils = False
-                elif play == dominioncards.NobleBrigand or \
-                        play == dominioncards.Thief or\
-                        play == dominioncards.Rogue:
-                    thieving_from_trash = True
-                    counterfeiting_spoils = False
-                    #thieved_cards = []
-                elif play == dominioncards.MiningVillage:
-                    trashing_mv_would_give_2 = True
-                    counterfeiting_spoils = False
+                last_play = play
+                done_resolving = False
             continue
-
-        # Everything other than 'plays a spoils' means the next line 
-        # after a Counterfeit isn't playing a spoils
-        counterfeiting_spoils = False
 
         if KW_BUYS in action_taken:
             buys = capture_cards(action_taken)
             ret[BUYS].extend(buys)
-            thieving_from_trash = False
-            trashing_mv_would_give_2 = False 
 
+            # easier to deal with the on-buy attack by making it a fake play
             if dominioncards.NobleBrigand in buys:
-                 thieving_from_trash = True
-                 #thieved_cards = []
+                last_play == dominioncards.NobleBrigand  
+                done_resolving = False
             continue
 
         if KW_RETURNS in action_taken:
             ret[RETURNS].extend(capture_cards(action_taken))
-            thieving_from_trash = False
-            trashing_mv_would_give_2 = False 
             continue
 
         if KW_GAINS in action_taken:
-            trashing_mv_would_give_2 = False 
             gained = capture_cards(action_taken)
             if active_player == ret[NAME]:
                 ret[GAINS].extend(gained)
-                if dominioncards.NobleBrigand in ret[GAINS]:
-                    thieving_from_trash = False
-                if(thieving_from_trash):
+                if(not done_resolving and
+                   (last_play == dominioncards.NobleBrigand or 
+                    last_play == dominioncards.Thief or 
+                    last_play == dominioncards.Rogue or 
+                    last_play == dominioncards.Graverobber)):
                     for c in gained:
-                        #if c in thieved_cards:
                         trash_pile.remove(c)
-                        #thieved_cards.remove(c)
             else:
                 opp_turn_info[active_player][GAINS].extend(gained)
             continue
@@ -427,45 +438,27 @@ def parse_turn(log_lines, trash_pile):
                 trashed.remove(dominioncards.Fortress)
 
             if active_player == ret[NAME]:
-                if dominioncards.MiningVillage in trashed and\
-                   trashing_mv_would_give_2:
-                    turn_money += 2
+                if last_play == dominioncards.MiningVillage:
+                    if not done_resolving and dominioncards.MiningVillage in trashed:
+                        turn_money += 2
+                    done_resolving = True
 
                 if not ret[POSSESSION]:
                     ret[TRASHES].extend(trashed)
                     trash_pile.extend(trashed)
+
+                if last_play == dominioncards.Forager and not done_resolving:
+                    turn_money +=sum([d.is_treasure() for d in set(trash_pile)])
+                    done_resolving = True
+
             else:
                 opp_turn_info[active_player][TRASHES].extend(trashed)
                 trash_pile.extend(trashed)
-                #if thieving_from_trash:
-                    #thieved_cards.extend(trashed)
 
-            trashing_mv_would_give_2 = False
+            if last_play == dominioncards.MiningVillage or last_play == dominioncards.Forager:
+                done_resolving = True
             continue
 
-        if (KW_DRAWS in action_taken):
-            thieving_from_trash = False
-            continue
-
-        if (KW_REVEALS in action_taken or 
-            KW_REVEALS_C in action_taken or 
-            KW_APPLIED in action_taken or 
-            KW_APPLIES_WHEN_TRASHED in action_taken or 
-            KW_DISCARDS in action_taken or 
-            KW_DISCARDS_C in action_taken or 
-            (KW_CHOOSES in action_taken and not 
-             KW_CHOOSES_TWO_COINS in action_taken)):
-            trashing_mv_would_give_2 = False
-            continue
-            
-        if (KW_SHUFFLES in action_taken):
-            continue
-
-        # All remaining keywords indicate that both taking cards from trash
-        # via noble brigand or thief is over, and also that a trashed mv
-        # would not give coins.
-        thieving_from_trash = False
-        trashing_mv_would_give_2 = False
 
         if KW_PASSES in action_taken:
             if active_player == ret[NAME]:
@@ -515,6 +508,15 @@ def parse_turn(log_lines, trash_pile):
             KW_EMBARGOES in action_taken or 
             KW_NAMES in action_taken or 
             KW_CARDS_IN_DISCARDS in action_taken or
+            KW_DRAWS in action_taken or 
+            KW_REVEALS in action_taken or 
+            KW_REVEALS_C in action_taken or 
+            KW_APPLIED in action_taken or 
+            KW_APPLIES_WHEN_TRASHED in action_taken or 
+            KW_DISCARDS in action_taken or 
+            KW_DISCARDS_C in action_taken or 
+            KW_SHUFFLES in action_taken or 
+            KW_CHOOSES in action_taken or 
             KW_TAKES_SET_ASIDE in action_taken):
             continue
 
