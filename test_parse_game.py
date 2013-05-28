@@ -1392,9 +1392,9 @@ class ParseGokoGameTest(unittest.TestCase):
         self.assertEqual(parsed_game[DECKS][0][TURNS][7][MONEY], 3)
         #Steward 
         self.assertEqual(parsed_game[DECKS][0][TURNS][14][MONEY], 3)
-        self.assertEqual(parsed_game[DECKS][0][TURNS][18][MONEY], 5)
+        self.assertEqual(parsed_game[DECKS][1][TURNS][18][MONEY], 8)
         #Baron 
-        self.assertEqual(parsed_game[DECKS][0][TURNS][18][MONEY], 2)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][18][MONEY], 3)
         self.assertEqual(parsed_game[DECKS][0][TURNS][22][MONEY], 7)
         #Minion
         self.assertEqual(parsed_game[DECKS][0][TURNS][23][MONEY], 0)
@@ -1406,9 +1406,10 @@ class ParseGokoGameTest(unittest.TestCase):
 
         #Harvest
         self.assertEqual(parsed_game[DECKS][0][TURNS][11][MONEY], 5)
+        self.assertEqual(parsed_game[DECKS][1][TURNS][20][MONEY], 11)
 
         #Fool's Gold
-        self.assertEqual(parsed_game[DECKS][0][TURNS][14][MONEY], 5)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][14][MONEY], 3)
         self.assertEqual(parsed_game[DECKS][0][TURNS][20][MONEY], 8)
 
         #Count
@@ -1416,7 +1417,7 @@ class ParseGokoGameTest(unittest.TestCase):
         self.assertEqual(parsed_game[DECKS][0][TURNS][23][MONEY], 0)
 
         #Bank
-        self.assertEqual(parsed_game[DECKS][0][TURNS][23][MONEY], 14)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][27][MONEY], 14)
 
     def test_goko_variable_coin_cards_part_2(self):
         # More variable-value tests

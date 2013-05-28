@@ -226,10 +226,7 @@ def parse_turn(log_lines, trash_pile):
     money: Amount of money available during entire buy phase.
     opp: Dict keyed by opponent index in names_list, containing dicts with trashes/gains.
     """
-    # Need special accounting for: 
-    # Moneylender (did I trash a copper?)
-    # Baron (did I discard an estate?)
-    # Salvager (did I trash something? What did it cost?)
+    # Still need special accounting for: 
     # Harvest (how many cards did I reveal? What were they?)
     # Secret Chamber/Vault/Storeroom: how many did I discard?
     # Ironworks/Ironmonger: did I gain a treasure? 
@@ -269,6 +266,7 @@ def parse_turn(log_lines, trash_pile):
     # for stuff like trashing copper to Moneylender, gaining cards from the
     # trash, etc. Card effects which last more than one line. 
     last_play = None
+    harvest_reveal = []
     current_phase = None
     done_resolving = True
 
@@ -276,10 +274,8 @@ def parse_turn(log_lines, trash_pile):
                                                      TRASHES: [], PASSES: []})
     while True:
         line = log_lines.pop(0)
-        print(line) # Remove prior to production! This is for large-scale debugging. 
         turn_start = START_TURN_RE.match(line)
 
-        # detect line which starts the turn, parse out turn number and player name
         if turn_start:
             ret[NAME] = turn_start.group(1)
             ret[NUMBER] = int(turn_start.group(2))
@@ -297,6 +293,8 @@ def parse_turn(log_lines, trash_pile):
 
             if last_play == dominioncards.Forager and not done_resolving:
                 turn_money += sum([d.is_treasure() for d in set(trash_pile)])
+            if last_play == dominioncards.Harvest and not done_resolving:
+                turn_money += len(set(harvest_reveal))
 
             money = parse_common.count_money(ret[PLAYS], True) + \
                     turn_money + parse_common.count_money(durations, True)
@@ -332,7 +330,11 @@ def parse_turn(log_lines, trash_pile):
         action_taken = player_and_rest.group(2)
 
         # Card-specific processing:
-        # Will need to add Stash options whenever stash is implemented
+        # Will need to add Stash options whenever stash is implemented.
+        # These cards all have unstated effects that last longer than one goko
+        # line. For example, Forager will need to count coins after the next
+        # 'trash' line - if there is one. Mining Village gives +$2 if trashed - 
+        # on the next line after it is played and it draws a card. 
         if (last_play == dominioncards.Forager and not done_resolving and
            not (KW_TRASHES in action_taken)):
             turn_money += sum([d.is_treasure() for d in set(trash_pile)])
@@ -373,6 +375,24 @@ def parse_turn(log_lines, trash_pile):
             done_resolving = True
         elif (last_play == dominioncards.Graverobber and 
               not (KW_GAINS in action_taken)):
+            done_resolving = True
+        elif (last_play == dominioncards.Moneylender and 
+              not (KW_TRASHES in action_taken and 
+                   dominioncards.Copper in capture_cards(action_taken))):
+            done_resolving = True
+        elif (last_play == dominioncards.Salvager and 
+              not (KW_TRASHES in action_taken)):
+            done_resolving = True
+        elif (last_play == dominioncards.Baron and 
+              not (KW_DISCARDS in action_taken and 
+                   dominioncards.Estate in capture_cards(action_taken))):
+            done_resolving = True
+        elif (last_play == dominioncards.Harvest and 
+              not (KW_REVEALS in action_taken) and 
+              not (KW_REVEALS_C in action_taken) and 
+              not (KW_SHUFFLES in action_taken)):
+            turn_money += len(set(harvest_reveal))
+            harvest_reveal = []
             done_resolving = True
 
         if KW_PLAYS in action_taken:
@@ -434,14 +454,22 @@ def parse_turn(log_lines, trash_pile):
         # fixed, though. So there will be bugs with some PS logs.
         if KW_TRASHES in action_taken:
             trashed = capture_cards(action_taken)
-            while dominioncards.Fortress in trashed:
-                trashed.remove(dominioncards.Fortress)
 
             if active_player == ret[NAME]:
-                if last_play == dominioncards.MiningVillage:
-                    if not done_resolving and dominioncards.MiningVillage in trashed:
-                        turn_money += 2
-                    done_resolving = True
+                if (last_play == dominioncards.MiningVillage and
+                    not done_resolving and 
+                    dominioncards.MiningVillage in trashed):
+                    turn_money += 2
+                elif (last_play == dominioncards.Moneylender and 
+                      not done_resolving and 
+                      dominioncards.Copper in trashed):
+                    turn_money += 3
+                elif last_play == dominioncards.Salvager and not done_resolving:
+                    turn_money += trashed[0].coin_cost
+
+
+                while dominioncards.Fortress in trashed:
+                    trashed.remove(dominioncards.Fortress)
 
                 if not ret[POSSESSION]:
                     ret[TRASHES].extend(trashed)
@@ -452,10 +480,12 @@ def parse_turn(log_lines, trash_pile):
                     done_resolving = True
 
             else:
+                while dominioncards.Fortress in trashed:
+                    trashed.remove(dominioncards.Fortress)
                 opp_turn_info[active_player][TRASHES].extend(trashed)
                 trash_pile.extend(trashed)
 
-            if last_play == dominioncards.MiningVillage or last_play == dominioncards.Forager:
+            if last_play in [dominioncards.MiningVillage, dominioncards.Forager, dominioncards.Salvager]:
                 done_resolving = True
             continue
 
@@ -494,11 +524,20 @@ def parse_turn(log_lines, trash_pile):
             turn_money += int(match.group(1))
             continue
 
+        if KW_DISCARDS in action_taken or KW_DISCARDS_C in action_taken:
+            if (dominioncards.Estate in capture_cards(action_taken) and 
+                last_play == dominioncards.Baron and 
+                not done_resolving):
+                turn_money += 4
+                done_resolving = True
+
+        if (KW_REVEALS in action_taken or KW_REVEALS_C in action_taken):
+            if last_play == dominioncards.Harvest:
+                harvest_reveal.extend(capture_cards(action_taken))
+            continue
+
         # All remaining actions should be captured; the next few statements
         # are those which are not logged in any way (though they could be!)
-
-        # They are separated by what keeping-track things they would interrupt:
-        # Mining village trashing, Thief/Noble Brigand.
 
         if (KW_LOOKS_AT in action_taken or 
             KW_RECEIVES in action_taken or 
@@ -509,8 +548,6 @@ def parse_turn(log_lines, trash_pile):
             KW_NAMES in action_taken or 
             KW_CARDS_IN_DISCARDS in action_taken or
             KW_DRAWS in action_taken or 
-            KW_REVEALS in action_taken or 
-            KW_REVEALS_C in action_taken or 
             KW_APPLIED in action_taken or 
             KW_APPLIES_WHEN_TRASHED in action_taken or 
             KW_DISCARDS in action_taken or 

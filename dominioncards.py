@@ -36,6 +36,7 @@ class Card(object):
         self.trash = int_or_default(self.trash, 1)
         self.actions = int_or_default(self.actions, 1)
         self.index = int(self.index)
+        self.coin_cost = int_or_default(self.cost.replace('P',''),0)
 
     def pluralize(self, freq):
         return self.singular if freq == 1 else self.plural
