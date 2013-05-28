@@ -1519,6 +1519,10 @@ class ParseGokoGameTest(unittest.TestCase):
         assert_equal_card_lists(parsed_game[DECKS][1][TURNS][10][TRASHES],
                                 ["Band of Misfits", "Adventurer", 
                                  "Band of Misfits"]) 
+        game_contents = codecs.open('testing/testdata/log.50612a9b51c36e573294bfd0.1369774866910.txt', encoding='utf-8').read()
+        parsed_game=parse_game.parse_game(game_contents)
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][8][TRASHES],
+                                ["Band of Misfits", "Mining Village"]) 
 
     def test_goko_bom_as_nothing(self):
         # What happens when Band of Misfits is unplayable? 
