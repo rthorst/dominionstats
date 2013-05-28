@@ -1491,7 +1491,34 @@ class ParseGokoGameTest(unittest.TestCase):
     def test_goko_trashing_bom_as_things(self):
         # What happens when Band of Misfits is a mining village?
         # or if it's a Fortress? Or a Feast, or an Embargo? 
-        self.assertTrue(False)
+        game_contents = codecs.open('testing/testdata/log.50612a9b51c36e573294bfd0.1369767124157.txt', encoding='utf-8').read()
+        parsed_game=parse_game.parse_game(game_contents)
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][5][TRASHES],
+                                ["Band of Misfits"]) # As Mining Village
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][8][TRASHES],
+                                ["Band of Misfits"]) # As Feast
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][9][TRASHES],
+                                ["Band of Misfits"]) # As Embargo 
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][10][TRASHES],
+                                ["Band of Misfits"]) # As Treasure Map
+        self.assertEqual(parsed_game[DECKS][1][TURNS][10][MONEY], 6)
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][11][TRASHES],
+                                ["Estate"]) # Bug in goko! Should trash Hermit
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][13][TRASHES],
+                                ["Band of Misfits"]) # As Urchin
+
+    def test_goko_kc_tr_trashing_bom_as_things(self):
+        # What happens when Band of Misfits is throned/KCed and then trashed?
+        # Using BoM as Mining Village for this test.
+        game_contents = codecs.open('testing/testdata/log.50612a9b51c36e573294bfd0.1369771564268.txt', encoding='utf-8').read()
+        parsed_game=parse_game.parse_game(game_contents)
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][7][TRASHES],
+                                ["Village", "Band of Misfits"]) # Processioned
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][9][TRASHES],
+                                ["Band of Misfits", "Band of Misfits"]) #KC/TR
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][10][TRASHES],
+                                ["Band of Misfits", "Adventurer", 
+                                 "Band of Misfits"]) 
 
     def test_goko_bom_as_nothing(self):
         # What happens when Band of Misfits is unplayable? 

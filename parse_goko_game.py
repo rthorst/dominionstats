@@ -268,6 +268,8 @@ def parse_turn(log_lines, trash_pile):
     last_play = None
     harvest_reveal = []
     current_phase = None
+    bom_plays = 0 # For throne room/procession/KC - don't get to rechoose BoM
+    bom_choice = None
     done_resolving = True
 
     opp_turn_info = collections.defaultdict(lambda: {GAINS: [], BUYS: [],
@@ -297,7 +299,8 @@ def parse_turn(log_lines, trash_pile):
                 turn_money += len(set(harvest_reveal))
 
             money = parse_common.count_money(ret[PLAYS], True) + \
-                    turn_money + parse_common.count_money(durations, True)
+                    turn_money + parse_common.count_money(durations, True) - \
+                    durations.count(dominioncards.HorseTraders)*3 
 
             (buys, gains) = fix_buys_and_gains(ret[BUYS], ret[GAINS])
 
@@ -394,6 +397,9 @@ def parse_turn(log_lines, trash_pile):
             turn_money += len(set(harvest_reveal))
             harvest_reveal = []
             done_resolving = True
+        elif (last_play == dominioncards.BandofMisfits and 
+              not KW_CHOOSES in action_taken):
+            done_resolving = True
 
         if KW_PLAYS in action_taken:
             played = capture_cards(action_taken)
@@ -401,6 +407,12 @@ def parse_turn(log_lines, trash_pile):
 
             # special cases - actions that don't get reported in the log 
             for play in played: 
+                if bom_choice is not None:
+                    if bom_plays == 0:
+                        bom_choice = None
+                    else:
+                        bom_plays -= 1
+
                 if play.is_treasure():
                     phase = BUY_PHASE
                 if (play == dominioncards.Spoils and 
@@ -416,6 +428,15 @@ def parse_turn(log_lines, trash_pile):
                     if (last_play != dominioncards.Counterfeit or 
                         done_resolving):
                         ret[RETURNS].append(play)
+                elif play == dominioncards.BandofMisfits:
+                    if last_play in [dominioncards.Procession, 
+                                     dominioncards.ThroneRoom]:
+                        bom_plays = 2
+                    elif last_play == dominioncards.KingsCourt:
+                        bom_plays = 3
+                    else:
+                        bom_plays = 1
+                    
                 last_play = play
                 done_resolving = False
             continue
@@ -470,6 +491,8 @@ def parse_turn(log_lines, trash_pile):
 
                 while dominioncards.Fortress in trashed:
                     trashed.remove(dominioncards.Fortress)
+                if trashed == bom_choice: 
+                    trashed = [dominioncards.BandofMisfits]
 
                 if not ret[POSSESSION]:
                     ret[TRASHES].extend(trashed)
@@ -503,6 +526,11 @@ def parse_turn(log_lines, trash_pile):
 
         if KW_CHOOSES_TWO_COINS in action_taken:
             turn_money += 2
+            continue
+
+        if KW_CHOOSES in action_taken:
+            if last_play == dominioncards.BandofMisfits and not done_resolving:
+                bom_choice = capture_cards(action_taken)
             continue
 
         if KW_PIRATE_COIN in action_taken:
@@ -553,7 +581,6 @@ def parse_turn(log_lines, trash_pile):
             KW_DISCARDS in action_taken or 
             KW_DISCARDS_C in action_taken or 
             KW_SHUFFLES in action_taken or 
-            KW_CHOOSES in action_taken or 
             KW_TAKES_SET_ASIDE in action_taken):
             continue
 
