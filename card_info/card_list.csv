@@ -98,7 +98,7 @@ Hovel,Hovels,1,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,94,"Dark Ages",Hv
 "Hunting Party","Hunting Parties",5,1,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,96,Cornucopia,Hunt
 "Ill-Gotten Gains","Ill-Gotten Gains",5,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,97,Hinterlands,IGG
 Inn,Inns,5,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,98,Hinterlands,Inn
-Ironmonger,Ironmongers,4,?,?,1,0,0,0,0,0,0,0,0,0,0,0,?,0,99,"Dark Ages",IM
+Ironmonger,Ironmongers,4,?,1,1,0,0,0,0,0,0,0,0,0,0,0,?,0,99,"Dark Ages",IM
 Ironworks,Ironworks,4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,?,0,100,Intrigue,IW
 Island,Islands,4,0,0,1,0,1,0,0,0,0,0,0,0,2,0,0,0,101,Seaside,Isl
 "Jack of All Trades","Jacks of All Trades",4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,102,Hinterlands,JoaT

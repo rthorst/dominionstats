@@ -34,7 +34,7 @@ class Card(object):
         self.vp = int_or_default(self.vp, 0)
         self.coins = int_or_default(self.coins, 0)
         self.trash = int_or_default(self.trash, 1)
-        self.actions = int_or_default(self.actions, 1)
+        self.actions = int_or_default(self.actions, 0)
         self.index = int(self.index)
         self.coin_cost = int_or_default(self.cost.replace('P',''),0)
 

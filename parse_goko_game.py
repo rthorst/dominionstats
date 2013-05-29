@@ -228,16 +228,13 @@ def parse_turn(log_lines, trash_pile, trade_route_set):
     opp: Dict keyed by opponent index in names_list, containing dicts with trashes/gains.
     """
     # Still need special accounting for: 
-    # Harvest (how many cards did I reveal? What were they?)
-    # Secret Chamber/Vault/Storeroom: how many did I discard?
-    # Ironworks/Ironmonger: did I gain a treasure? 
-    # Trade Route: what has been gained?
-    # City: what has been gained? 
-    # Tribute: what was revealed?
-    # Tournament: did opponent reveal a province?
     # Mercenary:  did you trash cards? 
     # Diadem - requires action tracking. So much work for one card!   
-    # Poor house! 
+    # City. Piles tracking.
+    # Action tracking - all the non-default ones.
+    # Pawn, Conspirator, Ironworks, Tribute, Nobles, Hamlet, trusty steed
+    # Crossroads, Spice Merchant, Squire, Ironmonger, 
+    # Action tracking done: TR, KC, procession, fishing village, tact
 
     def _delete_if_exists(d, n):
         if n in d:
@@ -274,6 +271,8 @@ def parse_turn(log_lines, trash_pile, trade_route_set):
     storeroom_discards = [] 
     done_resolving = True
 
+    action_counter = 0 # All that... just for diadem. :/ 
+
     opp_turn_info = collections.defaultdict(lambda: {GAINS: [], BUYS: [],
                                                      TRASHES: [], PASSES: []})
     while True:
@@ -281,6 +280,7 @@ def parse_turn(log_lines, trash_pile, trade_route_set):
         turn_start = START_TURN_RE.match(line)
 
         if turn_start:
+            action_counter = 1
             ret[NAME] = turn_start.group(1)
             ret[NUMBER] = int(turn_start.group(2))
             current_phase = ACTION_PHASE
@@ -428,8 +428,10 @@ def parse_turn(log_lines, trash_pile, trade_route_set):
             played = capture_cards(action_taken)
             ret[PLAYS].extend(played)
 
-            # special cases - actions that don't get reported in the log 
+            # special cases 
             for play in played: 
+                action_counter -= 1
+                action_counter += play.num_plus_actions()
                 if bom_choice is not None:
                     if bom_plays == 0:
                         bom_choice = None
@@ -438,6 +440,11 @@ def parse_turn(log_lines, trash_pile, trade_route_set):
 
                 if play.is_treasure():
                     phase = BUY_PHASE
+                elif (last_play == dominioncards.ThroneRoom or 
+                        last_play == dominioncards.Procession):
+                    action_counter += 2 
+                elif last_play == dominioncards.KingsCourt:
+                    action_counter += 3 
 
                 if play == dominioncards.PoorHouse:
                     turn_money += 4 # Subtraction will happen later
@@ -554,7 +561,11 @@ def parse_turn(log_lines, trash_pile, trade_route_set):
             continue
 
         if KW_DURATION in action_taken:
-            durations.extend(capture_cards(action_taken))
+            duration = capture_cards(action_taken)
+            durations.extend(duration)
+            for d in duration:
+                if d in [dominioncards.FishingVillage, dominioncards.Tactician]:
+                    action_counter += 1
             continue
 
         if KW_CHOOSES_TWO_COINS in action_taken:

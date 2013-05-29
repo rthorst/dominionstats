@@ -1461,6 +1461,7 @@ class ParseGokoGameTest(unittest.TestCase):
 
         #Diadem. 
         self.assertEqual(parsed_game[DECKS][0][TURNS][16][MONEY], 8)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][19][MONEY], 7)
 
 
     def test_goko_trashing_fortress(self):
