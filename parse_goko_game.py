@@ -57,12 +57,13 @@ KW_RECEIVES = 'receives '
 KW_RESIGNED = 'resigned'
 KW_QUIT = 'quit'
 KW_REVEALS_C = 'reveals: ' 
+KW_REVEALS_HAND = 'reveals hand: ' 
+KW_HAND = 'hand: '
 KW_REVEALS = 'reveals ' 
 KW_DISCARDS = 'discards '
 KW_DISCARDS_C = 'discards: '
 KW_PLACES = 'places '
 KW_BUYS = 'buys '
-KW_GAINS = 'gains ' 
 KW_DRAWS = 'draws ' 
 KW_TRASHES = 'trashes ' 
 KW_PASSES = 'passes ' 
@@ -205,7 +206,7 @@ def capture_cards(line, return_dict=False):
             cards.extend([card] * mult)
     return cards
 
-def parse_turn(log_lines, trash_pile):
+def parse_turn(log_lines, trash_pile, trade_route_set):
     """ Parse the information from a given turn.
 
     Maintain the trash pile. This is necessary for Forager money counting.
@@ -270,6 +271,7 @@ def parse_turn(log_lines, trash_pile):
     current_phase = None
     bom_plays = 0 # For throne room/procession/KC - don't get to rechoose BoM
     bom_choice = None
+    storeroom_discards = [] 
     done_resolving = True
 
     opp_turn_info = collections.defaultdict(lambda: {GAINS: [], BUYS: [],
@@ -339,66 +341,87 @@ def parse_turn(log_lines, trash_pile):
         # 'trash' line - if there is one. Mining Village gives +$2 if trashed - 
         # on the next line after it is played and it draws a card. 
         if (last_play == dominioncards.Forager and not done_resolving and
-           not (KW_TRASHES in action_taken)):
+                KW_TRASHES not in action_taken):
             turn_money += sum([d.is_treasure() for d in set(trash_pile)])
             done_resolving = True
         elif (last_play == dominioncards.MiningVillage and 
-              not (KW_SHUFFLES in action_taken) and
-              not (KW_DRAWS in action_taken) and
-              not (KW_TRASHES in action_taken)):
+                KW_SHUFFLES not in action_taken and
+                KW_DRAWS not in action_taken and
+                KW_TRASHES not in action_taken):
+            done_resolving = True
+        elif (last_play == dominioncards.Tournament and
+                KW_REVEALS not in action_taken and
+                KW_REVEALS_C not in action_taken and
+                KW_GAINS not in action_taken):
             done_resolving = True
         elif (last_play == dominioncards.Counterfeit and 
-              (not (KW_PLAYS in action_taken) or
-              not (dominioncards.Spoils in capture_cards(action_taken)))):
+                (KW_PLAYS not in action_taken or
+                    dominioncards.Spoils not in capture_cards(action_taken))):
             done_resolving = True
         elif (last_play == dominioncards.Thief and 
-              not (KW_TRASHES in action_taken) and
-              not (KW_SHUFFLES in action_taken) and 
-              not (KW_REVEALS in action_taken) and 
-              not (KW_REVEALS_C in action_taken) and 
-              not (KW_DISCARDS in action_taken) and 
-              not (KW_DISCARDS_C in action_taken) and 
-              not (KW_GAINS in action_taken)):
+                KW_TRASHES not in action_taken and
+                KW_SHUFFLES not in action_taken and 
+                KW_REVEALS not in action_taken and 
+                KW_REVEALS_C not in action_taken and 
+                KW_DISCARDS not in action_taken and 
+                KW_DISCARDS_C not in action_taken and 
+                KW_GAINS not in action_taken):
             done_resolving = True
         elif (last_play == dominioncards.NobleBrigand and 
-              KW_GAINS in action_taken and 
-              dominioncards.NobleBrigand in capture_cards(action_taken)):
+                KW_GAINS in action_taken and 
+                dominioncards.NobleBrigand in capture_cards(action_taken)):
             done_resolving = True
         elif (last_play == dominioncards.NobleBrigand and 
-              not (KW_TRASHES in action_taken) and
-              not (KW_SHUFFLES in action_taken) and 
-              not (KW_REVEALS in action_taken) and 
-              not (KW_REVEALS_C in action_taken) and 
-              not (KW_DISCARDS in action_taken) and 
-              not (KW_DISCARDS_C in action_taken) and 
-              not (KW_GAINS in action_taken)):
+                KW_TRASHES not in action_taken and
+                KW_SHUFFLES not in action_taken and 
+                KW_REVEALS not in action_taken and 
+                KW_REVEALS_C not in action_taken and 
+                KW_DISCARDS not in action_taken and 
+                KW_DISCARDS_C not in action_taken and 
+                KW_GAINS not in action_taken):
             done_resolving = True
         elif (last_play == dominioncards.Rogue and 
-              not (KW_GAINS in action_taken)):
+                KW_GAINS not in action_taken):
             done_resolving = True
         elif (last_play == dominioncards.Graverobber and 
-              not (KW_GAINS in action_taken)):
+                KW_GAINS not in action_taken):
             done_resolving = True
         elif (last_play == dominioncards.Moneylender and 
-              not (KW_TRASHES in action_taken and 
-                   dominioncards.Copper in capture_cards(action_taken))):
+                (KW_TRASHES not in action_taken or
+                    dominioncards.Copper not in capture_cards(action_taken))):
             done_resolving = True
         elif (last_play == dominioncards.Salvager and 
-              not (KW_TRASHES in action_taken)):
+                KW_TRASHES not in action_taken):
             done_resolving = True
         elif (last_play == dominioncards.Baron and 
-              not (KW_DISCARDS in action_taken and 
-                   dominioncards.Estate in capture_cards(action_taken))):
+                (KW_DISCARDS not in action_taken or 
+                    dominioncards.Estate not in capture_cards(action_taken))):
             done_resolving = True
         elif (last_play == dominioncards.Harvest and 
-              not (KW_REVEALS in action_taken) and 
-              not (KW_REVEALS_C in action_taken) and 
-              not (KW_SHUFFLES in action_taken)):
+                KW_REVEALS not in action_taken and 
+                KW_REVEALS_C not in action_taken and 
+                KW_SHUFFLES not in action_taken):
             turn_money += len(set(harvest_reveal))
             harvest_reveal = []
             done_resolving = True
         elif (last_play == dominioncards.BandofMisfits and 
-              not KW_CHOOSES in action_taken):
+                KW_CHOOSES not in action_taken):
+            done_resolving = True
+        elif (last_play == dominioncards.Ironmonger and 
+                KW_DRAWS not in action_taken and 
+                KW_SHUFFLES not in action_taken and 
+                KW_REVEALS_C not in action_taken and 
+                KW_REVEALS not in action_taken):
+            done_resolving = True
+        elif (last_play == dominioncards.Ironworks and 
+                KW_GAINS not in action_taken):
+            done_resolving = True
+        elif (last_play == dominioncards.Storeroom and 
+                KW_DISCARDS not in action_taken and 
+                KW_DRAWS not in action_taken and 
+                KW_SHUFFLES not in action_taken):
+            turn_money += len(storeroom_discards)
+            storeroom_discards = []
             done_resolving = True
 
         if KW_PLAYS in action_taken:
@@ -415,10 +438,9 @@ def parse_turn(log_lines, trash_pile):
 
                 if play.is_treasure():
                     phase = BUY_PHASE
-                if (play == dominioncards.Spoils and 
-                    last_play == dominioncards.Counterfeit and 
-                    not done_resolving):
-                    counterfeiting_spoils = True
+
+                if play == dominioncards.PoorHouse:
+                    turn_money += 4 # Subtraction will happen later
                 elif play == dominioncards.Spoils:
                     # Spoils always get returned on play...
                     # ...unless it's Counterfeited. 
@@ -428,6 +450,10 @@ def parse_turn(log_lines, trash_pile):
                     if (last_play != dominioncards.Counterfeit or 
                         done_resolving):
                         ret[RETURNS].append(play)
+                elif play == dominioncards.TradeRoute:
+                    turn_money += len(trade_route_set)
+                elif play == dominioncards.Tournament:
+                    turn_money += 1 # Might be canceled out later
                 elif play == dominioncards.BandofMisfits:
                     if last_play in [dominioncards.Procession, 
                                      dominioncards.ThroneRoom]:
@@ -457,6 +483,8 @@ def parse_turn(log_lines, trash_pile):
 
         if KW_GAINS in action_taken:
             gained = capture_cards(action_taken)
+            trade_route_set.update([g for g in gained if g.is_victory()])
+
             if active_player == ret[NAME]:
                 ret[GAINS].extend(gained)
                 if(not done_resolving and
@@ -466,6 +494,11 @@ def parse_turn(log_lines, trash_pile):
                     last_play == dominioncards.Graverobber)):
                     for c in gained:
                         trash_pile.remove(c)
+                elif (last_play == dominioncards.Ironworks and 
+                      not done_resolving):
+                    if gained[0].is_treasure():
+                        turn_money += 1
+                    done_resolving = True
             else:
                 opp_turn_info[active_player][GAINS].extend(gained)
             continue
@@ -554,16 +587,45 @@ def parse_turn(log_lines, trash_pile):
 
         if KW_DISCARDS in action_taken or KW_DISCARDS_C in action_taken:
             if (dominioncards.Estate in capture_cards(action_taken) and 
-                last_play == dominioncards.Baron and 
-                not done_resolving):
+                    last_play == dominioncards.Baron and 
+                    not done_resolving):
                 turn_money += 4
                 done_resolving = True
+            elif (last_play == dominioncards.SecretChamber):
+                turn_money += len(capture_cards(action_taken))
+            elif (last_play == dominioncards.Vault and 
+                    active_player == ret[NAME]):
+                turn_money += len(capture_cards(action_taken))
+            elif (last_play == dominioncards.Storeroom and not done_resolving):
+                storeroom_discards.extend(capture_cards(action_taken))
+            continue
+
+        if (KW_REVEALS_HAND in action_taken):
+            if last_play == dominioncards.PoorHouse and not done_resolving:
+                turn_money -= len([tr for tr in capture_cards(action_taken) if tr.is_treasure()])
+                if turn_money < 0:
+                    turn_money = 0
+            continue
+
 
         if (KW_REVEALS in action_taken or KW_REVEALS_C in action_taken):
             if last_play == dominioncards.Harvest:
                 harvest_reveal.extend(capture_cards(action_taken))
+            elif (last_play == dominioncards.Tournament and 
+                not done_resolving and active_player != ret[NAME] and 
+                dominioncards.Province in capture_cards(action_taken)):
+                turn_money -= 1
+                done_resolving = True
+            elif (last_play == dominioncards.Ironmonger and not done_resolving):
+                if capture_cards(action_taken)[0].is_treasure():
+                    turn_money += 1
+                done_resolving = True
             continue
 
+        if KW_DRAWS in action_taken: 
+            if last_play == dominioncards.Storeroom:
+                storeroom_discards = []
+            continue
         # All remaining actions should be captured; the next few statements
         # are those which are not logged in any way (though they could be!)
 
@@ -575,11 +637,8 @@ def parse_turn(log_lines, trash_pile):
             KW_EMBARGOES in action_taken or 
             KW_NAMES in action_taken or 
             KW_CARDS_IN_DISCARDS in action_taken or
-            KW_DRAWS in action_taken or 
             KW_APPLIED in action_taken or 
             KW_APPLIES_WHEN_TRASHED in action_taken or 
-            KW_DISCARDS in action_taken or 
-            KW_DISCARDS_C in action_taken or 
             KW_SHUFFLES in action_taken or 
             KW_TAKES_SET_ASIDE in action_taken):
             continue
@@ -599,10 +658,11 @@ def parse_turns(log_lines):
     """
     turns = [];
     trash_pile = [];
+    trade_route_set = set([])
     
     previous_name = '' # for Possession
     while not GAME_OVER_RE.match(log_lines[0]):
-        turn = parse_turn(log_lines, trash_pile)
+        turn = parse_turn(log_lines, trash_pile, trade_route_set)
         if turn[POSSESSION]:
             turn['pname'] = previous_name
         elif(len(turns) > 0 and turn[NAME] == turns[-1][NAME] and 

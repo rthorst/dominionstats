@@ -1427,9 +1427,8 @@ class ParseGokoGameTest(unittest.TestCase):
         #Secret chamber 
         self.assertEqual(parsed_game[DECKS][1][TURNS][12][MONEY], 4)
 
-        #Ironworks
-        self.assertEqual(parsed_game[DECKS][0][TURNS][9][MONEY], 6)
-        self.assertEqual(parsed_game[DECKS][0][TURNS][13][MONEY], 6)
+        #Vault
+        self.assertEqual(parsed_game[DECKS][1][TURNS][4][MONEY], 6)
 
         #Tribute
         self.assertEqual(parsed_game[DECKS][0][TURNS][4][MONEY], 7)
@@ -1438,15 +1437,20 @@ class ParseGokoGameTest(unittest.TestCase):
         self.assertEqual(parsed_game[DECKS][0][TURNS][6][MONEY], 3)
         self.assertEqual(parsed_game[DECKS][0][TURNS][8][MONEY], 5)
 
-        #Vault
-        self.assertEqual(parsed_game[DECKS][1][TURNS][4][MONEY], 6)
+        #Tournament
+        self.assertEqual(parsed_game[DECKS][0][TURNS][7][MONEY], 5)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][8][MONEY], 5)
+
+        #Ironworks
+        self.assertEqual(parsed_game[DECKS][0][TURNS][9][MONEY], 6)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][13][MONEY], 6)
 
         #Ironmonger
-        self.assertEqual(parsed_game[DECKS][1][TURNS][3][MONEY], 5)
         self.assertEqual(parsed_game[DECKS][0][TURNS][7][MONEY], 5)
+        self.assertEqual(parsed_game[DECKS][1][TURNS][3][MONEY], 5)
 
         #Poor House
-        self.assertEqual(parsed_game[DECKS][0][TURNS][7][MONEY], 6)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][15][MONEY], 6)
 
         # Storeroom
         self.assertEqual(parsed_game[DECKS][1][TURNS][8][MONEY], 6)
@@ -1454,10 +1458,6 @@ class ParseGokoGameTest(unittest.TestCase):
         #City
         self.assertEqual(parsed_game[DECKS][0][TURNS][11][MONEY], 5)
         self.assertEqual(parsed_game[DECKS][0][TURNS][18][MONEY], 8)
-
-        #Tournament
-        self.assertEqual(parsed_game[DECKS][0][TURNS][7][MONEY], 5)
-        self.assertEqual(parsed_game[DECKS][0][TURNS][8][MONEY], 5)
 
         #Diadem. 
         self.assertEqual(parsed_game[DECKS][0][TURNS][16][MONEY], 8)
