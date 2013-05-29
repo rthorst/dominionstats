@@ -29,7 +29,7 @@ Chancellor,Chancellors,3,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,26,Dominion,Chan
 Chapel,Chapels,2,0,0,1,0,0,0,0,0,0,0,0,0,0,4,0,0,27,Dominion,Chap
 City,Cities,5,2,1,1,0,0,0,0,0,0,0,0,0,0,0,?,1,28,Prosperity,City
 Colony,Colonies,11,0,0,0,0,1,0,0,0,0,0,0,0,10,0,0,0,29,Prosperity,Col
-Conspirator,Conspirators,4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,30,Intrigue,Cons
+Conspirator,Conspirators,4,?,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,30,Intrigue,Cons
 Contraband,Contrabands,5,0,0,0,1,0,0,0,0,0,0,0,0,0,0,3,1,31,Prosperity,Cband
 Copper,Coppers,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,32,Common,Cop
 Coppersmith,Coppersmiths,4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,33,Intrigue,Csmith
@@ -83,7 +83,7 @@ Governor,Governors,5,1,?,1,0,0,0,0,0,0,0,0,0,0,?,0,0,79,Promotional,Gov
 Graverobber,Graverobbers,5,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,81,"Dark Ages",GR
 "Great Hall","Great Halls",3,1,1,1,0,1,0,0,0,0,0,0,0,1,0,0,0,82,Intrigue,GH
 Haggler,Hagglers,5,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,83,Hinterlands,Hag
-Hamlet,Hamlets,2,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,84,Cornucopia,Ham
+Hamlet,Hamlets,2,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,84,Cornucopia,Ham
 Harem,Harems,6,0,0,0,1,1,0,0,0,0,0,0,0,2,0,2,0,85,Intrigue,Harem
 Harvest,Harvests,5,0,0,1,0,0,0,0,0,0,0,0,0,0,0,?,0,86,Cornucopia,Hvest
 Haven,Havens,2,1,1,1,0,0,0,0,1,0,0,0,0,0,0,0,0,87,Seaside,Hav
@@ -98,7 +98,7 @@ Hovel,Hovels,1,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,94,"Dark Ages",Hv
 "Hunting Party","Hunting Parties",5,1,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,96,Cornucopia,Hunt
 "Ill-Gotten Gains","Ill-Gotten Gains",5,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,97,Hinterlands,IGG
 Inn,Inns,5,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,98,Hinterlands,Inn
-Ironmonger,Ironmongers,4,?,1,1,0,0,0,0,0,0,0,0,0,0,0,?,0,99,"Dark Ages",IM
+Ironmonger,Ironmongers,4,1,1,1,0,0,0,0,0,0,0,0,0,0,0,?,0,99,"Dark Ages",IM
 Ironworks,Ironworks,4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,?,0,100,Intrigue,IW
 Island,Islands,4,0,0,1,0,1,0,0,0,0,0,0,0,2,0,0,0,101,Seaside,Isl
 "Jack of All Trades","Jacks of All Trades",4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,102,Hinterlands,JoaT
@@ -135,13 +135,13 @@ Mystic,Mystics,5,1,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,131,"Dark Ages",Mys
 Navigator,Navigators,4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,133,Seaside,Nav
 Necropolis,Necropolises,1,2,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,134,"Dark Ages",Nec
 "Noble Brigand","Noble Brigands",4,0,0,1,0,0,1,0,0,0,0,0,0,0,0,1,0,135,Hinterlands,NBri
-Nobles,Nobles,6,2,3,1,0,1,0,0,0,0,0,0,0,2,0,0,0,136,Intrigue,Nbles
+Nobles,Nobles,6,?,?,1,0,1,0,0,0,0,0,0,0,2,0,0,0,136,Intrigue,Nbles
 "Nomad Camp","Nomad Camps",4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,1,137,Hinterlands,NCamp
 Oasis,Oases,3,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,0,138,Hinterlands,Oasis
 Oracle,Oracles,3,0,2,1,0,0,1,0,0,0,0,0,0,0,0,0,0,139,Hinterlands,Ora
 Outpost,Outposts,5,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,140,Seaside,Out
 "Overgrown Estate","Overgrown Estates",1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,141,"Dark Ages",OE
-Pawn,Pawns,2,1,1,1,0,0,0,0,0,0,0,0,0,0,0,?,1,142,Intrigue,Pawn
+Pawn,Pawns,2,?,?,1,0,0,0,0,0,0,0,0,0,0,0,?,?,142,Intrigue,Pawn
 "Pearl Diver","Pearl Divers",2,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,143,Seaside,PDiv
 Peddler,Peddlers,8,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,0,144,Prosperity,Ped
 "Philosopher's Stone","Philosopher's Stones",P3,0,0,0,1,0,0,0,0,0,0,0,0,0,0,?,0,145,Alchemy,PStone
@@ -188,7 +188,7 @@ Smugglers,Smugglers,3,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,185,Seaside,Smug
 "Spice Merchant","Spice Merchants",4,?,?,1,0,0,0,0,0,0,0,0,0,0,0,?,?,186,Hinterlands,SMrch
 Spoils,Spoils,*0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,3,0,187,"Dark Ages",Spoils
 Spy,Spies,4,1,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,188,Dominion,Spy
-Squire,Squires,2,2,0,1,0,0,0,0,0,0,0,0,0,0,0,1,2,189,"Dark Ages",Sq
+Squire,Squires,2,?,0,1,0,0,0,0,0,0,0,0,0,0,0,1,2,189,"Dark Ages",Sq
 Stables,Stables,5,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,190,Hinterlands,Stab
 Stash,Stashes,5,0,0,0,1,0,0,0,0,0,0,0,0,0,0,2,0,191,Promotional,Sash
 Steward,Stewards,3,0,2,1,0,0,0,0,0,0,0,0,0,0,2,?,0,192,Intrigue,Ste
@@ -200,7 +200,7 @@ Talisman,Talismans,4,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,197,Prosperity,Tman
 Thief,Thieves,4,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,198,Dominion,Thi
 "Throne Room","Throne Rooms",4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,199,Dominion,TRoom
 Torturer,Torturers,5,0,3,1,0,0,1,0,0,0,0,0,0,0,0,0,0,200,Intrigue,Tort
-Tournament,Tournaments,4,1,1,1,0,0,0,0,0,0,0,0,0,0,0,?,0,201,Cornucopia,Tou
+Tournament,Tournaments,4,1,?,1,0,0,0,0,0,0,0,0,0,0,0,?,0,201,Cornucopia,Tou
 "Trade Route","Trade Routes",3,0,0,1,0,0,0,0,0,0,0,0,0,0,1,?,1,202,Prosperity,TRoute
 Trader,Traders,4,0,0,1,0,0,0,1,0,0,0,0,0,0,1,0,0,203,Hinterlands,Tder
 "Trading Post","Trading Posts",5,0,0,1,0,0,0,0,0,0,0,0,0,0,2,0,0,204,Intrigue,TPst

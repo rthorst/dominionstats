@@ -65,6 +65,9 @@ class Card(object):
     def is_knight(self):
         return self.knight == '1'
 
+    def is_ruins(self):
+        return self.ruins == '1'
+
     def vp_per_card(self):
         return self.vp
 

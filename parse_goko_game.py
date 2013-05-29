@@ -43,7 +43,10 @@ BANE_RE = re.compile('^Bane card: (.*)$')
 PLAYER_AND_START_DECK_RE = re.compile('^(.*) - starting cards: (.*)$')
 TAKES_COINS_RE = re.compile('takes (\d+) coin')
 RECEIVES_COINS_RE = re.compile('receives (\d+) coin')
+TAKES_ACTIONS_RE = re.compile('takes (\d+) action')
+RECEIVES_ACTIONS_RE = re.compile('receives (\d+) action')
 
+KW_MOVES_DECK_TO_DISCARD = 'moves deck to discard'
 KW_APPLIED = 'applied ' #applied Watchtower to place X on top of the deck
 KW_APPLIES_WHEN_TRASHED = "applies the 'when you trash ability' of "
 KW_TO_THE_SUPPLY = ' to the Supply'
@@ -73,6 +76,8 @@ KW_DURATION = 'duration '
 KW_SETS_ASIDE = 'sets aside ' 
 KW_TAKES_SET_ASIDE = 'takes set aside cards: '
 KW_CHOOSES = 'chooses '
+KW_CHOOSES_TWO_CARDS_AND_ONE_ACTION = 'chooses two cards and one action'
+KW_RECEIVES_ONE_ACTION = 'receives one action'
 KW_EMBARGOES = 'embargoes '
 KW_NAMES = 'names '
 KW_CHOOSES_TWO_COINS = 'chooses two coins'
@@ -206,10 +211,12 @@ def capture_cards(line, return_dict=False):
             cards.extend([card] * mult)
     return cards
 
-def parse_turn(log_lines, trash_pile, trade_route_set):
+def parse_turn(log_lines, trash_pile, trade_route_set, removed_from_supply, n_players):
     """ Parse the information from a given turn.
 
     Maintain the trash pile. This is necessary for Forager money counting.
+    Maintains the trade route tokens AND the list of all cards gained, which 
+    we need to accurately know when Cities are activated.
 
     Return a dict containing the following fields.  If any of the fields have
     a value that evaluates to False, do not keep it.
@@ -227,14 +234,55 @@ def parse_turn(log_lines, trash_pile, trade_route_set):
     money: Amount of money available during entire buy phase.
     opp: Dict keyed by opponent index in names_list, containing dicts with trashes/gains.
     """
-    # Still need special accounting for: 
-    # Mercenary:  did you trash cards? 
-    # Diadem - requires action tracking. So much work for one card!   
-    # City. Piles tracking.
-    # Action tracking - all the non-default ones.
-    # Pawn, Conspirator, Ironworks, Tribute, Nobles, Hamlet, trusty steed
-    # Crossroads, Spice Merchant, Squire, Ironmonger, 
-    # Action tracking done: TR, KC, procession, fishing village, tact
+
+    def pile_size(card, n_players):
+        if card == dominioncards.Ruins or card == dominioncards.Curse:
+            return max((n_players - 1)*10, 10)
+        if card == dominioncards.Province:
+            if n_players <= 2:
+                return 8
+            if n_players == 3:
+                return 12
+            return 12+(n_players - 4)*3
+        if card.is_victory():
+            if n_players <= 2:
+                return 8
+            return 12
+        if card in [dominioncards.Spoils, dominioncards.Mercenary, 
+                dominioncards.Madman] or card.is_ruins() or card.is_shelter():
+            return 999 
+        if card == dominioncards.Copper:
+            if n_players < 5:
+                return 60
+            return 120
+        if card == dominioncards.Silver:
+            if n_players < 5:
+                return 40
+            return 80
+        if card == dominioncards.Gold:
+            if n_players < 5:
+                return 30
+            return 60
+        if card == dominioncards.Platinum:
+            return 12
+        if card == dominioncards.Potion:
+            return 16
+        return 10
+
+    def empty_piles(removed_from_supply, n_players):
+        # For cities...
+        empty_piles = []
+
+        # First, piles of different cards
+        if (sum([removed_from_supply[c] for c in removed_from_supply.keys() if c.is_knight()]) == pile_size(dominioncards.Knights, n_players)):
+            empty_piles.append(dominioncards.Knights)
+        if (sum([removed_from_supply[c] for c in removed_from_supply.keys() if c.is_ruins()]) == pile_size(dominioncards.Knights, n_players)):
+            empty_piles.append(dominioncards.Knights)
+
+        for pile,num in removed_from_supply.items():
+            if pile_size(pile, n_players) == num:
+                empty_piles.append(pile)
+        return empty_piles
 
     def _delete_if_exists(d, n):
         if n in d:
@@ -265,6 +313,7 @@ def parse_turn(log_lines, trash_pile, trade_route_set):
     # trash, etc. Card effects which last more than one line. 
     last_play = None
     harvest_reveal = []
+    trashed_to_mercenary = 0
     current_phase = None
     bom_plays = 0 # For throne room/procession/KC - don't get to rechoose BoM
     bom_choice = None
@@ -386,6 +435,15 @@ def parse_turn(log_lines, trash_pile, trade_route_set):
         elif (last_play == dominioncards.Graverobber and 
                 KW_GAINS not in action_taken):
             done_resolving = True
+        elif (last_play == dominioncards.Mercenary and 
+                KW_TRASHES not in action_taken and
+                KW_REVEALS not in action_taken and 
+                KW_DRAWS not in action_taken and 
+                KW_PLACES not in action_taken and 
+                KW_GAINS not in action_taken and 
+                KW_SHUFFLES not in action_taken):
+            done_resolving = True
+            trashed_to_mercenary = 0
         elif (last_play == dominioncards.Moneylender and 
                 (KW_TRASHES not in action_taken or
                     dominioncards.Copper not in capture_cards(action_taken))):
@@ -430,7 +488,9 @@ def parse_turn(log_lines, trash_pile, trade_route_set):
 
             # special cases 
             for play in played: 
-                action_counter -= 1
+                if play.is_action():
+                    if not(play == dominioncards.Cultist and play == last_play):
+                        action_counter -= 1
                 action_counter += play.num_plus_actions()
                 if bom_choice is not None:
                     if bom_plays == 0:
@@ -461,6 +521,8 @@ def parse_turn(log_lines, trash_pile, trade_route_set):
                     turn_money += len(trade_route_set)
                 elif play == dominioncards.Tournament:
                     turn_money += 1 # Might be canceled out later
+                elif play == dominioncards.Diadem:
+                    turn_money += action_counter
                 elif play == dominioncards.BandofMisfits:
                     if last_play in [dominioncards.Procession, 
                                      dominioncards.ThroneRoom]:
@@ -469,6 +531,14 @@ def parse_turn(log_lines, trash_pile, trade_route_set):
                         bom_plays = 3
                     else:
                         bom_plays = 1
+                elif play == dominioncards.Conspirator and len(ret[PLAYS]) > 2:
+                    action_counter += 1
+                elif (play == dominioncards.Crossroads and 
+                        ret[PLAYS].count(dominioncards.Crossroads) == 1):
+                    action_counter += 3
+                elif play == dominioncards.City:
+                    if len(empty_piles(removed_from_supply, n_players)) >= 2:
+                        turn_money += 1
                     
                 last_play = play
                 done_resolving = False
@@ -485,7 +555,10 @@ def parse_turn(log_lines, trash_pile, trade_route_set):
             continue
 
         if KW_RETURNS in action_taken:
-            ret[RETURNS].extend(capture_cards(action_taken))
+            returned = capture_cards(action_taken)
+            ret[RETURNS].extend(returned)
+            for r in returned:
+                removed_from_supply[r] -= 1
             continue
 
         if KW_GAINS in action_taken:
@@ -501,13 +574,21 @@ def parse_turn(log_lines, trash_pile, trade_route_set):
                     last_play == dominioncards.Graverobber)):
                     for c in gained:
                         trash_pile.remove(c)
-                elif (last_play == dominioncards.Ironworks and 
+                else:
+                    for g in gained:
+                        removed_from_supply[g] += 1
+
+                if (last_play == dominioncards.Ironworks and 
                       not done_resolving):
                     if gained[0].is_treasure():
                         turn_money += 1
+                    if gained[0].is_action():
+                        action_counter += 1
                     done_resolving = True
             else:
                 opp_turn_info[active_player][GAINS].extend(gained)
+                for g in gained:
+                    removed_from_supply[g] += 1
             continue
 
         # Some old Goko logs mis-attribute pirate ship trashing. I'm not 
@@ -527,7 +608,12 @@ def parse_turn(log_lines, trash_pile, trade_route_set):
                     turn_money += 3
                 elif last_play == dominioncards.Salvager and not done_resolving:
                     turn_money += trashed[0].coin_cost
-
+                elif last_play == dominioncards.Mercenary and not done_resolving:
+                    trashed_to_mercenary += len(trashed)
+                    if trashed_to_mercenary == 2:
+                        turn_money += 2
+                        done_resolving = True
+                        trashed_to_mercenary = 0
 
                 while dominioncards.Fortress in trashed:
                     trashed.remove(dominioncards.Fortress)
@@ -568,6 +654,11 @@ def parse_turn(log_lines, trash_pile, trade_route_set):
                     action_counter += 1
             continue
 
+        if (KW_CHOOSES_TWO_CARDS_AND_ONE_ACTION in action_taken or 
+                KW_RECEIVES_ONE_ACTION in action_taken):
+            action_counter += 1
+            continue 
+
         if KW_CHOOSES_TWO_COINS in action_taken:
             turn_money += 2
             continue
@@ -596,6 +687,15 @@ def parse_turn(log_lines, trash_pile, trade_route_set):
             turn_money += int(match.group(1))
             continue
 
+        match = TAKES_ACTIONS_RE.match(action_taken)
+        if match:
+            action_counter += int(match.group(1))
+            continue
+
+        match = RECEIVES_ACTIONS_RE.match(action_taken)
+        if match:
+            action_counter += int(match.group(1))
+            continue
         if KW_DISCARDS in action_taken or KW_DISCARDS_C in action_taken:
             if (dominioncards.Estate in capture_cards(action_taken) and 
                     last_play == dominioncards.Baron and 
@@ -622,6 +722,8 @@ def parse_turn(log_lines, trash_pile, trade_route_set):
         if (KW_REVEALS in action_taken or KW_REVEALS_C in action_taken):
             if last_play == dominioncards.Harvest:
                 harvest_reveal.extend(capture_cards(action_taken))
+            elif last_play == dominioncards.Golem:
+                action_counter += len([c for c in capture_cards(action_taken)if (c.is_action() and not c == dominioncards.Golem)])
             elif (last_play == dominioncards.Tournament and 
                 not done_resolving and active_player != ret[NAME] and 
                 dominioncards.Province in capture_cards(action_taken)):
@@ -630,6 +732,8 @@ def parse_turn(log_lines, trash_pile, trade_route_set):
             elif (last_play == dominioncards.Ironmonger and not done_resolving):
                 if capture_cards(action_taken)[0].is_treasure():
                     turn_money += 1
+                if capture_cards(action_taken)[0].is_action():
+                    action_counter += 1
                 done_resolving = True
             continue
 
@@ -650,6 +754,7 @@ def parse_turn(log_lines, trash_pile, trade_route_set):
             KW_CARDS_IN_DISCARDS in action_taken or
             KW_APPLIED in action_taken or 
             KW_APPLIES_WHEN_TRASHED in action_taken or 
+            KW_MOVES_DECK_TO_DISCARD in action_taken or 
             KW_SHUFFLES in action_taken or 
             KW_TAKES_SET_ASIDE in action_taken):
             continue
@@ -657,7 +762,7 @@ def parse_turn(log_lines, trash_pile, trade_route_set):
         raise parse_common.BogusGameError('Line did not match any keywords!')
 
 
-def parse_turns(log_lines):
+def parse_turns(log_lines, removed_from_supply, n_players):
     """
     Sequentially go through the log and parse the game, splitting it into turns.
 
@@ -666,6 +771,11 @@ def parse_turns(log_lines):
 
     In the case of Outpost played during Possession turn, this will mark the 
     WRONG turn as being an outpost turn, but will still mark one of them. 
+
+    Needs number of players so parse_turn can accurately track when vp card 
+    piles have run out, to accurately report number of coins Cities give.
+
+    Starting decks are removed from supply (count supply for city empty piles)
     """
     turns = [];
     trash_pile = [];
@@ -673,7 +783,8 @@ def parse_turns(log_lines):
     
     previous_name = '' # for Possession
     while not GAME_OVER_RE.match(log_lines[0]):
-        turn = parse_turn(log_lines, trash_pile, trade_route_set)
+        turn = parse_turn(log_lines, trash_pile, trade_route_set, 
+                          removed_from_supply, n_players)
         if turn[POSSESSION]:
             turn['pname'] = previous_name
         elif(len(turns) > 0 and turn[NAME] == turns[-1][NAME] and 
@@ -791,7 +902,17 @@ def parse_game(game_str, dubious_check = False):
     validate_names(game_dict, dubious_check)
     game_dict[VETO] = {}
 
-    turns = parse_turns(log_lines)
+    # So much work just to know when two piles are empty for cities! 
+    # Here, need to account for number of coppers/zapped silvers in all start
+    # decks. Can't get estates to work with zapped start decks and shelters... 
+    removed_from_supply = collections.defaultdict(lambda: 0)
+    for d in game_dict[START_DECKS]:
+        for c in d[START_DECK]:
+            card = index_to_card(c)
+            if card != dominioncards.Estate and not card.is_shelter():
+                removed_from_supply[card] += 1
+
+    turns = parse_turns(log_lines, removed_from_supply, len(game_dict[PLAYERS]))
     decks = parse_endgame(log_lines)
     game_dict[DECKS] = decks
     associate_turns_with_owner(game_dict, turns, dubious_check)

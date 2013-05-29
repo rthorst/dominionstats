@@ -112,9 +112,21 @@ def bundle_goko_games(cur_date, games, saved_games_bundle):
         print len(games), " games to download..."
     for cur_game in games:
         url = GokoSingleGameUrl(cur_date, cur_game)
-        game_text = urllib.urlopen(url).read()
-        open(cur_game,'a').write(game_text)
-        bundle.add(cur_game)
+        retries_remaining = 3
+        while retries_remaining > 0:
+            try:
+                game_text = urllib.urlopen(url).read()
+
+                game =  open(cur_game,'a')
+                game.write(game_text)
+                game.close() 
+
+                bundle.add(cur_game)
+                break
+            except:
+                retries_remaining = retries_remaining - 1
+                if(DEBUG):
+                    print "Failed to download game: ", cur_game
     bundle.close();
     os.chdir(orig_dir)
     shutil.rmtree(directory_name)

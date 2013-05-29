@@ -1127,6 +1127,12 @@ class ValidateIsoNamesTest(unittest.TestCase):
 
 class ParseGokoGameTest(unittest.TestCase):
 
+    def test_goko_city_diadem(self):
+        # Another test of counting city and actions, this time with junking
+        game_contents = codecs.open('testing/testdata/log.50612a9b51c36e573294bfd0.1369817660556.txt', encoding='utf-8').read()
+        parsed_game=parse_game.parse_game(game_contents)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][18][MONEY], 33)
+
     def test_goko_turn_1_resign_with_large_supply(self):
         # Tests everything that can be tested in a game with a turn 1 resign:
         # Has supply with platinum, colonies, shelters, ruins, and a bane.
@@ -1455,14 +1461,20 @@ class ParseGokoGameTest(unittest.TestCase):
         # Storeroom
         self.assertEqual(parsed_game[DECKS][1][TURNS][8][MONEY], 6)
 
-        #City
-        self.assertEqual(parsed_game[DECKS][0][TURNS][11][MONEY], 5)
-        self.assertEqual(parsed_game[DECKS][0][TURNS][18][MONEY], 8)
-
         #Diadem. 
         self.assertEqual(parsed_game[DECKS][0][TURNS][16][MONEY], 8)
         self.assertEqual(parsed_game[DECKS][0][TURNS][19][MONEY], 7)
 
+        #City
+        self.assertEqual(parsed_game[DECKS][0][TURNS][11][MONEY], 5)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][18][MONEY], 8)
+
+    def test_goko_diadem(self):
+        game_contents = codecs.open('testing/testdata/log.50612a9b51c36e573294bfd0.1369810215227.txt', encoding='utf-8').read()
+        parsed_game=parse_game.parse_game(game_contents)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][12][MONEY], 19)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][14][MONEY], 20)
+        self.assertEqual(parsed_game[DECKS][0][TURNS][15][MONEY], 29)
 
     def test_goko_trashing_fortress(self):
         # Make sure fortress doesn't count as getting trashed
@@ -1507,6 +1519,7 @@ class ParseGokoGameTest(unittest.TestCase):
                                 ["Estate"]) # Bug in goko! Should trash Hermit
         assert_equal_card_lists(parsed_game[DECKS][1][TURNS][13][TRASHES],
                                 ["Band of Misfits"]) # As Urchin
+        self.assertEqual(parsed_game[DECKS][1][TURNS][14][MONEY], 8)
 
     def test_goko_kc_tr_trashing_bom_as_things(self):
         # What happens when Band of Misfits is throned/KCed and then trashed?
