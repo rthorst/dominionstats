@@ -23,6 +23,8 @@ import utils
 # Module-level logging instance
 log = logging.getLogger(__name__)
 
+s3_location = 'ftl-goko-councilroom-test-bucket'
+
 class GokoProcessingDate(object):
     # TODO: This is a partial implementation
 
@@ -81,9 +83,6 @@ def dates_needing_scraping(db):
         str_date = time.strftime("%Y%m%d", cur_date.timetuple())
 
         # Check on the status of the day in our scraper tracker
-
-
-
         raw_game_count = raw_games_col.find({'game_date': str_date}).count()
 
 
@@ -127,12 +126,12 @@ class GokoScraper:
 
     def goko_rawgame_url(self, gamedate):
         """Returns the URL to the rawgame folder at goko for the specified datetime.date"""
-        return 'http://dominionlogs.goko.com/{date.year:04d}{date.month:02d}{date.day:02d}/'.format(date=gamedate)
+        return 'http://archive-dominionlogs.goko.com/{date.year:04d}{date.month:02d}{date.day:02d}/'.format(date=gamedate)
 
 
     def s3_rawgame_url(self, gamedate):
         """Returns the URL to the rawgame archive in S3 for the specified datetime.date"""
-        return 'http://static.councilroom.mccllstr.com/{keyname}'.format(keyname=self.gamelog_s3_keyname(gamedate))
+        return 'http://'+s3_location+'/{keyname}'.format(keyname=self.gamelog_s3_keyname(gamedate))
 
 
     def establish_s3_connection(self):
@@ -145,7 +144,7 @@ class GokoScraper:
         """Returns true if there is a whole-day rawgame archive in S3 for the specified date"""
         self.establish_s3_connection()
 
-        bucket = self.s3conn.get_bucket('static.councilroom.mccllstr.com')
+        bucket = self.s3conn.get_bucket(s3_location)
         return bucket.get_key(self.gamelog_s3_keyname(date)) is not None
 
 
@@ -162,7 +161,7 @@ class GokoScraper:
         self.establish_s3_connection()
 
         # Upload the contents to s3 in the appropriate key
-        bucket = self.s3conn.get_bucket('static.councilroom.mccllstr.com')
+        bucket = self.s3conn.get_bucket(s3_location)
         key = bucket.get_key(self.gamelog_s3_keyname(date))
         if not key:
             log.debug("Creating new key")
@@ -177,7 +176,7 @@ class GokoScraper:
         """Return the whole-day rawgame archive from our S3 bucket for
         the specified datetime.date"""
         self.establish_s3_connection()
-        bucket = self.s3conn.get_bucket('static.councilroom.mccllstr.com')
+        bucket = self.s3conn.get_bucket(s3_location)
         key = bucket.get_key(self.gamelog_s3_keyname(date))
         return key.get_contents_as_string()
 

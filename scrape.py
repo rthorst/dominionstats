@@ -21,10 +21,7 @@ import tarfile
 # if the size of the game log is less than this assume we got an error page
 SMALL_FILE_SIZE = 5000 
 
-# Modifying default start date to be the first recorded goko log
-#default_startdate = datetime.date(2010, 10, 15)
-default_startdate = datetime.date(2013, 04, 01)
-
+default_startdate = datetime.date(2010, 10, 15)
 
 DEBUG = True
 
@@ -55,7 +52,7 @@ def IsotropicGamesCollectionUrl(cur_date):
     return host + FormatDate(ISOTROPIC_FORMAT, cur_date)
 
 def GokoGamesCollectionUrl(cur_date):
-    host = 'http://dominionlogs.goko.com/'
+    host = 'http://archive-dominionlogs.goko.com/'
     return host+FormatDate(GOKO_FORMAT, cur_date)
 
 def GokoSingleGameUrl(cur_date, cur_game):
@@ -102,7 +99,8 @@ def download_date(str_date, cur_date, saved_games_bundle):
     return False
 
 def bundle_goko_games(cur_date, games, saved_games_bundle):
-    bundle = tarfile.open(saved_games_bundle,'w:bz2')
+    progressfile = tempfile.mktemp()
+    bundle = tarfile.open(progressfile,'w:bz2')
 
     orig_dir = os.getcwd()
     directory_name = tempfile.mkdtemp()
@@ -129,6 +127,7 @@ def bundle_goko_games(cur_date, games, saved_games_bundle):
                     print "Failed to download game: ", cur_game
     bundle.close();
     os.chdir(orig_dir)
+    os.rename(progressfile, saved_games_bundle)
     shutil.rmtree(directory_name)
 
 def unzip_date(directory, filename):
@@ -243,7 +242,7 @@ def scrape_games():
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
     #Goko updates logs in real time; wait a day so the list is finalized.
 
-    for cur_date in utils.daterange(default_startdate, yesterday):
+    for cur_date in utils.daterange(default_startdate, yesterday, reverse=True):
         str_date = time.strftime("%Y%m%d", cur_date.timetuple())
         if not utils.includes_day(args, str_date):
             if DEBUG:
