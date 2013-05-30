@@ -118,6 +118,8 @@ representations (singular, plural, and __repr__()"""
 def get_card(name):
     """Look up a card by its name."""
     try:
+        if name == "JackOfAllTrades":
+            name = "Jack of All Trades"
         return _CARDS[name]
     except KeyError:
         raise CardNameError(name)

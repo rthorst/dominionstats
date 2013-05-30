@@ -1127,6 +1127,14 @@ class ValidateIsoNamesTest(unittest.TestCase):
 
 class ParseGokoGameTest(unittest.TestCase):
 
+    def test_goko_JoaT(self):
+        game_contents = codecs.open('testing/testdata/log.50ff462be4b02b7235c36c70.1364860449322.txt', encoding='utf-8').read()
+        parsed_game=parse_game.parse_game(game_contents)
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][5][PLAYS],
+                                ["Jack of All Trades", "Copper", "Copper",
+                                 "Copper", "Copper"])
+
+
     def test_goko_city_diadem(self):
         # Another test of counting city and actions, this time with junking
         game_contents = codecs.open('testing/testdata/log.50612a9b51c36e573294bfd0.1369817660556.txt', encoding='utf-8').read()
