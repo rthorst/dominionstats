@@ -18,6 +18,10 @@ import tarfile
 import urllib2
 
 import utils
+import os
+import subprocess
+import tempfile
+import time
 
 
 # Module-level logging instance
@@ -115,7 +119,7 @@ class GokoScraper:
         """Returns our filename of the rawgame archive for the specified datetime.date"""
         return '{date.year:04d}{date.month:02d}{date.day:02d}.all.tar.bz2'.format(date=gamedate)
 
-    def gamelog_local_filename(self,gamedate)
+    def gamelog_local_filename(self,gamedate):
         """Returns the local path to the rawgame archive for the specified datetime.date"""
         return 'static/scrape_data/{filename}'.format(filename=self.our_gamelog_filename(gamedate))
 
@@ -149,13 +153,21 @@ class GokoScraper:
 
 
     def copy_rawgames_to_s3(self, date):
-        """Copy the day's archive of rawgames from goko to our S3 bucket"""
+        """Copy the day's archive of rawgames from goko to our S3 bucket.
+        Does not save a local copy."""
 
         current_directory = os.getcwd()
-        utils.ensure_exists('static/scrape_data')
-        os.chdir('static/scrape_data')
+        directory_name = tempfile.mkdtemp()
+        os.chdir(directory_name)
         str_date = time.strftime("%Y%m%d", date.timetuple())
-        scrape_date(str_date, date, passive=False)
+        try:
+            subprocess.check_call([current_directory + '/multi_scrape.sh', str_date])
+        except subprocess.CalledProcessError, e:
+            logging.warning("Unexpected return from scraper: {msg}".format(msg=e.output))
+            os.chdir(orig_dir)
+            shutil.rmtree(directory_name)
+            raise
+
         os.chdir(current_directory)
 
         self.establish_s3_connection()
@@ -167,9 +179,10 @@ class GokoScraper:
             log.debug("Creating new key")
             key = bucket.new_key(self.gamelog_s3_keyname(date))
             log.debug("Starting upload from local copy to s3")
-            key.set_contents_from_filename(self.gamelog_local_filename(date),
+            key.set_contents_from_filename(directory_name+'/'+self.our_gamelog_filename(date),
                                        cb=lambda sent, total: log.info('Transferred %d of %d', sent, total),
                                        replace=False, policy='public-read')
+        shutil.rmtree(directory_name) 
 
 
     def get_rawgames_from_s3(self, date):
@@ -219,8 +232,8 @@ class GokoScraper:
             else:
                 # Insert all the games
                 for tarinfo in t:
-                    log.debug("Working on %s", tarinfo.name)
-                    g = { u'_id': tarinfo.name,
+                    log.debug("Working on %s", yyyy_mm_dd+'/'+tarinfo.name)
+                    g = { u'_id': yyyy_mm_dd+'/'+tarinfo.name,
                           u'game_date': yyyy_mm_dd,
                           u'text': bson.Binary(bz2.compress(t.extractfile(tarinfo).read())) }
                     self.rawgames_col.save(g, safe=True)

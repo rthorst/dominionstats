@@ -114,13 +114,18 @@ def bundle_goko_games(cur_date, games, saved_games_bundle):
         while retries_remaining > 0:
             try:
                 game_text = urllib.urlopen(url).read()
+                if '<title>403 Forbidden' not in game_text and '<title>404 Not Found' not in game_text:
+                    game =  open(cur_game,'a')
+                    game.write(game_text)
+                    game.close() 
 
-                game =  open(cur_game,'a')
-                game.write(game_text)
-                game.close() 
+                    bundle.add(cur_game)
+                    break
+                else:
+                    retries_remaining = retries_remaining - 1
+                    if(DEBUG):
+                        print "Failed to download game: ", cur_game
 
-                bundle.add(cur_game)
-                break
             except:
                 retries_remaining = retries_remaining - 1
                 if(DEBUG):

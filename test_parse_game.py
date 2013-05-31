@@ -1222,11 +1222,11 @@ class ParseGokoGameTest(unittest.TestCase):
         self.assertEqual(parsed_game[DECKS][1][TURNS][26][VP_TOKENS], 2)
         assert_equal_card_lists(parsed_game[DECKS][1][TURNS][26][TRASHES],[])
         assert_equal_card_lists(parsed_game[DECKS][1][TURNS][26][GAINS],[])
-        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][26][OPP]['michaeljb'][GAINS],["Pawn"])
-        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][26][OPP]['michaeljb'][TRASHES],["Estate"])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][26][OPP][0][GAINS],["Pawn"])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][26][OPP][0][TRASHES],["Estate"])
         assert_equal_card_lists(parsed_game[DECKS][1][TURNS][18][GAINS],[])
         assert_equal_card_lists(parsed_game[DECKS][1][TURNS][18][TRASHES],[])
-        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][18][OPP]['michaeljb'][GAINS],["Silver"])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][18][OPP][0][GAINS],["Silver"])
 
     def test_goko_multi_card_trashing(self):
         # Trashing more than one card at a time with chapel
@@ -1263,14 +1263,14 @@ class ParseGokoGameTest(unittest.TestCase):
         self.assertEqual(parsed_game[RATING_SYSTEM], 'unrated')
         self.assertEqual(parsed_game[DECKS][0][NAME], 'ftl')
         self.assertEqual(parsed_game[DECKS][1][NAME], 'Lord Bottington')
-        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][5][OPP]['Lord Bottington'][GAINS], ["Curse", "Copper", "Ruined Library"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][5][OPP][1][GAINS], ["Curse", "Copper", "Ruined Library"])
         assert_equal_card_lists(parsed_game[DECKS][0][TURNS][5][GAINS], ["Spoils", "Watchtower"])
         assert_equal_card_lists(parsed_game[DECKS][0][TURNS][5][BUYS], ["Border Village"])
         assert_equal_card_lists(parsed_game[DECKS][0][TURNS][6][RETURNS], ["Spoils"])
         assert_equal_card_lists(parsed_game[DECKS][0][TURNS][9][BUYS], ["Estate"])
         assert_equal_card_lists(parsed_game[DECKS][0][TURNS][9][TRASHES], ["Estate"])
-        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][15][OPP]['ftl'][GAINS], ["Ruined Library"])
-        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][15][OPP]['ftl'][TRASHES], ["Ruined Library"])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][15][OPP][0][GAINS], ["Ruined Library"])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][15][OPP][0][TRASHES], ["Ruined Library"])
         self.assertEqual(parsed_game[DECKS][0][TURNS][21][MONEY], 12)
 
     def test_goko_counterfeit_spoils(self):
@@ -1291,7 +1291,7 @@ class ParseGokoGameTest(unittest.TestCase):
         assert_equal_card_lists(parsed_game[DECKS][1][TURNS][4][RETURNS],
                                 ["Copper","Copper"])
         assert_equal_card_lists(parsed_game[DECKS][1][TURNS][7][RETURNS], [])
-        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][7][OPP]["Hurtig"][GAINS], ["Copper"])
+        assert_equal_card_lists(parsed_game[DECKS][1][TURNS][7][OPP][0][GAINS], ["Copper"])
         self.assertEqual(parsed_game[DECKS][0][TURNS][3][MONEY],4)
         self.assertEqual(parsed_game[DECKS][0][TURNS][4][MONEY],5)
 
@@ -1370,7 +1370,7 @@ class ParseGokoGameTest(unittest.TestCase):
                          'Hazardous_Lazarus')
         self.assertEqual(parsed_game[DECKS][0][TURNS][14][GAINS], [])
         self.assertEqual(parsed_game[DECKS][0][TURNS][14][TRASHES], [])
-        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][14][OPP]['Hazardous_Lazarus'][GAINS], ["Navigator", "Gold"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][14][OPP][0][GAINS], ["Navigator", "Gold"])
 
     def test_goko_forager_last_play_of_turn(self):
         # Forager coin-counting despite being played at odd times
@@ -1498,16 +1498,30 @@ class ParseGokoGameTest(unittest.TestCase):
     def test_goko_masquerade(self):
         game_contents = codecs.open('testing/testdata/log.50bbfdf8e4b07d338bca0e67.1364827084306.txt', encoding='utf-8').read()
         parsed_game=parse_game.parse_game(game_contents)
-        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][4][PASSES],
-                                ['Copper'])
-        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][4][OPP]['Conqueror Bot'][PASSES], ['Copper'])
-        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][4][OPP]['Warlord Bot'][PASSES], ['Estate'])
-        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][4][OPP]['Kerry Monroe'][PASSES], ['Estate'])
-        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][11][PASSES],
-                                ['Copper'])
-        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][11][OPP]['Conqueror Bot'][PASSES], ['Fortress'])
-        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][11][OPP]['Warlord Bot'][PASSES], ['Copper'])
-        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][11][OPP]['Kerry Monroe'][PASSES], ['Copper'])
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][4][PASSES], ['Copper'])
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][4][RECEIVES], ['Estate'])
+
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][4][OPP][1][PASSES], ['Estate'])
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][4][OPP][1][RECEIVES], ['Estate'])
+
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][4][OPP][3][PASSES], ['Copper'])
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][4][OPP][3][RECEIVES], ['Copper'])
+
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][4][OPP][0][PASSES], ['Estate'])
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][4][OPP][0][RECEIVES], ['Copper'])
+
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][11][OPP][0][PASSES], ['Copper'])
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][11][OPP][0][RECEIVES], ['Fortress'])
+
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][11][OPP][1][PASSES], ['Copper'])
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][11][OPP][1][RECEIVES], ['Copper'])
+
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][11][PASSES], ['Copper'])
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][11][RECEIVES], ['Copper'])
+
+
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][11][OPP][3][PASSES], ['Fortress'])
+        assert_equal_card_lists(parsed_game[DECKS][3][TURNS][11][OPP][3][RECEIVES], ['Copper'])
 
     def test_goko_trashing_bom_as_things(self):
         # What happens when Band of Misfits is a mining village?
@@ -1603,12 +1617,12 @@ class ParseGokoGameTest(unittest.TestCase):
                                 ['Curse'])
         assert_equal_card_lists(parsed_game[DECKS][2][TURNS][7][PLAYS], 
                                 ['Witch','Copper','Copper'])
-        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][7][OPP]['sandyttc'][GAINS], ['Curse']) 
-        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][7][OPP]['sandyttc'][TRASHES], ['Curse']) 
-        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][7][OPP]['konichiwa'][GAINS], ['Curse']) 
-        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][7][OPP]['konichiwa'][TRASHES], ['Curse']) 
-        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][7][OPP]['Ali Iskandar Othman'][GAINS], ['Curse']) 
-        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][7][OPP]['Ali Iskandar Othman'][TRASHES], ['Curse']) 
+        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][7][OPP][3][GAINS], ['Curse']) 
+        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][7][OPP][3][TRASHES], ['Curse']) 
+        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][7][OPP][1][GAINS], ['Curse']) 
+        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][7][OPP][1][TRASHES], ['Curse']) 
+        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][7][OPP][2][GAINS], ['Curse']) 
+        assert_equal_card_lists(parsed_game[DECKS][2][TURNS][7][OPP][2][TRASHES], ['Curse']) 
         assert_equal_card_lists(parsed_game[DECKS][2][TURNS][8][PLAYS], 
                                 ['Embargo', 'Silver', 'Copper'])
         assert_equal_card_lists(parsed_game[DECKS][2][TURNS][8][TRASHES], 
@@ -1665,8 +1679,8 @@ class ParseGokoGameTest(unittest.TestCase):
                                 ["Death Cart"])
         assert_equal_card_lists(parsed_game[DECKS][0][TURNS][1][GAINS],
                                 ["Ruined Village", "Ruined Library"])
-        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][6][OPP]["Warlord Bot"][TRASHES], ["Cutpurse"])
-        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][6][OPP]["Warlord Bot"][GAINS], ["Pirate Ship"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][6][OPP][1][TRASHES], ["Cutpurse"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][6][OPP][1][GAINS], ["Pirate Ship"])
         assert_equal_card_lists(parsed_game[DECKS][0][TURNS][6][GAINS],
                                 ["Ruined Library", "Ruined Village"])
         assert_equal_card_lists(parsed_game[DECKS][0][TURNS][6][BUYS],
@@ -1763,8 +1777,8 @@ class ParseGokoGameTest(unittest.TestCase):
                                 ["Province", "Province"])
         assert_equal_card_lists(parsed_game[DECKS][0][TURNS][13][GAINS],
                                 [])
-        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][4][OPP]['ftl'][GAINS], ["Gold", "Gold", "Gold"])
-        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][4][OPP]['ftl'][TRASHES], ["Copper"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][4][OPP][0][GAINS], ["Gold", "Gold", "Gold"])
+        assert_equal_card_lists(parsed_game[DECKS][0][TURNS][4][OPP][0][TRASHES], ["Copper"])
         
 
 

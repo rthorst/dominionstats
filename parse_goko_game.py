@@ -31,9 +31,9 @@ import parse_common
 
 RATING_SYSTEM_RE = re.compile('^Rating system: (.*)$')
 GAME_OVER_RE = re.compile('^------------ Game Over ------------$')
-EMPTY_LINE_RE = re.compile('^\s+$')
+EMPTY_LINE_RE = re.compile('^\s*$')
 ENDGAME_VP_CHIP_RE = re.compile('^.* - victory point chips: (\d+)$')
-ENDGAME_POINTS_RE = re.compile('^.* - total victory points: (\d+)$')
+ENDGAME_POINTS_RE = re.compile('^.* - total victory points: (-?\d+)$')
 START_TURN_RE = re.compile('^---------- (.*): turn (.*?) (\[possessed\] )?----------$')
 VP_CHIPS_RE = re.compile('receives (\d+) victory point chips')
 HYPHEN_SPLIT_RE = re.compile('^(.*?) - (.*)$')
@@ -46,6 +46,7 @@ RECEIVES_COINS_RE = re.compile('receives (\d+) coin')
 TAKES_ACTIONS_RE = re.compile('takes (\d+) action')
 RECEIVES_ACTIONS_RE = re.compile('receives (\d+) action')
 
+KW_SCHEME_CHOICE = 'Scheme choice: '
 KW_MOVES_DECK_TO_DISCARD = 'moves deck to discard'
 KW_APPLIED = 'applied ' #applied Watchtower to place X on top of the deck
 KW_APPLIES_WHEN_TRASHED = "applies the 'when you trash ability' of "
@@ -63,6 +64,8 @@ KW_REVEALS_C = 'reveals: '
 KW_REVEALS_HAND = 'reveals hand: ' 
 KW_HAND = 'hand: '
 KW_REVEALS = 'reveals ' 
+KW_REVEALS_REACTION = 'reveals reaction ' 
+KW_REACTION = 'reaction ' 
 KW_DISCARDS = 'discards '
 KW_DISCARDS_C = 'discards: '
 KW_PLACES = 'places '
@@ -187,10 +190,15 @@ def capture_cards(line, return_dict=False):
     for kw in KEYWORDS:
         line=line.replace(kw, '')
 
+
     if return_dict:
         cards = {}
     else:
         cards = []
+
+    if EMPTY_LINE_RE.match(line):
+        return cards
+
     card_sections = COMMA_SPLIT_RE.split(line)
     for sect in card_sections:
         multiple = NUMBER_CARD_RE.match(sect)
@@ -211,7 +219,7 @@ def capture_cards(line, return_dict=False):
             cards.extend([card] * mult)
     return cards
 
-def parse_turn(log_lines, trash_pile, trade_route_set, removed_from_supply, n_players):
+def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_supply, masq_targets, previous_name):
     """ Parse the information from a given turn.
 
     Maintain the trash pile. This is necessary for Forager money counting.
@@ -229,11 +237,13 @@ def parse_turn(log_lines, trash_pile, trade_route_set, removed_from_supply, n_pl
     trashes: List of cards trashed.
     returns: List of cards returned.
     passes: List of cards passed with Masquerade.
+    receives: List of cards received from Masquerade.
     ps_tokens: Number of pirate ship tokens gained.
     vp_tokens: Number of victory point tokens gained.
     money: Amount of money available during entire buy phase.
-    opp: Dict keyed by opponent index in names_list, containing dicts with trashes/gains.
+    opp: Dict keyed by opponent index in names_list, containing dicts with trashes/gains/passes/receives.
     """
+    n_players = len(names_list)
 
     def pile_size(card, n_players):
         if card == dominioncards.Ruins or card == dominioncards.Curse:
@@ -302,7 +312,8 @@ def parse_turn(log_lines, trash_pile, trade_route_set, removed_from_supply, n_pl
                 new_buys.append(buy)
         return (new_buys, gains)
 
-    ret = {PLAYS: [], RETURNS: [], GAINS: [], TRASHES: [], BUYS: [], PASSES: []}
+    ret = {PLAYS: [], RETURNS: [], GAINS: [], TRASHES: [], BUYS: [], PASSES: [],
+           RECEIVES: []}
     durations = []
     turn_money = 0
     vp_tokens = 0
@@ -323,7 +334,8 @@ def parse_turn(log_lines, trash_pile, trade_route_set, removed_from_supply, n_pl
     action_counter = 0 # All that... just for diadem. :/ 
 
     opp_turn_info = collections.defaultdict(lambda: {GAINS: [], BUYS: [],
-                                                     TRASHES: [], PASSES: []})
+                                                     TRASHES: [], PASSES: [],
+                                                     RECEIVES:[]})
     while True:
         line = log_lines.pop(0)
         turn_start = START_TURN_RE.match(line)
@@ -335,8 +347,8 @@ def parse_turn(log_lines, trash_pile, trade_route_set, removed_from_supply, n_pl
             current_phase = ACTION_PHASE
             if turn_start.group(3):
                 ret[POSSESSION] = True
-            else:
-                ret[POSSESSION] = False
+            if previous_name and previous_name not in masq_targets:
+                masq_targets[previous_name] = ret[NAME]
             continue
 
         # empty line ends the turn, clean up and return
@@ -361,6 +373,7 @@ def parse_turn(log_lines, trash_pile, trade_route_set, removed_from_supply, n_pl
             ret[GAINS] = indexes(gains)
             ret[TRASHES] = indexes(ret[TRASHES])
             ret[PASSES] = indexes(ret[PASSES])
+            ret[RECEIVES] = indexes(ret[RECEIVES])
             durations = indexes(durations)
             for opp in opp_turn_info.keys():
                 _delete_if_exists(opp_turn_info[opp], 'buy_or_gain')
@@ -567,13 +580,20 @@ def parse_turn(log_lines, trash_pile, trade_route_set, removed_from_supply, n_pl
 
             if active_player == ret[NAME]:
                 ret[GAINS].extend(gained)
-                if(not done_resolving and
-                   (last_play == dominioncards.NobleBrigand or 
-                    last_play == dominioncards.Thief or 
-                    last_play == dominioncards.Rogue or 
-                    last_play == dominioncards.Graverobber)):
+                if(not done_resolving and (last_play == dominioncards.Thief or 
+                    last_play == dominioncards.NobleBrigand) and 
+                    dominioncards.Mercenary not in gained):
+                    for c in gained:
+                        if not c.is_treasure():
+                            done_resolving = True
+                        else:
+                            trash_pile.remove(c)
+                if(not done_resolving and (last_play == dominioncards.Rogue or 
+                    last_play == dominioncards.Graverobber) and 
+                    dominioncards.Mercenary not in gained):
                     for c in gained:
                         trash_pile.remove(c)
+                        done_resolving = True
                 else:
                     for g in gained:
                         removed_from_supply[g] += 1
@@ -586,7 +606,7 @@ def parse_turn(log_lines, trash_pile, trade_route_set, removed_from_supply, n_pl
                         action_counter += 1
                     done_resolving = True
             else:
-                opp_turn_info[active_player][GAINS].extend(gained)
+                opp_turn_info[names_list.index(active_player)][GAINS].extend(gained)
                 for g in gained:
                     removed_from_supply[g] += 1
             continue
@@ -620,7 +640,7 @@ def parse_turn(log_lines, trash_pile, trade_route_set, removed_from_supply, n_pl
                 if trashed == bom_choice: 
                     trashed = [dominioncards.BandofMisfits]
 
-                if not ret[POSSESSION]:
+                if POSSESSION not in ret:
                     ret[TRASHES].extend(trashed)
                     trash_pile.extend(trashed)
 
@@ -631,7 +651,7 @@ def parse_turn(log_lines, trash_pile, trade_route_set, removed_from_supply, n_pl
             else:
                 while dominioncards.Fortress in trashed:
                     trashed.remove(dominioncards.Fortress)
-                opp_turn_info[active_player][TRASHES].extend(trashed)
+                opp_turn_info[names_list.index(active_player)][TRASHES].extend(trashed)
                 trash_pile.extend(trashed)
 
             if last_play in [dominioncards.MiningVillage, dominioncards.Forager, dominioncards.Salvager]:
@@ -640,10 +660,18 @@ def parse_turn(log_lines, trash_pile, trade_route_set, removed_from_supply, n_pl
 
 
         if KW_PASSES in action_taken:
+            passed_cards = capture_cards(action_taken)
+            receiver = masq_targets[active_player]
+
             if active_player == ret[NAME]:
-                ret[PASSES].extend(capture_cards(action_taken))
+                ret[PASSES].extend(passed_cards)
             else:
-                opp_turn_info[active_player][PASSES].extend(capture_cards(action_taken))
+                opp_turn_info[names_list.index(active_player)][PASSES].extend(passed_cards)
+            if receiver == ret[NAME]:
+                ret[RECEIVES].extend(passed_cards)
+            else:
+                opp_turn_info[names_list.index(receiver)][RECEIVES].extend(passed_cards)
+
             continue
 
         if KW_DURATION in action_taken:
@@ -755,6 +783,7 @@ def parse_turn(log_lines, trash_pile, trade_route_set, removed_from_supply, n_pl
             KW_APPLIED in action_taken or 
             KW_APPLIES_WHEN_TRASHED in action_taken or 
             KW_MOVES_DECK_TO_DISCARD in action_taken or 
+            KW_SCHEME_CHOICE in action_taken or 
             KW_SHUFFLES in action_taken or 
             KW_TAKES_SET_ASIDE in action_taken):
             continue
@@ -762,7 +791,7 @@ def parse_turn(log_lines, trash_pile, trade_route_set, removed_from_supply, n_pl
         raise parse_common.BogusGameError('Line did not match any keywords!')
 
 
-def parse_turns(log_lines, removed_from_supply, n_players):
+def parse_turns(log_lines, names_list, removed_from_supply):
     """
     Sequentially go through the log and parse the game, splitting it into turns.
 
@@ -780,15 +809,17 @@ def parse_turns(log_lines, removed_from_supply, n_players):
     turns = [];
     trash_pile = [];
     trade_route_set = set([])
+
+    masq_targets = {}
     
-    previous_name = '' # for Possession
+    previous_name = None # for Possession and Masq
     while not GAME_OVER_RE.match(log_lines[0]):
-        turn = parse_turn(log_lines, trash_pile, trade_route_set, 
-                          removed_from_supply, n_players)
-        if turn[POSSESSION]:
+        turn = parse_turn(log_lines, names_list, trash_pile, trade_route_set, 
+                          removed_from_supply, masq_targets, previous_name)
+        if POSSESSION in turn:
             turn['pname'] = previous_name
         elif(len(turns) > 0 and turn[NAME] == turns[-1][NAME] and 
-           not turn[POSSESSION] and not turns[-1][POSSESSION]):
+           POSSESSION not in turn and  POSSESSION not in turns[-1]):
             turn[OUTPOST] = True
             previous_name = turn[NAME]
         else:
@@ -875,7 +906,6 @@ def parse_endgame(log_lines):
                       DECK: deck_comp, VP_TOKENS: vp_tokens})
     return decks
 
-
 def parse_game(game_str, dubious_check = False):
     """ Parse game_str into game dictionary.
 
@@ -912,7 +942,7 @@ def parse_game(game_str, dubious_check = False):
             if card != dominioncards.Estate and not card.is_shelter():
                 removed_from_supply[card] += 1
 
-    turns = parse_turns(log_lines, removed_from_supply, len(game_dict[PLAYERS]))
+    turns = parse_turns(log_lines, game_dict[PLAYERS], removed_from_supply)
     decks = parse_endgame(log_lines)
     game_dict[DECKS] = decks
     associate_turns_with_owner(game_dict, turns, dubious_check)

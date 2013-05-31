@@ -22,7 +22,7 @@ GAINED=1           # Player bought or gained in any turn
 
 class PlayerDeckChange(object):
     " This represents a change to a players deck in response to a game event."
-    CATEGORIES = ['buys', 'gains', 'returns', 'trashes']
+    CATEGORIES = ['buys', 'gains', 'returns', 'trashes', 'passes', 'receives']
 
     def __init__(self, name):
         self.name = name
@@ -55,7 +55,7 @@ class PlayerDeckChange(object):
         return s
 
     def accumulates(self):
-        return self.buys + self.gains
+        return self.buys + self.gains + self.receives
 
 
 
@@ -71,6 +71,8 @@ class Turn(object):
         self.buys    = turn_decode(turn_dict, BUYS)
         self.returns = turn_decode(turn_dict, RETURNS)
         self.trashes = turn_decode(turn_dict, TRASHES)
+        self.passes = turn_decode(turn_dict, PASSES)
+        self.receives = turn_decode(turn_dict, RECEIVES)
         self.turn_no = turn_no
         self.poss_no = poss_no
         self.is_outpost = OUTPOST in turn_dict
@@ -84,6 +86,8 @@ class Turn(object):
             getattr(change, 'gains' ).extend(turn_decode(info_dict, GAINS))
             getattr(change, 'trashes').extend(turn_decode(info_dict, TRASHES))
             getattr(change, 'returns').extend(turn_decode(info_dict, RETURNS))
+            getattr(change, 'receives').extend(turn_decode(info_dict, RECEIVES))
+            getattr(change, 'passes').extend(turn_decode(info_dict, RECEIVES))
             change.vp_tokens += info_dict.get(VP_TOKENS, 0)
             self.opp_info[opp_name] = change
 
@@ -109,6 +113,10 @@ class Turn(object):
             played.append('Trashes: %s' % self.trashes)
         if self.returns:
             played.append('Returns: %s' % self.returns)
+        if self.passes:
+            played.append('Passes: %s' % self.passes)
+        if self.passes:
+            played.append('Receives: %s' % self.passes)
         return played
 
 
@@ -116,7 +124,7 @@ class Turn(object):
         return self.player
 
     def player_accumulates(self):
-        return self.buys + self.gains
+        return self.buys + self.gains + self.receives
 
     def get_turn_no(self):
         return self.turn_no
@@ -157,6 +165,8 @@ class Turn(object):
         setattr(my_change, 'buys' , self.buys)
         setattr(my_change, 'trashes', self.trashes)
         setattr(my_change, 'returns', self.returns)
+        setattr(my_change, 'passes', self.trashes)
+        setattr(my_change, 'receives', self.returns)
         my_change.vp_tokens += self.vp_tokens
 
         for change in self.opp_info.itervalues():
@@ -171,7 +181,7 @@ class PlayerDeck(object):
         self.player_name = player_deck_dict[NAME]
         self.win_points = player_deck_dict[WIN_POINTS]
         self.points = player_deck_dict[POINTS]
-        self.deck = {}
+        self.deck = dict()
         for (index, count) in player_deck_dict[DECK].iteritems():
             self.deck[ index_to_card(int(index)) ] = count
         self.turn_order = player_deck_dict[ORDER]

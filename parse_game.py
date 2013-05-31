@@ -112,6 +112,9 @@ def parse_game_from_dict(log, parse_error_col, game):
     if '<b>game aborted' in contents:
         log.debug('%s is aborted game', game['_id'])
         return None
+    if '<title>403 Forbidden' in contents or '<title>404 Not Found' in contents:
+        log.debug('%s mis-downloaded game', game['_id'])
+        return None
     try:
         parsed = parse_game(contents, dubious_check = True)
         parsed['_id'] = game['_id']
@@ -143,6 +146,8 @@ def outer_parse_game(filename):
         return None
     if '<b>game aborted' in contents:
         # print 'skipping aborted game', filename
+        return None
+    if '<title>403 Forbidden' in contents or '<title>404 Not Found' in contents:
         return None
     try:
         parsed = parse_game(contents, dubious_check = True)
