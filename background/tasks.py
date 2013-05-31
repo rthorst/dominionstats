@@ -16,6 +16,7 @@ import isotropic
 import goko
 import utils
 
+# CELERY NEEDS TO BE REENABLED!!!!
 
 log = get_task_logger(__name__)
 
