@@ -82,7 +82,7 @@ def dates_needing_scraping(db):
     it = GokoTracker(db)
 
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
-    for cur_datetime in utils.datetimerange(scrape.default_startdate,
+    for cur_datetime in utils.datetimerange(datetime.date(2012,8,5),
                                             yesterday):
         str_date = time.strftime("%Y%m%d", cur_date.timetuple())
 
@@ -227,7 +227,7 @@ class GokoScraper:
             # compared with how many are in the tarfile
             database_count = self.rawgames_col.find({'game_date': yyyy_mm_dd}).count()
             tarfile_count = len(t.getmembers())
-            if tarfile_count == database_count:
+            if tarfile_count <= database_count:
                 log.info("Raw games for %s have already been loaded", yyyy_mm_dd)
             else:
                 # Insert all the games

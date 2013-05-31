@@ -81,7 +81,7 @@ def parse_days(days):
             continue
 
         parsed_games_qty = games_col.find({'game_date': day}).count()
-        if float(parsed_games_qty) / float(raw_games_qty) > 0.65:
+        if float(parsed_games_qty) / float(raw_games_qty) > 0.95:
             log.info('Looks like raw games for %s have already been parsed. Found %5.2f%% in games collection.',
                      day, 100.0 * parsed_games_qty / raw_games_qty)
             continue
@@ -202,8 +202,8 @@ def check_for_work():
     connection = utils.get_mongo_connection()
     db = connection.test
 
-    # Scrape isotropic for raw games
-    for date in isotropic.dates_needing_scraping(db):
+    # Scrape goko for raw games
+    for date in goko.dates_needing_scraping(db):
         scrape_raw_games.delay(date)
 
 
