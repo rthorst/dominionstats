@@ -81,6 +81,64 @@ class GameStateTest(unittest.TestCase):
                           30)
 
 
+class GokoGameTest(unittest.TestCase):
+
+    def test_masq_game(self):
+        g = get_test_game('log.50bbfdf8e4b07d338bca0e67.1364827084306.txt')
+        self.assertEquals(['Kerry Monroe', 'Warlord Bot', 'Conqueror Bot', 'Villager Bot'], g.all_player_names())
+
+        accum_results = g.cards_gained_per_player()
+        player_bought = accum_results[game.BOUGHT][u'Kerry Monroe']
+        self.assertEquals(player_bought[dominioncards.Library], 1)
+        self.assertEquals(player_bought[dominioncards.Gold], 8)
+        self.assertEquals(player_bought[dominioncards.Masquerade], 1)
+        self.assertEquals(player_bought[dominioncards.TradeRoute], 1)
+        self.assertEquals(player_bought[dominioncards.HuntingParty], 2)
+        self.assertEquals(player_bought[dominioncards.Province], 5)
+        self.assertEquals(player_bought[dominioncards.Duchy], 3)
+        self.assertEquals(player_bought[dominioncards.Estate], 1)
+
+        player_received = accum_results[game.GAINED][u'Kerry Monroe']
+        self.assertEquals(player_received[dominioncards.Copper], 10)
+        self.assertEquals(player_received[dominioncards.Fortress], 3)
+        self.assertEquals(player_received[dominioncards.Masquerade], 2)
+        self.assertEquals(player_received[dominioncards.Silver], 1)
+
+        last_state = None
+        game_state_iterator = g.game_state_iterator()
+        for game_state in game_state_iterator:
+            last_state = game_state
+        for player_deck in g.get_player_decks():
+
+            parsed_deck_comp = player_deck.Deck()
+            computed_deck_comp = last_state.get_deck_composition(
+                player_deck.name())
+
+            for card in set(parsed_deck_comp.keys() +
+                            computed_deck_comp.keys()):
+                self.longMessage = True
+                self.assertEqual(parsed_deck_comp.get(card, 0), computed_deck_comp.get(card, 0), card)
+
+
+    def test_ruins_game(self):
+        g = get_test_game('log.50612a9b51c36e573294bfd0.1368579645597.txt')
+        last_state = None
+        game_state_iterator = g.game_state_iterator()
+        for game_state in game_state_iterator:
+            last_state = game_state
+        for player_deck in g.get_player_decks():
+
+            parsed_deck_comp = player_deck.Deck()
+            computed_deck_comp = last_state.get_deck_composition(
+                player_deck.name())
+
+            for card in set(parsed_deck_comp.keys() +
+                            computed_deck_comp.keys()):
+                self.longMessage = True
+                self.assertEqual(parsed_deck_comp.get(card, 0), computed_deck_comp.get(card, 0), card)
+
+
+
 class PlayerDeckTest(unittest.TestCase):
 
     outpost_game = get_test_game('game-20101015-094051-95e0a59e.html')
@@ -118,7 +176,9 @@ class PlayerDeckTest(unittest.TestCase):
     def test_card_accum_by_self(self):
         accum_results = self.accum_game.cards_gained_per_player()
         player_bought = accum_results[game.BOUGHT][u'Wolphmaniac']
+        player_gained = accum_results[game.GAINED][u'Wolphmaniac']
         self.assertEquals(player_bought[dominioncards.Spy], 10)
+        self.assertEquals(player_gained[dominioncards.Spy], 10)
         self.assertEquals(player_bought[dominioncards.Curse], 10)
         self.assertEquals(player_bought[dominioncards.Goons], 7)
         self.assertEquals(player_bought[dominioncards.City], 7)

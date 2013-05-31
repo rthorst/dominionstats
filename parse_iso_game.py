@@ -221,9 +221,7 @@ def make_start_decks(names):
     """
     start_decks = []
     for name in names:
-        start_decks.append({NAME:name, POINTS:3, RESIGNED:False, VP_TOKENS:0, 
-                           DECK: {str(dominioncards.Copper.index):7, 
-                                  str(dominioncards.Estate.index):3}})
+        start_decks.append({NAME:name, START_DECK: indexes([dominioncards.Copper]*7+[dominioncards.Estate]*3) })
     return start_decks
 
 
