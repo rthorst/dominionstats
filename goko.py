@@ -19,6 +19,7 @@ import urllib2
 
 import utils
 import os
+import shutil
 import subprocess
 import tempfile
 import time
