@@ -512,8 +512,7 @@ class GameState(object):
             sort_by_turn_order=True)
         self.supply = ConvertibleDefaultDict(value_type=int)
         num_players = len(game.get_player_decks())
-        for cardinst in itertools.chain(EVERY_SET_CARDS,
-                                        game.get_supply()):
+        for cardinst in set(EVERY_SET_CARDS + game.get_supply()):
             self.supply[cardinst] = cardinst.num_copies_per_game(num_players)
 
         self.player_decks = ConvertibleDefaultDict(
