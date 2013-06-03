@@ -152,7 +152,8 @@ def calc_goals_for_days(days):
         chunk = []
         for game in games_to_process:
             if len(chunk) >= CALC_GOALS_CHUNK_SIZE:
-                calc_goals.delay(chunk, day)
+                #calc_goals.delay(chunk, day)
+                calc_goals(chunk, day)
                 chunk = []
 
             if goals_col.find({'_id': game['_id']}).count() == 0:
@@ -160,7 +161,8 @@ def calc_goals_for_days(days):
                 game_count += 1
 
         if len(chunk) > 0:
-            calc_goals.delay(chunk, day)
+            calc_goals(chunk, day)
+            #calc_goals.delay(chunk, day)
 
     return game_count
 

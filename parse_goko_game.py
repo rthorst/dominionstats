@@ -142,7 +142,7 @@ def parse_header(log_lines):
     assert('Game Setup' in line)
     
     # next - supply
-    supply_cards = parse_supply(log_lines)
+    supply_cards = indexes(parse_supply(log_lines))
 
     # optionally, may say the game type. Old logs won't have this.
     rating_system_match = RATING_SYSTEM_RE.match(log_lines[0])
