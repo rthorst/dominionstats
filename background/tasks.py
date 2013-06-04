@@ -58,7 +58,7 @@ def parse_days(days):
 
     Skips days where there are no rawgames available.
 
-    Skips days where the parsed game collection has more than 65% of
+    Skips days where the parsed game collection has more than 95% of
     the quantity of rawgames, as this suggests the date has already
     been parsed.
 
@@ -81,7 +81,7 @@ def parse_days(days):
             continue
 
         parsed_games_qty = games_col.find({'game_date': day}).count()
-        if float(parsed_games_qty) / float(raw_games_qty) > 0.95:
+        if float(parsed_games_qty) / float(raw_games_qty) > 0.85:
             log.info('Looks like raw games for %s have already been parsed. Found %5.2f%% in games collection.',
                      day, 100.0 * parsed_games_qty / raw_games_qty)
             continue
@@ -244,7 +244,8 @@ def summarize_game_stats_for_days(days):
         chunk = []
         for game in games_to_process:
             if len(chunk) >= SUMMARIZE_GAMES_CHUNK_SIZE:
-                summarize_games.delay(chunk, day)
+                #summarize_games.delay(chunk, day)
+                summarize_games(chunk, day)
                 chunk = []
 
             if game_stats_col.find({'_id.game_id': game['_id']}).count() == 0:
@@ -252,7 +253,8 @@ def summarize_game_stats_for_days(days):
                 game_count += 1
 
         if len(chunk) > 0:
-            summarize_games.delay(chunk, day)
+            #summarize_games.delay(chunk, day)
+            summarize_games(chunk, day)
 
     return game_count
 

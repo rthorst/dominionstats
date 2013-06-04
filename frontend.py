@@ -20,6 +20,7 @@ import datetime
 import game
 import goals
 import parse_game
+import parse_common
 import query_matcher
 import utils
 from keys import *
@@ -442,7 +443,7 @@ class GamePage(object):
                         'Council Room Developers</a></b>')
         try:
             return annotate_game.annotate_game(contents, game_id, debug)
-        except parse_game.BogusGameError, b:
+        except parse_common.BogusGameError, b:
             return contents.replace('<body>',
                                     body_err_msg + ': foo? ' + str(b))
         except Exception, e:
@@ -562,6 +563,9 @@ class SupplyWinApi(object):
         return card_tuples
 
     def fetch_conditional_stats(self, target_inds, interaction_tuples):
+        print 'fetch unconditional stats'
+        print target_inds
+        print interaction_tuples
         db = utils.get_mongo_database()
         card_stats = []
         count_searched = 0

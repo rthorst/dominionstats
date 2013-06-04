@@ -7,6 +7,7 @@ players in the game or other games in the collection belongs here.
 
 import collections
 import itertools
+import re
 
 from dominioncards import index_to_card, EVERY_SET_CARDS
 from keys import *
@@ -308,8 +309,13 @@ class Game(object):
 
     @staticmethod
     def get_date_from_id(game_id):
-        yyyymmdd_date = game_id.split('-')[1]
-        return yyyymmdd_date
+        GOKO_ID_RE = re.compile('([\d]{4}[\d]{2}[\d]{2})/log.*')
+        match = GOKO_ID_RE.match(game_id)
+        if match:
+            return match.group(1)
+        else:
+            yyyymmdd_date = game_id.split('-')[1]
+            return yyyymmdd_date
 
     @staticmethod
     def get_datetime_from_id(game_id):
