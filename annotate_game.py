@@ -39,6 +39,14 @@ def get_goals(game):
         goal_contents += '</table>'
     return "<tr><td>goals</td><td>%s</td></tr>"%goal_contents
 
+def annotate_goko_game(contents, game_id, debug):
+    """ TODO: actually do the annotation in-house. Someone will want to do that.
+    Not me, not now, I've spent a lot of time on goko importing over the past 
+    month. """ 
+    return '<meta http-equiv="refresh" content="1; url=http://dom.retrobox.eu/?/%s">' % game_id + 'Redirecting to annotated game at <a href="http://dom.retrobox.eu/?/%s">dom.retrobox.eu</a>' % game_id
+
+
+
 def annotate_game(contents, game_id, debug=False):
     """ Decorate game contents with some JS that makes a score keeper 
     and provides anchors per turn."""
