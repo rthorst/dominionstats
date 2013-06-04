@@ -9,6 +9,7 @@ import logging
 import time
 
 import analyze
+import analyze2
 import background.tasks
 import count_buys
 import dominionstats.utils.log
@@ -102,6 +103,8 @@ def main(parsed_args):
     # Invoke the analyze script
     log.info("Starting analyze")
     analyze.main(parsed_args)
+    log.info("Starting analyze2")
+    analyze2.main(parsed_args)
 
     # Check for goals
     log.info("Starting search for goals acheived")
