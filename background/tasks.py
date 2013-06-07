@@ -179,11 +179,11 @@ def scrape_raw_games(date):
 
     try:
         inserted = scraper.scrape_and_store_rawgames(date)
-        if inserted > 0:
+        #if inserted > 0:
             # Also need to parse the raw games for the days where we
             # inserted new records.
             #parse_days.delay([date])
-            parse_days([date])
+        parse_days([date])
         return inserted
 
     except goko.ScrapeError:

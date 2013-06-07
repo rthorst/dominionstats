@@ -36,7 +36,7 @@ ENDGAME_VP_CHIP_RE = re.compile('^.* - victory point chips: (\d+)$')
 ENDGAME_POINTS_RE = re.compile('^.* - total victory points: (-?\d+)$')
 START_TURN_RE = re.compile('^---------- (.*): turn (.*?) (\[possessed\] )?----------$')
 VP_CHIPS_RE = re.compile('receives (\d+) victory point chips')
-HYPHEN_SPLIT_RE = re.compile('^(.*?) - (.*)$')
+HYPHEN_SPLIT_RE = re.compile('^(.*) - (.*)$')
 COMMA_SPLIT_RE = re.compile(', ')
 NUMBER_CARD_RE = re.compile('\s*(\d+) (.*)')
 BANE_RE = re.compile('^Bane card: (.*)$')
@@ -47,6 +47,7 @@ TAKES_ACTIONS_RE = re.compile('takes (\d+) action')
 RECEIVES_ACTIONS_RE = re.compile('receives (\d+) action')
 
 KW_SCHEME_CHOICE = 'Scheme choice: '
+KW_MOVES = 'moves '
 KW_MOVES_DECK_TO_DISCARD = 'moves deck to discard'
 KW_APPLIED = 'applied ' #applied Watchtower to place X on top of the deck
 KW_APPLIES_WHEN_TRASHED = "applies the 'when you trash ability' of "
@@ -587,7 +588,10 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
                         if not c.is_treasure():
                             done_resolving = True
                         else:
-                            trash_pile.remove(c)
+                            if c in trash_pile:
+                                # Early goko logs have bugs with who reported
+                                # trashing cards. 
+                                trash_pile.remove(c)
                 if(not done_resolving and (last_play == dominioncards.Rogue or 
                     last_play == dominioncards.Graverobber) and 
                     dominioncards.Mercenary not in gained):
@@ -606,7 +610,7 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
                         action_counter += 1
                     done_resolving = True
             else:
-                opp_turn_info[names_list.index(active_player)][GAINS].extend(gained)
+                opp_turn_info[str(names_list.index(active_player))][GAINS].extend(gained)
                 for g in gained:
                     removed_from_supply[g] += 1
             continue
@@ -639,6 +643,12 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
                     trashed.remove(dominioncards.Fortress)
                 if trashed == bom_choice: 
                     trashed = [dominioncards.BandofMisfits]
+                if (bom_choice is not None and
+                        dominioncards.TreasureMap in bom_choice and
+                        dominioncards.TreasureMap in trashed):
+                    trashed.remove(dominioncards.TreasureMap)
+                    trashed.extend([dominioncards.BandofMisfits])
+
 
                 if POSSESSION not in ret:
                     ret[TRASHES].extend(trashed)
@@ -651,7 +661,7 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
             else:
                 while dominioncards.Fortress in trashed:
                     trashed.remove(dominioncards.Fortress)
-                opp_turn_info[names_list.index(active_player)][TRASHES].extend(trashed)
+                opp_turn_info[str(names_list.index(active_player))][TRASHES].extend(trashed)
                 trash_pile.extend(trashed)
 
             if last_play in [dominioncards.MiningVillage, dominioncards.Forager, dominioncards.Salvager]:
@@ -666,11 +676,11 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
             if active_player == ret[NAME]:
                 ret[PASSES].extend(passed_cards)
             else:
-                opp_turn_info[names_list.index(active_player)][PASSES].extend(passed_cards)
+                opp_turn_info[str(names_list.index(active_player))][PASSES].extend(passed_cards)
             if receiver == ret[NAME]:
                 ret[RECEIVES].extend(passed_cards)
             else:
-                opp_turn_info[names_list.index(receiver)][RECEIVES].extend(passed_cards)
+                opp_turn_info[str(names_list.index(receiver))][RECEIVES].extend(passed_cards)
 
             continue
 
@@ -782,6 +792,7 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
             KW_CARDS_IN_DISCARDS in action_taken or
             KW_APPLIED in action_taken or 
             KW_APPLIES_WHEN_TRASHED in action_taken or 
+            KW_MOVES in action_taken or 
             KW_MOVES_DECK_TO_DISCARD in action_taken or 
             KW_SCHEME_CHOICE in action_taken or 
             KW_SHUFFLES in action_taken or 

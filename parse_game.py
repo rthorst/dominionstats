@@ -280,8 +280,8 @@ def check_game_sanity(game_val, log):
 
     supply = game_val.get_supply()
     # ignore known bugs.
-    if set(supply).intersection([get_card('Masquerade'), get_card('Black Market'), get_card('Trader')]):
-        return True
+    #if set(supply).intersection([get_card('Masquerade'), get_card('Black Market'), get_card('Trader')]):
+        #return True
 
     # TODO: add score sanity checking here
     last_state = None

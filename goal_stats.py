@@ -57,11 +57,12 @@ def main(parsed_args):
         i = 0
         while leaders < 3 and i < len(psorted):
             (player, count) = psorted[i]
+            players = []
             if player not in AIs.names:
                 players = [player]
             i += 1
             while i < len(psorted) and psorted[i][1] == count:
-                if player not in AIs.names:
+                if psorted[i][0] not in AIs.names:
                     players.append(psorted[i][0])
                 i += 1
             leaders += len(players)
