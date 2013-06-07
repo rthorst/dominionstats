@@ -521,7 +521,7 @@ class GoalsPage(object):
         n = db.games.count()
 
         ret = standard_heading("CouncilRoom.com: Goal Stats")
-        ret += 'Goko bots don\'t get to be listed here! If one has snuck in, please report it by sending an email to councilroom-dev@googlegroups.com.<br>'
+        ret += '<p class="intro"> Goko bots don\'t get to be listed here! If one has snuck in, please report it by sending an email to <a href="mailto:councilroom-dev@googlegroups.com">councilroom-dev@googlegroups.com</a>.</p>'
         ret += '<span class="subhead">Goal Stats</span>\n<p>\n'
         ret += '<table width="50%">'
         ret += '<tr><td><th>Goal Name<th width="1%">Total Times Achieved<th width="1%">% Occurrence<th>Description<th>Leaders'
