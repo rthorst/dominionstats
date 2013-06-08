@@ -279,6 +279,9 @@ def check_game_sanity(game_val, log):
     global __problem_deck_index__
 
     supply = game_val.get_supply()
+    if game_val.any_resigned():
+        return True # Resign leaves deck in arbitrary state, don't catch that
+
     # ignore known bugs.
     #if set(supply).intersection([get_card('Masquerade'), get_card('Black Market'), get_card('Trader')]):
         #return True

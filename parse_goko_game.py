@@ -596,7 +596,9 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
                     last_play == dominioncards.Graverobber) and 
                     dominioncards.Mercenary not in gained):
                     for c in gained:
-                        trash_pile.remove(c)
+                        if c in trash_pile:
+                            # BoM as death cart is ambiguous
+                            trash_pile.remove(c)
                         done_resolving = True
                 else:
                     for g in gained:
@@ -827,6 +829,7 @@ def parse_turns(log_lines, names_list, removed_from_supply):
     while not GAME_OVER_RE.match(log_lines[0]):
         turn = parse_turn(log_lines, names_list, trash_pile, trade_route_set, 
                           removed_from_supply, masq_targets, previous_name)
+        print trash_pile
         if POSSESSION in turn:
             turn['pname'] = previous_name
         elif(len(turns) > 0 and turn[NAME] == turns[-1][NAME] and 
