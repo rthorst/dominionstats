@@ -33,6 +33,7 @@ class Card(object):
         # instead of in the getter during each call.
         self.vp = int_or_default(self.vp, 0)
         self.coins = int_or_default(self.coins, 0)
+        self.cointokens = int_or_default(self.cointokens, 0)
         self.trash = int_or_default(self.trash, 1)
         self.actions = int_or_default(self.actions, 0)
         self.index = int(self.index)
@@ -74,6 +75,9 @@ class Card(object):
     def money_value(self):
         return self.coins
 
+    def coin_tokens(self):
+        return self.cointokens
+
     def trashes(self):
         return self.trash
 
@@ -82,6 +86,9 @@ class Card(object):
 
     def get_expansion(self):
         return self.expansion
+
+    def can_trash_self(self):
+        return self in [Feast, Pillage, MiningVillage, Embargo, TreasureMap, DeathCart]
 
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__, self.singular)

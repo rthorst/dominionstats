@@ -137,6 +137,25 @@ class GokoGameTest(unittest.TestCase):
                 self.longMessage = True
                 self.assertEqual(parsed_deck_comp.get(card, 0), computed_deck_comp.get(card, 0), card)
 
+    def test_goko_unknown_error(self):
+        g = get_test_game('log.50bbfdf8e4b07d338bca0e67.1366508665569.txt')
+        last_state = None
+        game_state_iterator = g.game_state_iterator()
+        for game_state in game_state_iterator:
+            last_state = game_state
+        for player_deck in g.get_player_decks():
+
+            parsed_deck_comp = player_deck.Deck()
+            computed_deck_comp = last_state.get_deck_composition(
+                player_deck.name())
+
+            print player_deck.name()
+            for card in set(parsed_deck_comp.keys() +
+                            computed_deck_comp.keys()):
+                self.longMessage = True
+                self.assertEqual(parsed_deck_comp.get(card, 0), computed_deck_comp.get(card, 0), card)
+
+
 
 
 class PlayerDeckTest(unittest.TestCase):

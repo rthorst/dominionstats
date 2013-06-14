@@ -16,7 +16,7 @@ import isotropic
 import goko
 import utils
 
-# CELERY NEEDS TO BE REENABLED!!!!
+# CELERY NEEDS TO BE REENABLED!!!! #TODO:FIX
 
 log = get_task_logger(__name__)
 
@@ -26,7 +26,7 @@ CALC_GOALS_CHUNK_SIZE = 100
 SUMMARIZE_GAMES_CHUNK_SIZE = 2000
 
 
-#@celery.task
+#@celery.task #TODO:FIX
 def parse_games(games, day):
     """Takes list of game ids and a game date and parses them out."""
     log.info("Parsing %d games for %s", len(games), day)
@@ -48,7 +48,7 @@ def parse_games(games, day):
     return parse_and_insert(log, raw_games, parsed_games_col, parse_error_col, day)
 
 
-#@celery.task
+#@celery.task #TODO:FIX
 def parse_days(days):
     """Parses rawgames into games records and stores them in the DB.
 
@@ -89,13 +89,13 @@ def parse_days(days):
         game_count += games_to_parse.count()
         log.info('%s games to parse in %s', games_to_parse.count(), day)
         for chunk in utils.segments([x['_id'] for x in games_to_parse], PARSE_GAMES_CHUNK_SIZE):
-            #parse_games.delay(chunk, day)
-            parse_games(chunk,day)
+            #parse_games.delay(chunk, day) #TODO:FIX
+            parse_games(chunk,day) #TODO:FIX
 
     return game_count
 
 
-#@celery.task
+#@celery.task #TODO:FIX
 def calc_goals(game_ids, day):
     """ Calculate the goals achieved in the passed list of games """
     log.info("Calculating goals for %d game IDs from %s", len(game_ids), day)
@@ -117,7 +117,7 @@ def calc_goals(game_ids, day):
     return calculate_goals(games, goals_col, goals_error_col, day)
 
 
-#@celery.task
+#@celery.task #TODO:FIX
 def calc_goals_for_days(days):
     """Examines games and determines if any goals were achieved, storing them in the DB.
 
@@ -152,8 +152,8 @@ def calc_goals_for_days(days):
         chunk = []
         for game in games_to_process:
             if len(chunk) >= CALC_GOALS_CHUNK_SIZE:
-                #calc_goals.delay(chunk, day)
-                calc_goals(chunk, day)
+                #calc_goals.delay(chunk, day) #TODO:FIX
+                calc_goals(chunk, day) #TODO:FIX
                 chunk = []
 
             if goals_col.find({'_id': game['_id']}).count() == 0:
@@ -161,13 +161,13 @@ def calc_goals_for_days(days):
                 game_count += 1
 
         if len(chunk) > 0:
-            calc_goals(chunk, day)
-            #calc_goals.delay(chunk, day)
+            calc_goals(chunk, day) #TODO:FIX
+            #calc_goals.delay(chunk, day) #TODO:FIX
 
     return game_count
 
 
-#@celery.task(rate_limit='2/m')
+#@celery.task(rate_limit='2/m') #TODO:FIX
 def scrape_raw_games(date):
     """Download the specified raw game archive, store it in S3, and load it into MongoDB.
 
@@ -179,11 +179,11 @@ def scrape_raw_games(date):
 
     try:
         inserted = scraper.scrape_and_store_rawgames(date)
-        #if inserted > 0:
+        #if inserted > 0: #TODO:FIX
             # Also need to parse the raw games for the days where we
             # inserted new records.
-            #parse_days.delay([date])
-        parse_days([date])
+            #parse_days.delay([date]) #TODO:FIX
+        parse_days([date]) #TODO:FIX
         return inserted
 
     except goko.ScrapeError:
@@ -191,7 +191,7 @@ def scrape_raw_games(date):
         return None
 
 
-#@celery.task
+#@celery.task #TODO:FIX
 def check_for_work():
     """Examine the state of the database and generate tasks for necessary work.
 
@@ -209,7 +209,7 @@ def check_for_work():
         scrape_raw_games.delay(date)
 
 
-#@celery.task
+#@celery.task #TODO:FIX
 def summarize_game_stats_for_days(days):
     """Examines games and determines if need to be summarized.
 
@@ -245,21 +245,23 @@ def summarize_game_stats_for_days(days):
         for game in games_to_process:
             if len(chunk) >= SUMMARIZE_GAMES_CHUNK_SIZE:
                 #summarize_games.delay(chunk, day)
-                summarize_games(chunk, day)
+                summarize_games(chunk, day) #TODO: FIX 
                 chunk = []
 
-            if game_stats_col.find({'_id.game_id': game['_id']}).count() == 0:
-                chunk.append(game['_id'])
-                game_count += 1
+            chunk.append(game['_id'])#TODO: DELETE
+            game_count += 1#TODO: DELETE
+            #if game_stats_col.find({'_id.game_id': game['_id']}).count() == 0:#TODO: FIX
+                #chunk.append(game['_id'])#TODO: FIX
+                #game_count += 1#TODO: FIX
 
         if len(chunk) > 0:
-            #summarize_games.delay(chunk, day)
-            summarize_games(chunk, day)
+            #summarize_games.delay(chunk, day) #TODO:FIX
+            summarize_games(chunk, day) #TODO:FIX
 
     return game_count
 
 
-#@celery.task
+#@celery.task #TODO:FIX
 def summarize_games(game_ids, day):
     """Summarize the passed list of games"""
     log.info("Summarizing %d games from %s", len(game_ids), day)

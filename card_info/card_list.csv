@@ -1,231 +1,244 @@
-Singular,Plural,Cost,Actions,Cards,Action,Treasure,Victory,Attack,Reaction,Duration,Ruins,Looter,Shelter,Knight,VP,Trash,Coins,Buys,Index,Expansion,Abbreviation
-"Abandoned Mine","Abandoned Mines",0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,"Dark Ages",AM
-Adventurer,Adventurers,6,0,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,Dominion,Adv
-Alchemist,Alchemists,P3,1,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,2,Alchemy,Alc
-Altar,Altars,6,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,3,"Dark Ages",Alt
-Ambassador,Ambassadors,3,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,4,Seaside,Amb
-Apothecary,Apothecaries,P2,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,5,Alchemy,Apoth
-Apprentice,Apprentices,5,1,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,6,Alchemy,App
-Archivist,Archivists,5,1,?,1,0,0,0,0,0,0,0,0,0,0,0,?,0,7,Fan,Arc
-Armory,Armories,4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,8,"Dark Ages",Arm
-"Bag of Gold","Bags of Gold",*0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,9,Cornucopia,BoG
-"Band of Misfits","Bands of Misfits",5,?,?,1,0,0,0,0,0,0,0,0,0,0,?,?,?,10,"Dark Ages",BoM
-"Bandit Camp","Bandit Camps",5,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,11,"Dark Ages",BC
-Bank,Banks,7,0,0,0,1,0,0,0,0,0,0,0,0,0,0,?,0,12,Prosperity,Bank
-Baron,Barons,4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,?,1,13,Intrigue,Bron
-Bazaar,Bazaars,5,2,1,1,0,0,0,0,0,0,0,0,0,0,0,1,0,14,Seaside,Baz
-Beggar,Beggars,2,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,15,"Dark Ages",Beg
-Bishop,Bishops,4,0,0,1,0,0,0,0,0,0,0,0,0,0,1,1,0,16,Prosperity,Bish
-"Black Market","Black Markets",3,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,1,17,Promotional,BMark
-"Border Village","Border Villages",6,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,18,Hinterlands,Bord
-Bridge,Bridges,4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,19,Intrigue,Bri
-Bureaucrat,Bureaucrats,4,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,20,Dominion,Bur
-Cache,Caches,5,0,0,0,1,0,0,0,0,0,0,0,0,0,0,3,0,21,Hinterlands,Cache
-Caravan,Caravans,4,1,1,1,0,0,0,0,1,0,0,0,0,0,0,0,0,22,Seaside,Cvan
-Cartographer,Cartographers,5,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,23,Hinterlands,Cart
-Catacombs,Catacombs,5,0,3,1,0,0,0,0,0,0,0,0,0,0,0,0,0,24,"Dark Ages",Cat
-Cellar,Cellars,2,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,25,Dominion,Cel
-Chancellor,Chancellors,3,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,26,Dominion,Chan
-Chapel,Chapels,2,0,0,1,0,0,0,0,0,0,0,0,0,0,4,0,0,27,Dominion,Chap
-City,Cities,5,2,1,1,0,0,0,0,0,0,0,0,0,0,0,?,1,28,Prosperity,City
-Colony,Colonies,11,0,0,0,0,1,0,0,0,0,0,0,0,10,0,0,0,29,Prosperity,Col
-Conspirator,Conspirators,4,?,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,30,Intrigue,Cons
-Contraband,Contrabands,5,0,0,0,1,0,0,0,0,0,0,0,0,0,0,3,1,31,Prosperity,Cband
-Copper,Coppers,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,32,Common,Cop
-Coppersmith,Coppersmiths,4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,33,Intrigue,Csmith
-"Council Room","Council Rooms",5,0,4,1,0,0,0,0,0,0,0,0,0,0,0,0,1,34,Dominion,CR
-Count,Counts,5,0,0,1,0,0,0,0,0,0,0,0,0,0,?,?,0,35,"Dark Ages",Count
-Counterfeit,Counterfeits,5,0,0,0,1,0,0,0,0,0,0,0,0,0,1,1,1,36,"Dark Ages",Cf
-"Counting House","Counting Houses",5,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,37,Prosperity,CH
-Courtyard,Courtyards,2,0,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,38,Intrigue,Cyard
-Crossroads,Crossroads,2,?,?,1,0,0,0,0,0,0,0,0,0,0,0,0,0,39,Hinterlands,Croads
-Cultist,Cultists,5,0,2,1,0,0,1,0,0,0,1,0,0,0,0,0,0,40,"Dark Ages",Cul
-Curse,Curses,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,41,Common,Curse
-Cutpurse,Cutpurses,4,0,0,1,0,0,1,0,0,0,0,0,0,0,0,2,0,42,Seaside,Cut
-"Dame Anna","Dames Anna",5,0,0,1,0,0,1,0,0,0,0,0,1,0,2,0,0,43,"Dark Ages",DAn
-"Dame Josephine","Dames Josephine",5,0,0,1,0,1,1,0,0,0,0,0,1,2,0,0,0,44,"Dark Ages",DJo
-"Dame Molly","Dames Molly",5,2,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,45,"Dark Ages",DMo
-"Dame Natalie","Dames Natalie",5,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,46,"Dark Ages",DNat
-"Dame Sylvia","Dames Sylvia",5,0,0,1,0,0,1,0,0,0,0,0,1,0,0,2,0,47,"Dark Ages",DSyl
-"Death Cart","Death Carts",4,0,0,1,0,0,0,0,0,0,1,0,0,0,1,5,0,48,"Dark Ages",DC
-Develop,Develops,3,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,49,Hinterlands,Dev
-Diadem,Diadems,*0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,2,0,50,Cornucopia,Dia
-Duchess,Duchesses,2,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,51,Hinterlands,Dss
-Duchy,Duchies,5,0,0,0,0,1,0,0,0,0,0,0,0,3,0,0,0,52,Common,Duchy
-Duke,Dukes,5,0,0,0,0,1,0,0,0,0,0,0,0,?,0,0,0,53,Intrigue,Duke
-Embargo,Embargoes,2,0,0,1,0,0,0,0,0,0,0,0,0,0,1,2,0,54,Seaside,Ebarg
-Embassy,Embassies,5,0,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,55,Hinterlands,Ebass
-Envoy,Envoys,4,0,4,1,0,0,0,0,0,0,0,0,0,0,0,0,0,56,Promotional,Env
-Estate,Estates,2,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,57,Common,Est
-Expand,Expands,7,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,58,Prosperity,Epand
-Explorer,Explorers,5,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,59,Seaside,Expl
-Fairgrounds,Fairgrounds,6,0,0,0,0,1,0,0,0,0,0,0,0,?,0,0,0,60,Cornucopia,Fair
-Familiar,Familiars,P3,1,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,61,Alchemy,Fam
-"Farming Village","Farming Villages",4,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,62,Cornucopia,FarmV
-Farmland,Farmlands,6,0,0,0,0,1,0,0,0,0,0,0,0,2,0,0,0,63,Hinterlands,Fland
-Feast,Feasts,4,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,64,Dominion,Feast
-Feodum,Feoda,4,0,0,0,0,1,0,0,0,0,0,0,0,?,0,0,0,65,"Dark Ages",Feo
-Festival,Festivals,5,2,0,1,0,0,0,0,0,0,0,0,0,0,0,2,1,66,Dominion,Fest
-"Fishing Village","Fishing Villages",3,2,0,1,0,0,0,0,1,0,0,0,0,0,0,1,0,67,Seaside,FishV
-Followers,Followers,*0,0,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,68,Cornucopia,Foll
-"Fool's Gold","Fool's Golds",2,0,0,0,1,0,0,1,0,0,0,0,0,0,0,?,0,69,Hinterlands,Fool
-Forager,Foragers,3,1,0,1,0,0,0,0,0,0,0,0,0,0,1,?,1,70,"Dark Ages",Fger
-Forge,Forges,7,0,0,1,0,0,0,0,0,0,0,0,0,0,99,0,0,71,Prosperity,Forge
-Fortress,Fortresses,4,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,72,"Dark Ages",Ftrs
-"Fortune Teller","Fortune Tellers",3,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,73,Cornucopia,FT
-Gardens,Gardens,4,0,0,0,0,1,0,0,0,0,0,0,0,?,0,0,0,74,Dominion,Gard
-"Ghost Ship","Ghost Ships",5,0,2,1,0,0,1,0,0,0,0,0,0,0,0,0,0,75,Seaside,GS
-Gold,Golds,6,0,0,0,1,0,0,0,0,0,0,0,0,0,0,3,0,76,Common,Gold
-Golem,Golems,P4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,77,Alchemy,Golem
-Goons,Goons,6,0,0,1,0,0,1,0,0,0,0,0,0,0,0,2,1,78,Prosperity,Goon
-Governor,Governors,5,1,?,1,0,0,0,0,0,0,0,0,0,0,?,0,0,79,Promotional,Gov
-"Grand Market","Grand Markets",6,1,1,1,0,0,0,0,0,0,0,0,0,0,0,2,1,80,Prosperity,Gmark
-Graverobber,Graverobbers,5,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,81,"Dark Ages",GR
-"Great Hall","Great Halls",3,1,1,1,0,1,0,0,0,0,0,0,0,1,0,0,0,82,Intrigue,GH
-Haggler,Hagglers,5,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,83,Hinterlands,Hag
-Hamlet,Hamlets,2,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,84,Cornucopia,Ham
-Harem,Harems,6,0,0,0,1,1,0,0,0,0,0,0,0,2,0,2,0,85,Intrigue,Harem
-Harvest,Harvests,5,0,0,1,0,0,0,0,0,0,0,0,0,0,0,?,0,86,Cornucopia,Hvest
-Haven,Havens,2,1,1,1,0,0,0,0,1,0,0,0,0,0,0,0,0,87,Seaside,Hav
-Herbalist,Herbalists,2,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,88,Alchemy,Herb
-Hermit,Hermits,3,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,89,"Dark Ages",Hrm
-Highway,Highways,5,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,90,Hinterlands,Hway
-Hoard,Hoards,6,0,0,0,1,0,0,0,0,0,0,0,0,0,0,2,0,91,Prosperity,Hoard
-"Horn of Plenty","Horns of Plenty",5,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,92,Cornucopia,HoP
-"Horse Traders","Horse Traders",4,0,-2,1,0,0,0,1,0,0,0,0,0,0,0,3,1,93,Cornucopia,HT
-Hovel,Hovels,1,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,94,"Dark Ages",Hv
-"Hunting Grounds","Hunting Grounds",6,0,4,1,0,0,0,0,0,0,0,0,0,0,0,0,0,95,"Dark Ages",HG
-"Hunting Party","Hunting Parties",5,1,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,96,Cornucopia,Hunt
-"Ill-Gotten Gains","Ill-Gotten Gains",5,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,97,Hinterlands,IGG
-Inn,Inns,5,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,98,Hinterlands,Inn
-Ironmonger,Ironmongers,4,1,1,1,0,0,0,0,0,0,0,0,0,0,0,?,0,99,"Dark Ages",IM
-Ironworks,Ironworks,4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,?,0,100,Intrigue,IW
-Island,Islands,4,0,0,1,0,1,0,0,0,0,0,0,0,2,0,0,0,101,Seaside,Isl
-"Jack of All Trades","Jacks of All Trades",4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,102,Hinterlands,JoaT
-Jester,Jesters,5,0,0,1,0,0,1,0,0,0,0,0,0,0,0,2,0,103,Cornucopia,Jest
-"Junk Dealer","Junk Dealers",5,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,104,"Dark Ages",JD
-"King's Court","King's Courts",7,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,105,Prosperity,KC
-Knights,Knights,5,0,0,1,0,0,1,0,0,0,0,0,1,0,0,?,0,106,"Dark Ages",Kn
-Laboratory,Laboratories,5,1,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,107,Dominion,Lab
-Library,Libraries,5,0,3,1,0,0,0,0,0,0,0,0,0,0,0,0,0,108,Dominion,Lib
-Lighthouse,Lighthouses,2,1,0,1,0,0,0,1,1,0,0,0,0,0,0,1,0,109,Seaside,Light
-Loan,Loans,3,0,0,0,1,0,0,0,0,0,0,0,0,0,1,1,0,110,Prosperity,Loan
-Lookout,Lookouts,3,1,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,111,Seaside,Look
-Madman,Madmen,*0,2,?,1,0,0,0,0,0,0,0,0,0,0,0,0,0,112,"Dark Ages",MM
-Mandarin,Mandarins,5,0,0,1,3,0,0,0,0,0,0,0,0,0,0,3,0,113,Hinterlands,Mand
-Marauder,Marauders,4,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0,0,114,"Dark Ages",Mard
-Margrave,Margraves,5,0,3,1,0,0,1,0,0,0,0,0,0,0,0,0,1,115,Hinterlands,Marg
-"Market Square","Market Squares",3,1,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0,116,"Dark Ages",MS
-Market,Markets,5,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,117,Dominion,Mark
-Masquerade,Masquerades,3,0,2,1,0,0,0,0,0,0,0,0,0,0,1,0,0,118,Intrigue,Masq
-Menagerie,Menageries,3,1,3,1,0,0,0,0,0,0,0,0,0,0,0,0,,119,Cornucopia,Men
-Mercenary,Mercenaries,*0,0,2,1,0,0,1,0,0,0,0,0,0,0,2,?,0,120,"Dark Ages",Merc
-"Merchant Ship","Merchant Ships",5,0,0,1,0,0,0,0,1,0,0,0,0,0,0,2,0,121,Seaside,MS
-Militia,Militias,4,0,0,1,0,0,1,0,0,0,0,0,0,0,0,2,0,122,Dominion,Mil
-Mine,Mines,5,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,123,Dominion,Mine
-"Mining Village","Mining Villages",4,2,1,1,0,0,0,0,0,0,0,0,0,0,1,?,0,124,Intrigue,MinV
-Minion,Minions,5,1,0,1,0,0,1,0,0,0,0,0,0,0,0,?,0,125,Intrigue,Mion
-Mint,Mints,5,0,0,1,0,0,0,0,0,0,0,0,0,0,?,0,0,126,Prosperity,Mint
-Moat,Moats,2,0,2,1,0,0,0,1,0,0,0,0,0,0,0,0,0,127,Dominion,Moa
-Moneylender,Moneylenders,4,0,0,1,0,0,0,0,0,0,0,0,0,0,1,?,0,128,Dominion,Mlend
-Monument,Monuments,4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,129,Prosperity,Mment
-Mountebank,Mountebanks,5,0,0,1,0,0,1,0,0,0,0,0,0,0,0,2,0,130,Prosperity,Mbank
-Mystic,Mystics,5,1,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,131,"Dark Ages",Mys
-"Native Village","Native Villages",2,2,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,132,Seaside,NatV
-Navigator,Navigators,4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,133,Seaside,Nav
-Necropolis,Necropolises,1,2,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,134,"Dark Ages",Nec
-"Noble Brigand","Noble Brigands",4,0,0,1,0,0,1,0,0,0,0,0,0,0,0,1,0,135,Hinterlands,NBri
-Nobles,Nobles,6,?,?,1,0,1,0,0,0,0,0,0,0,2,0,0,0,136,Intrigue,Nbles
-"Nomad Camp","Nomad Camps",4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,1,137,Hinterlands,NCamp
-Oasis,Oases,3,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,0,138,Hinterlands,Oasis
-Oracle,Oracles,3,0,2,1,0,0,1,0,0,0,0,0,0,0,0,0,0,139,Hinterlands,Ora
-Outpost,Outposts,5,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,140,Seaside,Out
-"Overgrown Estate","Overgrown Estates",1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,141,"Dark Ages",OE
-Pawn,Pawns,2,?,?,1,0,0,0,0,0,0,0,0,0,0,0,?,?,142,Intrigue,Pawn
-"Pearl Diver","Pearl Divers",2,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,143,Seaside,PDiv
-Peddler,Peddlers,8,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,0,144,Prosperity,Ped
-"Philosopher's Stone","Philosopher's Stones",P3,0,0,0,1,0,0,0,0,0,0,0,0,0,0,?,0,145,Alchemy,PStone
-Pillage,Pillages,5,0,0,1,0,0,1,0,0,0,0,0,0,0,1,0,0,146,"Dark Ages",Pil
-"Pirate Ship","Pirate Ships",4,0,0,1,0,0,1,0,0,0,0,0,0,0,0,?,0,147,Seaside,PShip
-Platinum,Platinums,9,0,0,0,1,0,0,0,0,0,0,0,0,0,0,5,0,148,Prosperity,Plat
-"Poor House","Poor Houses",1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,?,0,149,"Dark Ages",PH
-Possession,Possessions,P6,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,150,Alchemy,Pos
-Potion,Potions,4,0,0,0,1,0,0,0,0,0,0,0,0,0,0,P,0,151,Alchemy,Pot
-Princess,Princesses,*0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,152,Cornucopia,Prin
-Procession,Processions,4,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,153,"Dark Ages",Proc
-Province,Provinces,8,0,0,0,0,1,0,0,0,0,0,0,0,6,0,0,0,154,Common,Prov
-Quarry,Quarries,4,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,155,Prosperity,Qua
-Rabble,Rabbles,5,0,3,1,0,0,1,0,0,0,0,0,0,0,0,0,0,156,Prosperity,Rab
-Rats,Rats,4,1,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,157,"Dark Ages",Rats
-Rebuild,Rebuilds,5,1,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,158,"Dark Ages",Reb
-Remake,Remakes,4,0,0,1,0,0,0,0,0,0,0,0,0,0,2,0,0,159,Cornucopia,Rke
-Remodel,Remodels,4,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,160,Dominion,Rdel
-Rogue,Rogues,5,0,0,1,0,0,1,0,0,0,0,0,0,0,0,2,0,161,"Dark Ages",Rogue
-"Royal Seal","Royal Seals",5,0,0,0,1,0,0,0,0,0,0,0,0,0,0,2,0,162,Prosperity,RS
-"Ruined Library","Ruined Libraries",0,0,1,1,0,0,0,0,0,1,0,0,0,0,0,0,0,163,"Dark Ages",RLib
-"Ruined Market","Ruined Markets",0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,1,164,"Dark Ages",RMar
-"Ruined Village","Ruined Villages",0,1,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,165,"Dark Ages",RVil
-Ruins,Ruins,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,?,0,166,"Dark Ages",Ruins
-Saboteur,Saboteurs,5,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,167,Intrigue,Sab
-Sage,Sages,3,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,168,"Dark Ages",Sage
-Salvager,Salvagers,4,0,0,1,0,0,0,0,0,0,0,0,0,0,1,?,1,169,Seaside,Salv
-Scavenger,Scavengers,4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,170,"Dark Ages",Scav
-Scheme,Schemes,3,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,171,Hinterlands,Sch
-Scout,Scouts,4,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,172,Intrigue,Sco
-"Scrying Pool","Scrying Pools",P2,1,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,173,Alchemy,SP
-"Sea Hag","Sea Hags",4,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,174,Seaside,SHag
-"Secret Chamber","Secret Chambers",2,0,0,1,0,0,0,1,0,0,0,0,0,0,0,?,0,175,Intrigue,SC
-"Shanty Town","Shanty Towns",3,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,176,Intrigue,ST
-"Silk Road","Silk Roads",4,0,0,0,0,1,0,0,0,0,0,0,0,?,0,0,0,177,Hinterlands,SR
-Silver,Silvers,3,0,0,0,1,0,0,0,0,0,0,0,0,0,0,2,0,178,Common,Silv
-"Sir Bailey","Sirs Bailey",5,1,1,1,0,0,1,0,0,0,0,0,1,0,0,0,0,179,"Dark Ages",SBai
-"Sir Destry","Sirs Destry",5,0,2,1,0,0,1,0,0,0,0,0,1,0,0,0,0,180,"Dark Ages",SDes
-"Sir Martin","Sirs Martin",4,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,2,181,"Dark Ages",SMar
-"Sir Michael","Sirs Michael",5,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,182,"Dark Ages",SMi
-"Sir Vander","Sirs Vander",5,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,183,"Dark Ages",SVan
-Smithy,Smithies,4,0,3,1,0,0,0,0,0,0,0,0,0,0,0,0,0,184,Dominion,Sthy
-Smugglers,Smugglers,3,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,185,Seaside,Smug
-"Spice Merchant","Spice Merchants",4,?,?,1,0,0,0,0,0,0,0,0,0,0,0,?,?,186,Hinterlands,SMrch
-Spoils,Spoils,*0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,3,0,187,"Dark Ages",Spoils
-Spy,Spies,4,1,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,188,Dominion,Spy
-Squire,Squires,2,?,0,1,0,0,0,0,0,0,0,0,0,0,0,1,2,189,"Dark Ages",Sq
-Stables,Stables,5,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,190,Hinterlands,Stab
-Stash,Stashes,5,0,0,0,1,0,0,0,0,0,0,0,0,0,0,2,0,191,Promotional,Sash
-Steward,Stewards,3,0,2,1,0,0,0,0,0,0,0,0,0,0,2,?,0,192,Intrigue,Ste
-Storeroom,Storerooms,3,0,0,1,0,0,0,0,0,0,0,0,0,0,0,?,1,193,"Dark Ages",SR
-Survivors,Survivors,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,194,"Dark Ages",Surv
-Swindler,Swindlers,3,0,0,1,0,0,1,0,0,0,0,0,0,0,0,2,0,195,Intrigue,Swi
-Tactician,Tacticians,5,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,196,Seaside,Tac
-Talisman,Talismans,4,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,197,Prosperity,Tman
-Thief,Thieves,4,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,198,Dominion,Thi
-"Throne Room","Throne Rooms",4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,199,Dominion,TRoom
-Torturer,Torturers,5,0,3,1,0,0,1,0,0,0,0,0,0,0,0,0,0,200,Intrigue,Tort
-Tournament,Tournaments,4,1,?,1,0,0,0,0,0,0,0,0,0,0,0,?,0,201,Cornucopia,Tou
-"Trade Route","Trade Routes",3,0,0,1,0,0,0,0,0,0,0,0,0,0,1,?,1,202,Prosperity,TRoute
-Trader,Traders,4,0,0,1,0,0,0,1,0,0,0,0,0,0,1,0,0,203,Hinterlands,Tder
-"Trading Post","Trading Posts",5,0,0,1,0,0,0,0,0,0,0,0,0,0,2,0,0,204,Intrigue,TPst
-Transmute,Transmutes,P,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,205,Alchemy,Tmut
-"Treasure Map","Treasure Maps",4,0,0,1,0,0,0,0,0,0,0,0,0,0,2,0,0,206,Seaside,TMap
-Treasury,Treasuries,5,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,0,207,Seaside,Tsury
-Tribute,Tributes,5,?,?,1,0,0,0,0,0,0,0,0,0,0,0,?,0,208,Intrigue,Trib
-"Trusty Steed","Trusty Steeds",*0,?,?,1,0,0,0,0,0,0,0,0,0,0,0,?,0,209,Cornucopia,TS
-Tunnel,Tunnels,3,0,0,0,0,1,0,1,0,0,0,0,0,2,0,0,0,210,Hinterlands,Tun
-University,Universities,P2,2,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,211,Alchemy,Un
-Upgrade,Upgrades,5,1,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,212,Intrigue,Up
-Urchin,Urchins,3,1,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,213,"Dark Ages",Urc
-Vagrant,Vagrants,2,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,214,"Dark Ages",Vag
-Vault,Vaults,5,0,2,1,0,0,0,0,0,0,0,0,0,0,0,?,0,215,Prosperity,Va
-Venture,Ventures,5,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,216,Prosperity,Ven
-Village,Villages,3,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,217,Dominion,Vil
-Vineyard,Vineyards,P,0,0,0,0,1,0,0,0,0,0,0,0,?,0,0,0,218,Alchemy,Vin
-"Walled Village","Walled Villages",4,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,219,Promotional,Wvil
-"Wandering Minstrel","Wandering Minstrels",4,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,220,"Dark Ages",WM
-Warehouse,Warehouses,3,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,221,Seaside,Whouse
-Watchtower,Watchtowers,3,0,2,1,0,0,0,1,0,0,0,0,0,0,0,0,0,222,Prosperity,Wat
-Wharf,Wharves,5,0,2,1,0,0,0,0,1,0,0,0,0,0,0,0,1,223,Seaside,Wrf
-"Wishing Well","Wishing Wells",3,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,224,Intrigue,WW
-Witch,Witches,5,0,2,1,0,0,1,0,0,0,0,0,0,0,0,0,0,225,Dominion,Wit
-Woodcutter,Woodcutters,3,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,1,226,Dominion,Wood
-"Worker's Village","Worker's Villages",4,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,227,Prosperity,Wvil
-Workshop,Workshops,3,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,228,Dominion,Wshop
-"Young Witch","Young Witches",4,0,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,229,Cornucopia,Yng
+Singular,Plural,Cost,Actions,Cards,Action,Treasure,Victory,Attack,Reaction,Duration,Ruins,Looter,Shelter,Knight,VP,Trash,Coins,Buys,CoinTokens,Index,Expansion,Abbreviation
+"Abandoned Mine","Abandoned Mines",0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,"Dark Ages",AM
+Adventurer,Adventurers,6,0,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,Dominion,Adv
+Advisor,Advisors,4,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,Guilds,Advi
+Alchemist,Alchemists,P3,1,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,Alchemy,Alc
+Altar,Altars,6,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,4,"Dark Ages",Alt
+Ambassador,Ambassadors,3,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,5,Seaside,Amb
+Apothecary,Apothecaries,P2,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,Alchemy,Apoth
+Apprentice,Apprentices,5,1,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,7,Alchemy,App
+Archivist,Archivists,5,1,?,1,0,0,0,0,0,0,0,0,0,0,0,?,0,0,8,Fan,Arc
+Armory,Armories,4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,9,"Dark Ages",Arm
+"Bag of Gold","Bags of Gold",*0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,Cornucopia,BoG
+Baker,Bakers,5,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,Guilds,Bak
+"Band of Misfits","Bands of Misfits",5,?,?,1,0,0,0,0,0,0,0,0,0,0,?,?,?,0,12,"Dark Ages",BoM
+"Bandit Camp","Bandit Camps",5,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13,"Dark Ages",BC
+Bank,Banks,7,0,0,0,1,0,0,0,0,0,0,0,0,0,0,?,0,0,14,Prosperity,Bank
+Baron,Barons,4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,?,1,0,15,Intrigue,Bron
+Bazaar,Bazaars,5,2,1,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,16,Seaside,Baz
+Beggar,Beggars,2,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,17,"Dark Ages",Beg
+Bishop,Bishops,4,0,0,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,18,Prosperity,Bish
+"Black Market","Black Markets",3,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,1,0,19,Promotional,BMark
+"Border Village","Border Villages",6,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,20,Hinterlands,Bord
+Bridge,Bridges,4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,21,Intrigue,Bri
+Bureaucrat,Bureaucrats,4,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,22,Dominion,Bur
+Butcher,Butchers,5,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,23,Guilds,Butc
+Cache,Caches,5,0,0,0,1,0,0,0,0,0,0,0,0,0,0,3,0,0,24,Hinterlands,Cache
+"Candlestick Maker","Candlestick Makers",2,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,25,Guilds,Cand
+Caravan,Caravans,4,1,1,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,26,Seaside,Cvan
+Cartographer,Cartographers,5,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,27,Hinterlands,Cart
+Catacombs,Catacombs,5,0,3,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,28,"Dark Ages",Cat
+Cellar,Cellars,2,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,Dominion,Cel
+Chancellor,Chancellors,3,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,0,30,Dominion,Chan
+Chapel,Chapels,2,0,0,1,0,0,0,0,0,0,0,0,0,0,4,0,0,0,31,Dominion,Chap
+City,Cities,5,2,1,1,0,0,0,0,0,0,0,0,0,0,0,?,1,0,32,Prosperity,City
+Colony,Colonies,11,0,0,0,0,1,0,0,0,0,0,0,0,10,0,0,0,0,33,Prosperity,Col
+Conspirator,Conspirators,4,?,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,0,34,Intrigue,Cons
+Contraband,Contrabands,5,0,0,0,1,0,0,0,0,0,0,0,0,0,0,3,1,0,35,Prosperity,Cband
+Copper,Coppers,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,36,Common,Cop
+Coppersmith,Coppersmiths,4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,37,Intrigue,Csmith
+"Council Room","Council Rooms",5,0,4,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,38,Dominion,CR
+Count,Counts,5,0,0,1,0,0,0,0,0,0,0,0,0,0,?,?,0,0,39,"Dark Ages",Count
+Counterfeit,Counterfeits,5,0,0,0,1,0,0,0,0,0,0,0,0,0,1,1,1,0,40,"Dark Ages",Cf
+"Counting House","Counting Houses",5,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,41,Prosperity,CH
+Courtyard,Courtyards,2,0,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,42,Intrigue,Cyard
+Crossroads,Crossroads,2,?,?,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,43,Hinterlands,Croads
+Cultist,Cultists,5,0,2,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,44,"Dark Ages",Cul
+Curse,Curses,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,45,Common,Curse
+Cutpurse,Cutpurses,4,0,0,1,0,0,1,0,0,0,0,0,0,0,0,2,0,0,46,Seaside,Cut
+"Dame Anna","Dames Anna",5,0,0,1,0,0,1,0,0,0,0,0,1,0,2,0,0,0,47,"Dark Ages",DAn
+"Dame Josephine","Dames Josephine",5,0,0,1,0,1,1,0,0,0,0,0,1,2,0,0,0,0,48,"Dark Ages",DJo
+"Dame Molly","Dames Molly",5,2,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,0,49,"Dark Ages",DMo
+"Dame Natalie","Dames Natalie",5,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,0,50,"Dark Ages",DNat
+"Dame Sylvia","Dames Sylvia",5,0,0,1,0,0,1,0,0,0,0,0,1,0,0,2,0,0,51,"Dark Ages",DSyl
+"Death Cart","Death Carts",4,0,0,1,0,0,0,0,0,0,1,0,0,0,1,5,0,0,52,"Dark Ages",DC
+Develop,Develops,3,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,53,Hinterlands,Dev
+Diadem,Diadems,*0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,2,0,0,54,Cornucopia,Dia
+Doctor,Doctors,3,0,0,1,0,0,0,0,0,0,0,0,0,0,3,0,0,0,55,Guilds,Doc
+Duchess,Duchesses,2,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,0,56,Hinterlands,Dss
+Duchy,Duchies,5,0,0,0,0,1,0,0,0,0,0,0,0,3,0,0,0,0,57,Common,Duchy
+Duke,Dukes,5,0,0,0,0,1,0,0,0,0,0,0,0,?,0,0,0,0,58,Intrigue,Duke
+Embargo,Embargoes,2,0,0,1,0,0,0,0,0,0,0,0,0,0,1,2,0,0,59,Seaside,Ebarg
+Embassy,Embassies,5,0,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,60,Hinterlands,Ebass
+Envoy,Envoys,4,0,4,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,61,Promotional,Env
+Estate,Estates,2,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,62,Common,Est
+Expand,Expands,7,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,63,Prosperity,Epand
+Explorer,Explorers,5,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,64,Seaside,Expl
+Fairgrounds,Fairgrounds,6,0,0,0,0,1,0,0,0,0,0,0,0,?,0,0,0,0,65,Cornucopia,Fair
+Familiar,Familiars,P3,1,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,66,Alchemy,Fam
+"Farming Village","Farming Villages",4,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,67,Cornucopia,FarmV
+Farmland,Farmlands,6,0,0,0,0,1,0,0,0,0,0,0,0,2,0,0,0,0,68,Hinterlands,Fland
+Feast,Feasts,4,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,69,Dominion,Feast
+Feodum,Feoda,4,0,0,0,0,1,0,0,0,0,0,0,0,?,0,0,0,0,70,"Dark Ages",Feo
+Festival,Festivals,5,2,0,1,0,0,0,0,0,0,0,0,0,0,0,2,1,0,71,Dominion,Fest
+"Fishing Village","Fishing Villages",3,2,0,1,0,0,0,0,1,0,0,0,0,0,0,1,0,0,72,Seaside,FishV
+Followers,Followers,*0,0,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,73,Cornucopia,Foll
+"Fool's Gold","Fool's Golds",2,0,0,0,1,0,0,1,0,0,0,0,0,0,0,?,0,0,74,Hinterlands,Fool
+Forager,Foragers,3,1,0,1,0,0,0,0,0,0,0,0,0,0,1,?,1,0,75,"Dark Ages",Fger
+Forge,Forges,7,0,0,1,0,0,0,0,0,0,0,0,0,0,99,0,0,0,76,Prosperity,Forge
+Fortress,Fortresses,4,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,77,"Dark Ages",Ftrs
+"Fortune Teller","Fortune Tellers",3,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,0,78,Cornucopia,FT
+Gardens,Gardens,4,0,0,0,0,1,0,0,0,0,0,0,0,?,0,0,0,0,79,Dominion,Gard
+"Ghost Ship","Ghost Ships",5,0,2,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,80,Seaside,GS
+Gold,Golds,6,0,0,0,1,0,0,0,0,0,0,0,0,0,0,3,0,0,81,Common,Gold
+Golem,Golems,P4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,82,Alchemy,Golem
+Goons,Goons,6,0,0,1,0,0,1,0,0,0,0,0,0,0,0,2,1,0,83,Prosperity,Goon
+Governor,Governors,5,1,?,1,0,0,0,0,0,0,0,0,0,0,?,0,0,0,84,Promotional,Gov
+"Grand Market","Grand Markets",6,1,1,1,0,0,0,0,0,0,0,0,0,0,0,2,1,0,85,Prosperity,Gmark
+Graverobber,Graverobbers,5,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,86,"Dark Ages",GR
+"Great Hall","Great Halls",3,1,1,1,0,1,0,0,0,0,0,0,0,1,0,0,0,0,87,Intrigue,GH
+Haggler,Hagglers,5,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,0,88,Hinterlands,Hag
+Hamlet,Hamlets,2,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,89,Cornucopia,Ham
+Harem,Harems,6,0,0,0,1,1,0,0,0,0,0,0,0,2,0,2,0,0,90,Intrigue,Harem
+Harvest,Harvests,5,0,0,1,0,0,0,0,0,0,0,0,0,0,0,?,0,0,91,Cornucopia,Hvest
+Haven,Havens,2,1,1,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,92,Seaside,Hav
+Herald,Heralds,4,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,93,Guilds,Hera
+Herbalist,Herbalists,2,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,94,Alchemy,Herb
+Hermit,Hermits,3,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,95,"Dark Ages",Hrm
+Highway,Highways,5,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,96,Hinterlands,Hway
+Hoard,Hoards,6,0,0,0,1,0,0,0,0,0,0,0,0,0,0,2,0,0,97,Prosperity,Hoard
+"Horn of Plenty","Horns of Plenty",5,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,98,Cornucopia,HoP
+"Horse Traders","Horse Traders",4,0,-2,1,0,0,0,1,0,0,0,0,0,0,0,3,1,0,99,Cornucopia,HT
+Hovel,Hovels,1,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,100,"Dark Ages",Hv
+"Hunting Grounds","Hunting Grounds",6,0,4,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,101,"Dark Ages",HG
+"Hunting Party","Hunting Parties",5,1,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,102,Cornucopia,Hunt
+"Ill-Gotten Gains","Ill-Gotten Gains",5,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,103,Hinterlands,IGG
+Inn,Inns,5,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,104,Hinterlands,Inn
+Ironmonger,Ironmongers,4,1,1,1,0,0,0,0,0,0,0,0,0,0,0,?,0,0,105,"Dark Ages",IM
+Ironworks,Ironworks,4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,?,0,0,106,Intrigue,IW
+Island,Islands,4,0,0,1,0,1,0,0,0,0,0,0,0,2,0,0,0,0,107,Seaside,Isl
+"Jack of All Trades","Jacks of All Trades",4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,108,Hinterlands,JoaT
+Jester,Jesters,5,0,0,1,0,0,1,0,0,0,0,0,0,0,0,2,0,0,109,Cornucopia,Jest
+Journeyman,Journeymen,5,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,Guilds,Jour
+"Junk Dealer","Junk Dealers",5,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,111,"Dark Ages",JD
+"King's Court","King's Courts",7,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,112,Prosperity,KC
+Knights,Knights,5,0,0,1,0,0,1,0,0,0,0,0,1,0,0,?,0,0,113,"Dark Ages",Kn
+Laboratory,Laboratories,5,1,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,114,Dominion,Lab
+Library,Libraries,5,0,3,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,115,Dominion,Lib
+Lighthouse,Lighthouses,2,1,0,1,0,0,0,1,1,0,0,0,0,0,0,1,0,0,116,Seaside,Light
+Loan,Loans,3,0,0,0,1,0,0,0,0,0,0,0,0,0,1,1,0,0,117,Prosperity,Loan
+Lookout,Lookouts,3,1,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,118,Seaside,Look
+Madman,Madmen,*0,2,?,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,119,"Dark Ages",MM
+Mandarin,Mandarins,5,0,0,1,3,0,0,0,0,0,0,0,0,0,0,3,0,0,120,Hinterlands,Mand
+Marauder,Marauders,4,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,121,"Dark Ages",Mard
+Margrave,Margraves,5,0,3,1,0,0,1,0,0,0,0,0,0,0,0,0,1,0,122,Hinterlands,Marg
+"Market Square","Market Squares",3,1,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,123,"Dark Ages",MS
+Market,Markets,5,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,124,Dominion,Mark
+Masquerade,Masquerades,3,0,2,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,125,Intrigue,Masq
+Masterpiece,Masterpieces,3,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,126,Guilds,Mast
+Menagerie,Menageries,3,1,3,1,0,0,0,0,0,0,0,0,0,0,0,0,,0,127,Cornucopia,Men
+Mercenary,Mercenaries,*0,0,2,1,0,0,1,0,0,0,0,0,0,0,2,?,0,0,128,"Dark Ages",Merc
+"Merchant Guild","Merchant Guilds",5,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,129,Guilds,MGui
+"Merchant Ship","Merchant Ships",5,0,0,1,0,0,0,0,1,0,0,0,0,0,0,2,0,0,130,Seaside,MS
+Militia,Militias,4,0,0,1,0,0,1,0,0,0,0,0,0,0,0,2,0,0,131,Dominion,Mil
+Mine,Mines,5,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,132,Dominion,Mine
+"Mining Village","Mining Villages",4,2,1,1,0,0,0,0,0,0,0,0,0,0,1,?,0,0,133,Intrigue,MinV
+Minion,Minions,5,1,0,1,0,0,1,0,0,0,0,0,0,0,0,?,0,0,134,Intrigue,Mion
+Mint,Mints,5,0,0,1,0,0,0,0,0,0,0,0,0,0,?,0,0,0,135,Prosperity,Mint
+Moat,Moats,2,0,2,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,136,Dominion,Moa
+Moneylender,Moneylenders,4,0,0,1,0,0,0,0,0,0,0,0,0,0,1,?,0,0,137,Dominion,Mlend
+Monument,Monuments,4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,0,138,Prosperity,Mment
+Mountebank,Mountebanks,5,0,0,1,0,0,1,0,0,0,0,0,0,0,0,2,0,0,139,Prosperity,Mbank
+Mystic,Mystics,5,1,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,0,140,"Dark Ages",Mys
+"Native Village","Native Villages",2,2,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,141,Seaside,NatV
+Navigator,Navigators,4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,0,142,Seaside,Nav
+Necropolis,Necropolises,1,2,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,143,"Dark Ages",Nec
+"Noble Brigand","Noble Brigands",4,0,0,1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,144,Hinterlands,NBri
+Nobles,Nobles,6,?,?,1,0,1,0,0,0,0,0,0,0,2,0,0,0,0,145,Intrigue,Nbles
+"Nomad Camp","Nomad Camps",4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,1,0,146,Hinterlands,NCamp
+Oasis,Oases,3,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,147,Hinterlands,Oasis
+Oracle,Oracles,3,0,2,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,148,Hinterlands,Ora
+Outpost,Outposts,5,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,149,Seaside,Out
+"Overgrown Estate","Overgrown Estates",1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,150,"Dark Ages",OE
+Pawn,Pawns,2,?,?,1,0,0,0,0,0,0,0,0,0,0,0,?,?,0,151,Intrigue,Pawn
+"Pearl Diver","Pearl Divers",2,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,152,Seaside,PDiv
+Peddler,Peddlers,8,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,153,Prosperity,Ped
+"Philosopher's Stone","Philosopher's Stones",P3,0,0,0,1,0,0,0,0,0,0,0,0,0,0,?,0,0,154,Alchemy,PStone
+Pillage,Pillages,5,0,0,1,0,0,1,0,0,0,0,0,0,0,1,0,0,0,155,"Dark Ages",Pil
+"Pirate Ship","Pirate Ships",4,0,0,1,0,0,1,0,0,0,0,0,0,0,0,?,0,0,156,Seaside,PShip
+Platinum,Platinums,9,0,0,0,1,0,0,0,0,0,0,0,0,0,0,5,0,0,157,Prosperity,Plat
+Plaza,Plazas,4,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,158,Guilds,Plaz
+"Poor House","Poor Houses",1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,?,0,0,159,"Dark Ages",PH
+Possession,Possessions,P6,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,160,Alchemy,Pos
+Potion,Potions,4,0,0,0,1,0,0,0,0,0,0,0,0,0,0,P,0,0,161,Alchemy,Pot
+Princess,Princesses,*0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,162,Cornucopia,Prin
+Procession,Processions,4,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,163,"Dark Ages",Proc
+Province,Provinces,8,0,0,0,0,1,0,0,0,0,0,0,0,6,0,0,0,0,164,Common,Prov
+Quarry,Quarries,4,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,165,Prosperity,Qua
+Rabble,Rabbles,5,0,3,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,166,Prosperity,Rab
+Rats,Rats,4,1,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,167,"Dark Ages",Rats
+Rebuild,Rebuilds,5,1,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,168,"Dark Ages",Reb
+Remake,Remakes,4,0,0,1,0,0,0,0,0,0,0,0,0,0,2,0,0,0,169,Cornucopia,Rke
+Remodel,Remodels,4,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,170,Dominion,Rdel
+Rogue,Rogues,5,0,0,1,0,0,1,0,0,0,0,0,0,0,0,2,0,0,171,"Dark Ages",Rogue
+"Royal Seal","Royal Seals",5,0,0,0,1,0,0,0,0,0,0,0,0,0,0,2,0,0,172,Prosperity,RS
+"Ruined Library","Ruined Libraries",0,0,1,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,173,"Dark Ages",RLib
+"Ruined Market","Ruined Markets",0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,1,0,174,"Dark Ages",RMar
+"Ruined Village","Ruined Villages",0,1,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,175,"Dark Ages",RVil
+Ruins,Ruins,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,?,0,0,176,"Dark Ages",Ruins
+Saboteur,Saboteurs,5,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,177,Intrigue,Sab
+Sage,Sages,3,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,178,"Dark Ages",Sage
+Salvager,Salvagers,4,0,0,1,0,0,0,0,0,0,0,0,0,0,1,?,1,0,179,Seaside,Salv
+Scavenger,Scavengers,4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,0,180,"Dark Ages",Scav
+Scheme,Schemes,3,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,181,Hinterlands,Sch
+Scout,Scouts,4,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,182,Intrigue,Sco
+"Scrying Pool","Scrying Pools",P2,1,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,183,Alchemy,SP
+"Sea Hag","Sea Hags",4,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,184,Seaside,SHag
+"Secret Chamber","Secret Chambers",2,0,0,1,0,0,0,1,0,0,0,0,0,0,0,?,0,0,185,Intrigue,SC
+"Shanty Town","Shanty Towns",3,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,186,Intrigue,ST
+"Silk Road","Silk Roads",4,0,0,0,0,1,0,0,0,0,0,0,0,?,0,0,0,0,187,Hinterlands,SR
+Silver,Silvers,3,0,0,0,1,0,0,0,0,0,0,0,0,0,0,2,0,0,188,Common,Silv
+"Sir Bailey","Sirs Bailey",5,1,1,1,0,0,1,0,0,0,0,0,1,0,0,0,0,0,189,"Dark Ages",SBai
+"Sir Destry","Sirs Destry",5,0,2,1,0,0,1,0,0,0,0,0,1,0,0,0,0,0,190,"Dark Ages",SDes
+"Sir Martin","Sirs Martin",4,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,2,0,191,"Dark Ages",SMar
+"Sir Michael","Sirs Michael",5,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,0,192,"Dark Ages",SMi
+"Sir Vander","Sirs Vander",5,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,0,193,"Dark Ages",SVan
+Smithy,Smithies,4,0,3,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,194,Dominion,Sthy
+Smugglers,Smugglers,3,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,195,Seaside,Smug
+Soothsayer,Soothsayers,5,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,196,Guilds,Sooth
+"Spice Merchant","Spice Merchants",4,?,?,1,0,0,0,0,0,0,0,0,0,0,0,?,?,0,197,Hinterlands,SMrch
+Spoils,Spoils,*0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,3,0,0,198,"Dark Ages",Spoils
+Spy,Spies,4,1,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,199,Dominion,Spy
+Squire,Squires,2,?,0,1,0,0,0,0,0,0,0,0,0,0,0,1,2,0,200,"Dark Ages",Sq
+Stables,Stables,5,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,201,Hinterlands,Stab
+Stash,Stashes,5,0,0,0,1,0,0,0,0,0,0,0,0,0,0,2,0,0,202,Promotional,Sash
+Steward,Stewards,3,0,2,1,0,0,0,0,0,0,0,0,0,0,2,?,0,0,203,Intrigue,Ste
+Stonemason,Stonemasons,2,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,204,Guilds,Ston
+Storeroom,Storerooms,3,0,0,1,0,0,0,0,0,0,0,0,0,0,0,?,1,0,205,"Dark Ages",SR
+Survivors,Survivors,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,206,"Dark Ages",Surv
+Swindler,Swindlers,3,0,0,1,0,0,1,0,0,0,0,0,0,0,0,2,0,0,207,Intrigue,Swi
+Tactician,Tacticians,5,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,208,Seaside,Tac
+Talisman,Talismans,4,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,209,Prosperity,Tman
+Taxman,Taxmen,4,0,0,1,0,0,1,0,0,0,0,0,0,0,1,0,0,0,210,Guilds,Taxm
+Thief,Thieves,4,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,211,Dominion,Thi
+"Throne Room","Throne Rooms",4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,212,Dominion,TRoom
+Torturer,Torturers,5,0,3,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,213,Intrigue,Tort
+Tournament,Tournaments,4,1,?,1,0,0,0,0,0,0,0,0,0,0,0,?,0,0,214,Cornucopia,Tou
+"Trade Route","Trade Routes",3,0,0,1,0,0,0,0,0,0,0,0,0,0,1,?,1,0,215,Prosperity,TRoute
+Trader,Traders,4,0,0,1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,216,Hinterlands,Tder
+"Trading Post","Trading Posts",5,0,0,1,0,0,0,0,0,0,0,0,0,0,2,0,0,0,217,Intrigue,TPst
+Transmute,Transmutes,P,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,218,Alchemy,Tmut
+"Treasure Map","Treasure Maps",4,0,0,1,0,0,0,0,0,0,0,0,0,0,2,0,0,0,219,Seaside,TMap
+Treasury,Treasuries,5,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,220,Seaside,Tsury
+Tribute,Tributes,5,?,?,1,0,0,0,0,0,0,0,0,0,0,0,?,0,0,221,Intrigue,Trib
+"Trusty Steed","Trusty Steeds",*0,?,?,1,0,0,0,0,0,0,0,0,0,0,0,?,0,0,222,Cornucopia,TS
+Tunnel,Tunnels,3,0,0,0,0,1,0,1,0,0,0,0,0,2,0,0,0,0,223,Hinterlands,Tun
+University,Universities,P2,2,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,224,Alchemy,Un
+Upgrade,Upgrades,5,1,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,225,Intrigue,Up
+Urchin,Urchins,3,1,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,226,"Dark Ages",Urc
+Vagrant,Vagrants,2,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,227,"Dark Ages",Vag
+Vault,Vaults,5,0,2,1,0,0,0,0,0,0,0,0,0,0,0,?,0,0,228,Prosperity,Va
+Venture,Ventures,5,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,229,Prosperity,Ven
+Village,Villages,3,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,230,Dominion,Vil
+Vineyard,Vineyards,P,0,0,0,0,1,0,0,0,0,0,0,0,?,0,0,0,0,231,Alchemy,Vin
+"Walled Village","Walled Villages",4,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,232,Promotional,Wvil
+"Wandering Minstrel","Wandering Minstrels",4,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,233,"Dark Ages",WM
+Warehouse,Warehouses,3,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,234,Seaside,Whouse
+Watchtower,Watchtowers,3,0,2,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,235,Prosperity,Wat
+Wharf,Wharves,5,0,2,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,236,Seaside,Wrf
+"Wishing Well","Wishing Wells",3,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,237,Intrigue,WW
+Witch,Witches,5,0,2,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,238,Dominion,Wit
+Woodcutter,Woodcutters,3,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,1,0,239,Dominion,Wood
+"Worker's Village","Worker's Villages",4,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,240,Prosperity,Wvil
+Workshop,Workshops,3,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,241,Dominion,Wshop
+"Young Witch","Young Witches",4,0,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,242,Cornucopia,Yng

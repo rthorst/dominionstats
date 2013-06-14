@@ -29,6 +29,10 @@ import simplejson as json
 import utils
 import parse_common
 
+RECEIVES_COIN_TOKENS_RE = re.compile('receives (\d+) coin token')
+USES_COIN_TOKENS_RE = re.compile('uses (\d+) coin token')
+KW_OVERPAYS = 'overpays for'
+
 RATING_SYSTEM_RE = re.compile('^Rating system: (.*)$')
 GAME_OVER_RE = re.compile('^------------ Game Over ------------$')
 EMPTY_LINE_RE = re.compile('^\s*$')
@@ -317,6 +321,7 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
            RECEIVES: []}
     durations = []
     turn_money = 0
+    turn_coin_tokens = 0
     vp_tokens = 0
     ps_tokens = 0
 
@@ -327,12 +332,16 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
     harvest_reveal = []
     trashed_to_mercenary = 0
     current_phase = None
+    dup_plays_remaining = -1
+    done_self_trashing = False
     bom_plays = 0 # For throne room/procession/KC - don't get to rechoose BoM
     bom_choice = None
+    bom_processioned = False # to trash it properly
     storeroom_discards = [] 
     done_resolving = True
+    coin_tokens = 0
 
-    action_counter = 0 # All that... just for diadem. :/ 
+    action_counter = 0 # All this... just for diadem. :/ 
 
     opp_turn_info = collections.defaultdict(lambda: {GAINS: [], BUYS: [],
                                                      TRASHES: [], PASSES: [],
@@ -388,7 +397,7 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
                         d[k] = indexes(v)
 
             ret.update({MONEY:money, VP_TOKENS: vp_tokens, 
-                        PIRATE_TOKENS: ps_tokens, OPP: dict(opp_turn_info)})
+                PIRATE_TOKENS: ps_tokens, COIN_TOKENS: coin_tokens, OPP: dict(opp_turn_info)})
             return ret
 
 
@@ -503,7 +512,7 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
             # special cases 
             for play in played: 
                 if play.is_action():
-                    if not(play == dominioncards.Cultist and play == last_play):
+                    if not(play == dominioncards.Cultist and play == last_play) and play != dominioncards.BandofMisfits:
                         action_counter -= 1
                 action_counter += play.num_plus_actions()
                 if bom_choice is not None:
@@ -512,16 +521,28 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
                     else:
                         bom_plays -= 1
 
+                if dup_plays_remaining >= 0 and play != dominioncards.BandofMisfits:
+                    dup_plays_remaining -= 1
+                if dup_plays_remaining < 0:
+                    done_self_trashing = False
+
                 if play.is_treasure():
                     phase = BUY_PHASE
                 elif (last_play == dominioncards.ThroneRoom or 
-                        last_play == dominioncards.Procession):
+                        last_play == dominioncards.Procession or 
+                        last_play == dominioncards.Golem):
                     action_counter += 2 
                 elif last_play == dominioncards.KingsCourt:
                     action_counter += 3 
 
                 if play == dominioncards.PoorHouse:
                     turn_money += 4 # Subtraction will happen later
+                elif play == dominioncards.ThroneRoom or play == dominioncards.Procession:
+                    dup_plays_remaining = 2
+                elif play == dominioncards.KingsCourt:
+                    dup_plays_remaining = 3
+                elif play == dominioncards.Madman and dup_plays_remaining <= 0:
+                    ret[RETURNS].append(play)
                 elif play == dominioncards.Spoils:
                     # Spoils always get returned on play...
                     # ...unless it's Counterfeited. 
@@ -538,9 +559,12 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
                 elif play == dominioncards.Diadem:
                     turn_money += action_counter
                 elif play == dominioncards.BandofMisfits:
-                    if last_play in [dominioncards.Procession, 
-                                     dominioncards.ThroneRoom]:
+                    bom_processioned = False
+                    if last_play == dominioncards.ThroneRoom:
                         bom_plays = 2
+                    elif last_play == dominioncards.Procession:
+                        bom_plays = 2
+                        bom_processioned = True
                     elif last_play == dominioncards.KingsCourt:
                         bom_plays = 3
                     else:
@@ -617,13 +641,23 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
                     removed_from_supply[g] += 1
             continue
 
-        # Some old Goko logs mis-attribute pirate ship trashing. I'm not 
+        # Some old Goko logs mis-attribute trashing from attacks. I'm not 
         # going to special-case all the various goko bugs that have since been
-        # fixed, though. So there will be bugs with some PS logs.
+        # fixed, though. So there will be bugs with some old logs.
         if KW_TRASHES in action_taken:
             trashed = capture_cards(action_taken)
 
             if active_player == ret[NAME]:
+
+                # Making TR-feast not doublecount Feast trashing
+                if(last_play not in trashed or not last_play.can_trash_self()):
+                    done_self_trashing = False
+                if (dup_plays_remaining >= 0 and last_play in trashed and done_self_trashing and last_play.can_trash_self()):
+                    trashed.remove(last_play) #TR+feast
+                if (last_play in trashed and dup_plays_remaining > 0 and last_play.can_trash_self()):
+                    done_self_trashing = True
+
+
                 if (last_play == dominioncards.MiningVillage and
                     not done_resolving and 
                     dominioncards.MiningVillage in trashed):
@@ -643,7 +677,7 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
 
                 while dominioncards.Fortress in trashed:
                     trashed.remove(dominioncards.Fortress)
-                if trashed == bom_choice: 
+                if trashed == bom_choice and (bom_choice[0].can_trash_self() or bom_processioned): 
                     trashed = [dominioncards.BandofMisfits]
                 if (bom_choice is not None and
                         dominioncards.TreasureMap in bom_choice and
@@ -670,6 +704,16 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
                 done_resolving = True
             continue
 
+        match = USES_COIN_TOKENS_RE.match(action_taken)
+        if match:
+            turn_money += match.group(1)
+            turn_coin_tokens -= match.group(1)
+            continue
+
+        match = RECEIVES_COIN_TOKENS_RE.match(action_taken)
+        if match:
+            turn_coin_tokens += match.group(1)
+            continue
 
         if KW_PASSES in action_taken:
             passed_cards = capture_cards(action_taken)
@@ -790,6 +834,7 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
             KW_SETS_ASIDE in action_taken or 
             KW_TAKES in action_taken or
             KW_EMBARGOES in action_taken or 
+            KW_OVERPAYS in action_taken or 
             KW_NAMES in action_taken or 
             KW_CARDS_IN_DISCARDS in action_taken or
             KW_APPLIED in action_taken or 
@@ -829,7 +874,6 @@ def parse_turns(log_lines, names_list, removed_from_supply):
     while not GAME_OVER_RE.match(log_lines[0]):
         turn = parse_turn(log_lines, names_list, trash_pile, trade_route_set, 
                           removed_from_supply, masq_targets, previous_name)
-        print trash_pile
         if POSSESSION in turn:
             turn['pname'] = previous_name
         elif(len(turns) > 0 and turn[NAME] == turns[-1][NAME] and 
