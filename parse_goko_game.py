@@ -806,6 +806,15 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
         if (KW_REVEALS in action_taken or KW_REVEALS_C in action_taken):
             if last_play == dominioncards.Harvest:
                 harvest_reveal.extend(capture_cards(action_taken))
+            elif last_play == dominioncards.Herald:
+                c = capture_cards(action_taken)
+                if len(c) > 0:
+                    if c[0].is_action():
+                        action_counter += 1 
+                        if bom_plays > 0:
+                            bom_plays += 1
+                        if dup_plays_remaining > 0:
+                            dup_plays_remaining += 1
             elif last_play == dominioncards.Golem:
                 action_counter += len([c for c in capture_cards(action_taken)if (c.is_action() and not c == dominioncards.Golem)])
             elif (last_play == dominioncards.Tournament and 

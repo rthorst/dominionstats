@@ -88,8 +88,8 @@ def main(parsed_args):
     # previous day backwards, until no games are inserted
     log.info("Starting scrape for raw games")
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
-    for date in utils.daterange(datetime.date(2010, 10, 15),
-                                yesterday, reverse=True):
+    dates = utils.daterange(datetime.date(2010,10,14), yesterday, reverse=True)
+    for date in dates:
         log.info("Invoking scrape_raw_games async task for %s", date)
         async_result = watch_and_log(background.tasks.scrape_raw_games.s(date))
         inserted = async_result.get()
@@ -103,13 +103,14 @@ def main(parsed_args):
     # Invoke the analyze script
     log.info("Starting analyze")
     analyze.main(parsed_args)
-    log.info("Starting analyze2")
+    log.info("Starting analyze2") # Too slow. Do it separately.
     analyze2.main(parsed_args)
 
     # Check for goals
     log.info("Starting search for goals acheived")
-    for date in utils.daterange(datetime.date(2010, 10, 15),
-                                datetime.date.today(), reverse=True):
+    dates = utils.daterange(datetime.date(2010,10,14), yesterday, reverse=True)
+    dates = utils.daterange(datetime.date(2013,6,10), yesterday, reverse=True)
+    for date in dates:
         log.info("Invoking calc_goals_for_days async task for %s", date)
         async_result = watch_and_log(background.tasks.calc_goals_for_days.s([date]))
         inserted = async_result.get()
@@ -120,8 +121,9 @@ def main(parsed_args):
 
     # Check for game_stats
     log.info("Starting game_stats summarization")
-    for date in utils.daterange(datetime.date(2010, 10, 15),
-                                datetime.date.today(), reverse=True):
+    dates = utils.daterange(datetime.date(2010,10,14), yesterday, reverse=True)
+    dates = utils.daterange(datetime.date(2013,6,10), yesterday, reverse=True)
+    for date in dates:
         log.info("Invoking summarize_game_stats_for_days async task for %s", date)
         async_result = watch_and_log(background.tasks.summarize_game_stats_for_days.s([date]))
         inserted = async_result.get()

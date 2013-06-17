@@ -7,7 +7,11 @@ then
     exit -1
 fi
 
-BASE=http://archive-dominionlogs.goko.com/$1/
+BASE_ARCHIVE=http://archive-dominionlogs.goko.com/$1/
+BASE_RECENT=http://dominionlogs.goko.com/$1/
+
+wget --spider $BASE_RECENT && BASE=$BASE_RECENT
+wget --spider $BASE_ARCHIVE && BASE=$BASE_ARCHIVE
 THREADS=20
 
 wget --header='Accept-Encoding: gzip' $BASE -O- | zcat | perl -lne 'print "$1" if /href="(.*?txt)"/' > _all
