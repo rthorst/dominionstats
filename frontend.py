@@ -334,7 +334,13 @@ class PlayerPage(object):
 
         ret += '<h2>Most recent games</h2>\n'
         qm = query_matcher.QueryMatcher(p1_name=target_player)
-        for g_id in game_list[:3]:
+        goko_games = [g for g in game_list if '.txt' in game_list]
+        if len(goko_games) > 2:
+            goko_games.sort(reverse=True)
+            most_recent = goko_games[:3]
+        else:
+            most_recent = game_list[:3]
+        for g_id in most_recent:
             g = db.games.find_one({'_id': g_id})
             game_val = game.Game(g)
             ret += (query_matcher.GameMatcher(game_val, qm).display_game_snippet() +
