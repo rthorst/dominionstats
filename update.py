@@ -86,8 +86,9 @@ def main(parsed_args):
 
     # Scrape and load the data from goko, proceeding from the
     # previous day backwards, until no games are inserted
+    today = datetime.date.today()
     log.info("Starting scrape for raw games")
-    dates = utils.daterange(datetime.date(2010,10,14), datetime.date.today(), reverse=True)
+    dates = utils.daterange(datetime.date(2010,10,14), today, reverse=True)
     for date in dates:
         log.info("Invoking scrape_raw_games async task for %s", date)
         async_result = watch_and_log(background.tasks.scrape_raw_games.s(date))
@@ -107,7 +108,7 @@ def main(parsed_args):
     log.info("Starting search for goals acheived")
     # Check for game_stats
     log.info("Starting game_stats summarization")
-    dates = utils.daterange(datetime.date(2010,10,14), datetime.date.today(), reverse=True)
+    dates = utils.daterange(datetime.date(2010,10,14), today, reverse=True)
     for date in dates:
         log.info("Invoking calc_goals_for_days async task for %s", date)
         async_result = watch_and_log(background.tasks.calc_goals_for_days.s([date]))
