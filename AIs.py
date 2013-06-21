@@ -203,4 +203,11 @@ names = set(['Warlord Bot', 'Warlord Bot I', 'Warlord Bot II', 'Warlord Bot III'
 'King Grappa',
 'King Peter',
 'Maiden Joanna',
-        'Tutor Thomas'])
+        'Tutor Thomas',
+        'Leo',  # Base set act 2
+        'Sea Hag', 'Ghost Gavin','Gavin the Terrible', 'Ricker', 'Jewel Owner', 'Ela',  #Seaside adventures. Prosperity adventures have no new names.
+        'Belinda', 'Servant',  #Intrigue adventures
+        'Silver Knight', 'Rayne', 'Archer', 'Bonifacius', 'Simon', 'Egbert', 'Barnabas', 'Morgana', 'Vagrant',  # Dark Ages
+        'WeiBot', 'Weibot', # Hinterlands
+        'Cadby' #Alchemy
+        ])
