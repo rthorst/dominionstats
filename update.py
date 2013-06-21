@@ -102,8 +102,6 @@ def main(parsed_args):
     # Invoke the analyze script
     log.info("Starting analyze")
     analyze.main(parsed_args)
-    log.info("Starting analyze2") # Too slow. Do it separately.
-    analyze2.main(parsed_args)
 
     # Check for goals
     log.info("Starting search for goals acheived")
@@ -146,6 +144,8 @@ def main(parsed_args):
     log.info("Loading the leaderboard")
     load_leaderboard.main()
 
+    log.info("Starting analyze2") # This is slow. Is it fast enough on cr?
+    analyze2.main(parsed_args)
     log.info("Done with the update.py process")
 
 

@@ -149,7 +149,6 @@ class GokoGameTest(unittest.TestCase):
             computed_deck_comp = last_state.get_deck_composition(
                 player_deck.name())
 
-            print player_deck.name()
             for card in set(parsed_deck_comp.keys() +
                             computed_deck_comp.keys()):
                 self.longMessage = True

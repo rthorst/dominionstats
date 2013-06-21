@@ -28,7 +28,8 @@ import time
 # Module-level logging instance
 log = logging.getLogger(__name__)
 
-s3_location = 'ftl-goko-councilroom-test-bucket'
+#s3_location = 'ftl-goko-councilroom-test-bucket'
+s3_location = 'static.councilroom.mccllstr.com'
 
 class GokoProcessingDate(object):
     # TODO: This is a partial implementation

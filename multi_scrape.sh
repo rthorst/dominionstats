@@ -19,7 +19,7 @@ wget --header='Accept-Encoding: gzip' $BASE -O- | zcat | perl -lne 'print "$1" i
 if [ `cat _all | wc -l` -gt 0 ]
 then
     cat _all | split -l 100 - _index.
-    ls _index.* | xargs -n 1 -P $THREADS wget --base=$BASE --header='Accept-Encoding: gzip' -i
+    ls _index.* | xargs -n 1 -P $THREADS wget --base=$BASE --header='Accept-Encoding: gzip' --quiet -i
     rm _index.*
     echo "Done downloading"
 fi
@@ -31,7 +31,7 @@ cat _all _old | sort | uniq -u > _new
 if [ `cat _new | wc -l` -gt 0 ]
 then
     cat _new | split -l 100 - _index.
-    ls _index.* | xargs -n 1 -P $THREADS wget --base=$BASE --header='Accept-Encoding: gzip' -i
+    ls _index.* | xargs -n 1 -P $THREADS wget --base=$BASE --header='Accept-Encoding: gzip' --quiet -i
     rm _index.*
     echo "Done doublechecking"
 fi
