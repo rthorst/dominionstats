@@ -243,11 +243,10 @@ def summarize_game_stats_for_days(days):
                 summarize_games.delay(chunk, day)
                 chunk = []
 
-            chunk.append(game['_id'])#TODO: DELETE
-            game_count += 1#TODO: DELETE
-            #if game_stats_col.find({'_id.game_id': game['_id']}).count() == 0:#TODO: FIX
-                #chunk.append(game['_id'])#TODO: FIX
-                #game_count += 1#TODO: FIX
+            # Is this really slow? Does it need to be fixed? 
+            #if game_stats_col.find({'_id.game_id': game['_id']}).count() == 0:
+            chunk.append(game['_id'])
+            game_count += 1
 
         if len(chunk) > 0:
             summarize_games.delay(chunk, day)

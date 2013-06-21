@@ -706,13 +706,13 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
 
         match = USES_COIN_TOKENS_RE.match(action_taken)
         if match:
-            turn_money += match.group(1)
-            turn_coin_tokens -= match.group(1)
+            turn_money += int(match.group(1))
+            turn_coin_tokens -= int(match.group(1))
             continue
 
         match = RECEIVES_COIN_TOKENS_RE.match(action_taken)
         if match:
-            turn_coin_tokens += match.group(1)
+            turn_coin_tokens += int(match.group(1))
             continue
 
         if KW_PASSES in action_taken:
@@ -750,6 +750,8 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
         if KW_CHOOSES in action_taken:
             if last_play == dominioncards.BandofMisfits and not done_resolving:
                 bom_choice = capture_cards(action_taken)
+            if bom_choice[0] == dominioncards.Knights:
+                bom_choice[0] == dominioncards.SirMartin
             continue
 
         if KW_PIRATE_COIN in action_taken:

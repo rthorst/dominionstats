@@ -87,8 +87,7 @@ def main(parsed_args):
     # Scrape and load the data from goko, proceeding from the
     # previous day backwards, until no games are inserted
     log.info("Starting scrape for raw games")
-    yesterday = datetime.date.today() - datetime.timedelta(days=1)
-    dates = utils.daterange(datetime.date(2010,10,14), yesterday, reverse=True)
+    dates = utils.daterange(datetime.date(2010,10,14), datetime.date.today(), reverse=True)
     for date in dates:
         log.info("Invoking scrape_raw_games async task for %s", date)
         async_result = watch_and_log(background.tasks.scrape_raw_games.s(date))
@@ -108,29 +107,20 @@ def main(parsed_args):
 
     # Check for goals
     log.info("Starting search for goals acheived")
-    dates = utils.daterange(datetime.date(2010,10,14), yesterday, reverse=True)
-    dates = utils.daterange(datetime.date(2013,6,10), yesterday, reverse=True)
+    # Check for game_stats
+    log.info("Starting game_stats summarization")
+    dates = utils.daterange(datetime.date(2010,10,14), datetime.date.today(), reverse=True)
     for date in dates:
         log.info("Invoking calc_goals_for_days async task for %s", date)
         async_result = watch_and_log(background.tasks.calc_goals_for_days.s([date]))
         inserted = async_result.get()
 
+        log.info("Invoking summarize_game_stats_for_days async task for %s", date)
+        async_result = watch_and_log(background.tasks.summarize_game_stats_for_days.s([date]))
         if inserted == 0:
             log.info("No games parsed for goals on %s", date)
             break
 
-    # Check for game_stats
-    log.info("Starting game_stats summarization")
-    dates = utils.daterange(datetime.date(2010,10,14), yesterday, reverse=True)
-    dates = utils.daterange(datetime.date(2013,6,10), yesterday, reverse=True)
-    for date in dates:
-        log.info("Invoking summarize_game_stats_for_days async task for %s", date)
-        async_result = watch_and_log(background.tasks.summarize_game_stats_for_days.s([date]))
-        inserted = async_result.get()
-
-        if inserted == 0:
-            log.info("No new games summarized on %s", date)
-            break
 
     # Invoke the count_buys script
     log.info("Counting buys")

@@ -3,7 +3,7 @@
 
 names = set(['Warlord Bot', 'Warlord Bot I', 'Warlord Bot II', 'Warlord Bot III', 'Villager Bot', 'Villager Bot I', 'Villager Bot II', 'Villager Bot III', 'Banker Bot', 'Banker Bot I', 'Banker Bot II', 'Banker Bot III', 'Village Idiot Bot', 'Village Idiot Bot I', 'Village Idiot Bot II', 'Village Idiot Bot III', 'Lord Bottington', 'Lord Bottington I', 'Lord Bottington II', 'Lord Bottington III', 'Serf Bot', 'Serf Bot I', 'Serf Bot II', 'Serf Bot III', 'Defender Bot', 'Defender Bot I', 'Defender Bot II', 'Defender Bot III', 'Conqueror Bot', 'Conqueror Bot I', 'Conqueror Bot II', 'Conqueror Bot III', #Basic names
     'Alice the Serf', 'Serf Adela', 'Maiden Abigail', 'King Rex', 'Serf Gordon', 'Maiden Marjoria', 'Squire Edwin', 'Queen Vada', 'Distant Cousin', 'Maiden Marie', 'Squire Clayton', 'Lady Sarra', 'Joseph Gelu', 'Overlord Hogan IV', ' Squire Brockton', 'Lady Marigold', 'Gentleman Garrick', 'Concealed Employer', 'Lady Gloriana', 'Gentleman Bradshaw', 'Gentleman Preston', 'Grandmother', #Base Set act 1
-    'Soldier', 'Witch Jezebel', 'Bonificaius', 'Sir Robert', 'Prince Arundel', 'Thief', 'Edith', 'Prince', 'Drusilla', # Manually added
+    'Soldier', 'Witch Jezebel', 'Bonificaius', 'Sir Robert', 'Prince Arundel', 'Thief', 'Edith', 'Prince', 'Drusilla', 'Lord Madison', 'Baroness Paulina', 'Jeeves', 'Torturer',  # Manually added
 'Alice the Serf', # Andrew Iannacone's Script 
 'Captain Althea',
 'Cardwell the Serf',

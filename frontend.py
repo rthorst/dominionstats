@@ -260,7 +260,6 @@ class PlayerPage(object):
                 expansion_dist[ex] += wt
                 expansion_win_points[ex] += wt * wp
 
-
         #TODO: a good choice for a template like jinja2
         ret = standard_heading("CouncilRoom.com: Dominion Stats: %s" % 
                                target_player)
@@ -570,9 +569,6 @@ class SupplyWinApi(object):
         return card_tuples
 
     def fetch_conditional_stats(self, target_inds, interaction_tuples):
-        print 'fetch unconditional stats'
-        print target_inds
-        print interaction_tuples
         db = utils.get_mongo_database()
         card_stats = []
         count_searched = 0
