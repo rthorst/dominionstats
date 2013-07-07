@@ -1,5 +1,9 @@
 #!/usr/bin/python
 
+""" WARNING: THIS MODULE IS DEPRECATED AND IS NO LONGER BEING USED.
+"""
+
+
 import logging
 import logging.handlers
 import os
@@ -17,6 +21,7 @@ find_iso_id = re.compile('game-.*.html')
 find_goko_id = re.compile('log.*.txt')
 
 def process_file(filename, incremental, games_table, log):
+    log.warning("DEPRECATED: DO NOT USE THIS METHOD")
     yyyymmdd = filename[:8]
 
     if incremental:
@@ -56,6 +61,7 @@ def process_file(filename, incremental, games_table, log):
 
 
 def main(args, log):
+    log.warning("DEPRECATED: DO NOT USE THIS METHOD")
 
     if args.incremental:
         log.info("Performing incremental parsing from %s to %s", args.startdate, args.enddate)
