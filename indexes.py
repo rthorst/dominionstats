@@ -7,6 +7,7 @@ import os.path
 import re
 import sys
 
+import dominionstats.utils.log
 import utils
 
 from keys import *
