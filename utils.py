@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
+from datetime import timedelta, datetime, date
 import ConfigParser
 import argparse
-import datetime
 import logging
 import os
 import pymongo
@@ -132,7 +132,7 @@ def daterange(start_date, end_date, reverse=False):
         sequence = reversed(sequence)
 
     for n in sequence:
-        yield start_date + datetime.timedelta(n)
+        yield start_date + timedelta(n)
 
 
 def base_parser():
@@ -154,11 +154,37 @@ def incremental_max_parser():
    parser.add_argument('--max_games', default=-1, type=int)
    return parser
 
-def incremental_date_range_cmd_line_parser():
-    parser = incremental_parser()
+def date_arg_convert(string_input):
+    """ Converts date representation on the command line into a datetime.date
+    """
+    if string_input == 'yesterday':
+        return date.today() - timedelta(days=1)
+    elif string_input.startswith('days-ago'):
+        # Handle arg in format "days-ago-3"
+        try:
+            days_delta = int(string_input[9:])
+            return date.today() - timedelta(days=days_delta)
+        except ValueError:
+            raise argparse.ArgumentTypeError("The 'days-ago-##' syntax requires an integer")
+    else:
+        try:
+            # Try parsing from ISO format
+            return datetime.strptime(string_input, "%Y-%m-%d").date()
+        except ValueError:
+            raise argparse.ArgumentTypeError("Date value '%s' not in ISO 8601 format" % string_input)
+
+def add_date_range_args(parser):
     # 20101015 is the first day with standard turn labels
-    parser.add_argument('--startdate', default='20101015')
-    parser.add_argument('--enddate', default='99999999')
+    parser.add_argument('--start-date', dest='startdate',
+                        default=date(2010, 10, 15),
+                        type=date_arg_convert)
+    parser.add_argument('--end-date', dest='enddate',
+                        default=date.today(),
+                        type=date_arg_convert)
+    return parser
+
+def incremental_date_range_cmd_line_parser():
+    parser = add_date_range_args(incremental_parser())
     parser.add_argument('--passive', action='store_true')
     return parser
 
