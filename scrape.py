@@ -1,6 +1,12 @@
 #!/usr/bin/python
 
-# taken from 
+"""
+NOTE: THIS MODULE IS DEPRECATED AND IS NOT USED IN THE MAIN PROCESSING
+PIPELINE ANY LONGER.
+"""
+
+
+# taken from
 # http://stackoverflow.com/questions/1060279/iterating-through-a-range-of-dates-in-python
 
 import datetime
@@ -19,7 +25,7 @@ import re
 import tarfile
 
 # if the size of the game log is less than this assume we got an error page
-SMALL_FILE_SIZE = 5000 
+SMALL_FILE_SIZE = 5000
 
 default_startdate = datetime.date(2010, 10, 15)
 
@@ -37,7 +43,7 @@ ISO_SOURCE = 7
 
 GOKO_LOG_RE = re.compile('"(log.\w+.\w+.txt)"', re.MULTILINE)
 
-# Councilroom format is more similar to old isotropic format. 
+# Councilroom format is more similar to old isotropic format.
 GOKO_FORMAT = '%(year)d%(month)02d%(day)02d/'
 ISOTROPIC_FORMAT =   '%(year)d%(month)02d/%(day)02d/all.tar.bz2'
 COUNCILROOM_FORMAT = '%(year)d%(month)02d%(day)02d/%(year)d%(month)02d%(day)02d.all.tar.bz2'
@@ -63,7 +69,7 @@ def CouncilroomGamesCollectionUrl(cur_date):
     return host + FormatDate(COUNCILROOM_FORMAT, cur_date)
 
 def RemoveSmallFileIfExists(fn):
-    if (os.path.exists(fn) and 
+    if (os.path.exists(fn) and
         os.stat(fn).st_size <= SMALL_FILE_SIZE):
         print 'removing small existing file', fn
         os.unlink(fn)
@@ -73,7 +79,7 @@ def download_date(str_date, cur_date, saved_games_bundle):
                         (CR_SOURCE, CouncilroomGamesCollectionUrl(cur_date)),
                         (GOKO_SOURCE, GokoGamesCollectionUrl(cur_date)),
                         (ISO_SOURCE, IsotropicGamesCollectionUrl(cur_date))
-                        ] 
+                        ]
 
     for (source, url) in urls_by_priority:
         if DEBUG:
@@ -117,7 +123,7 @@ def bundle_goko_games(cur_date, games, saved_games_bundle):
                 if '<title>403 Forbidden' not in game_text and '<title>404 Not Found' not in game_text:
                     game =  open(cur_game,'a')
                     game.write(game_text)
-                    game.close() 
+                    game.close()
 
                     bundle.add(cur_game)
                     break
@@ -153,7 +159,7 @@ def unzip_date(directory, filename):
 
 def repackage_filename(orig_archive_filename):
     return orig_archive_filename.replace(".all.tar.bz2", ".bz2.tar")
-    
+
 
 def repackage_archive(filename):
     """ Converts a .tar.bz2 file into a .bz2.tar file in the same directory.
@@ -173,18 +179,18 @@ def repackage_archive(filename):
     # Extract the existing file into a temporary folder
     directory_name = tempfile.mkdtemp()
     source_filename = os.path.abspath(filename)
-    
+
     try:
         subprocess.check_call(["tar", "--auto-compress", "-C", directory_name,
                                "-xf", source_filename])
-    except subprocess.CalledProcessError, e:  
+    except subprocess.CalledProcessError, e:
         # Not handling this yet, just re-raise
         logging.warning("Unexpected return from tar >>{msg}<<".format(msg=e.output))
         raise
 
-    # Compress all the game*.html log*txt files. 
-    # Individually, so the argument list doesn't explode from huge numbers of 
-    # goko logs. 
+    # Compress all the game*.html log*txt files.
+    # Individually, so the argument list doesn't explode from huge numbers of
+    # goko logs.
     os.chdir(directory_name)
     game_files = glob.glob("game*.html")+glob.glob("log*.txt")
     dest_filename = repackage_filename(source_filename)
@@ -243,7 +249,7 @@ def scrape_games():
 
     args = parser.parse_args()
     last_month = ''
-    
+
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
     #Goko updates logs in real time; wait a day so the list is finalized.
 
@@ -277,4 +283,4 @@ def scrape_games():
 
 if __name__=='__main__':
     scrape_games()
-                        
+
