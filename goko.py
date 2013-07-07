@@ -237,6 +237,7 @@ class GokoScraper:
                     log.debug("Working on %s", yyyy_mm_dd+'/'+tarinfo.name)
                     g = { u'_id': yyyy_mm_dd+'/'+tarinfo.name,
                           u'game_date': yyyy_mm_dd,
+                          u'src': 'goko',
                           u'text': bson.Binary(bz2.compress(t.extractfile(tarinfo).read())) }
                     self.rawgames_col.save(g, safe=True)
                     insert_count += 1

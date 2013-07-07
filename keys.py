@@ -32,3 +32,4 @@ OUTPOST = '0'
 POSSESSION = 'p'
 PIRATE_TOKENS = '%'
 COIN_TOKENS = 'k'
+SRC = 'F'         # Where the game log came from: 'G' for Goko, missing or 'I' is Isotropic

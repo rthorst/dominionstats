@@ -220,6 +220,7 @@ class IsotropicScraper:
                     log.debug("Working on %s", tarinfo.name)
                     g = { u'_id': tarinfo.name,
                           u'game_date': yyyy_mm_dd,
+                          u'src': 'iso',
                           u'text': bson.Binary(bz2.compress(t.extractfile(tarinfo).read())) }
                     self.rawgames_col.save(g, safe=True)
                     insert_count += 1
