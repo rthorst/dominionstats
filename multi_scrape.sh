@@ -42,7 +42,7 @@ do
     gunzip $x.gz
 done
 
-tar cjf $1.all.tar.bz2 -T _all
+tar cjf $1.tar.bz2 -T _all
 
 
 for x in `cat _all` 

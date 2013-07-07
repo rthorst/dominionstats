@@ -119,7 +119,7 @@ class GokoScraper:
 
     def our_gamelog_filename(self, gamedate):
         """Returns our filename of the rawgame archive for the specified datetime.date"""
-        return '{date.year:04d}{date.month:02d}{date.day:02d}.all.tar.bz2'.format(date=gamedate)
+        return '{date.year:04d}{date.month:02d}{date.day:02d}.tar.bz2'.format(date=gamedate)
 
     def gamelog_local_filename(self,gamedate):
         """Returns the local path to the rawgame archive for the specified datetime.date"""
@@ -127,7 +127,7 @@ class GokoScraper:
 
     def gamelog_s3_keyname(self, gamedate):
         """Returns the S3 keyname for the rawgame archive for the specified datetime.date"""
-        return 'scrape_data/{filename}'.format(filename=self.our_gamelog_filename(gamedate))
+        return 'goko_data/{filename}'.format(filename=self.our_gamelog_filename(gamedate))
 
 
     def goko_rawgame_url(self, gamedate):
@@ -184,7 +184,7 @@ class GokoScraper:
             key.set_contents_from_filename(directory_name+'/'+self.our_gamelog_filename(date),
                                        cb=lambda sent, total: log.info('Transferred %d of %d', sent, total),
                                        replace=False, policy='public-read')
-        shutil.rmtree(directory_name) 
+        shutil.rmtree(directory_name)
 
 
     def get_rawgames_from_s3(self, date):
