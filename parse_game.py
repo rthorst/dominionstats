@@ -322,6 +322,7 @@ def check_game_sanity(game_val, log):
     return True
 
 def main(args, log):
+    log.warning("DEPRECATED: DO NOT USE THIS METHOD")
     BEEN_PARSED_KEY = 'day_analyzed'
 
     if args.incremental:
