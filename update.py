@@ -89,6 +89,9 @@ def main(parsed_args):
     # day backwards, until no games are inserted
     dates = list(utils.daterange(parsed_args.startdate, parsed_args.enddate, reverse=True))
 
+    # TODO: Call indexes.ensure_all_indexes here and remove the random
+    # calls from elsewhere in the codebase.
+
     log.info("Starting scrape for raw games")
     for date in dates:
         log.info("Invoking scrape_raw_games async task for %s", date)
