@@ -1,3 +1,8 @@
+"""
+NOTE: THIS MODULE IS DEPRECATED AND IS NO LONGER USED IN THE MAIN
+PROCESSING PIPELINE.
+"""
+
 import os
 import time
 from datetime import date, timedelta
