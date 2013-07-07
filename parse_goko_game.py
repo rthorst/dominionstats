@@ -996,6 +996,7 @@ def parse_game(game_str, dubious_check = False):
     log_lines = game_str.split('\n')
 
     game_dict = parse_header(log_lines)
+    game_dict[SRC] = 'G'
     # start_decks, players, and supply are now set
 
     validate_names(game_dict, dubious_check)

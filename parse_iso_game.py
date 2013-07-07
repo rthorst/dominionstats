@@ -691,6 +691,7 @@ def parse_game(game_str, dubious_check = False):
     except ValueError, exception:
         raise parse_common.ParsingError('Failed to split sections')
     game_dict = parse_header(header_str)
+    game_dict[SRC] = 'I'
     game_dict[RATING_SYSTEM] = 'isotropic'
     decks = parse_decks(decks_blob)
     game_dict[DECKS] = decks
