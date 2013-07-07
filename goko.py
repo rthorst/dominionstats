@@ -6,23 +6,25 @@
 """Scraping support for Goko.
 """
 
-import boto.s3.connection
-import bson.binary
 import bz2
 import cStringIO
 import datetime
 import io
 import logging
-import sys
-import tarfile
-import urllib2
-
-import utils
 import os
+import os.path
 import shutil
 import subprocess
+import sys
+import tarfile
 import tempfile
 import time
+import urllib2
+
+import boto.s3.connection
+import bson.binary
+
+import utils
 
 
 # Module-level logging instance
@@ -163,6 +165,10 @@ class GokoScraper:
         os.chdir(directory_name)
         str_date = time.strftime("%Y%m%d", date.timetuple())
         try:
+            # TODO: Improve multi_scrape.sh so that it uses puf for
+            # faster downloading, uses a configurable temporary
+            # storage location, and stores the downloaded files in a
+            # date-based subdirectory.
             subprocess.check_call([current_directory + '/multi_scrape.sh', str_date])
         except subprocess.CalledProcessError, e:
             logging.warning("Unexpected return from scraper: {msg}".format(msg=e.output))
@@ -227,17 +233,21 @@ class GokoScraper:
         with tarfile.open(fileobj=rawgames_archive_contents) as t:
             # Figure out how many raw games are in the database,
             # compared with how many are in the tarfile
-            database_count = self.rawgames_col.find({'game_date': yyyy_mm_dd}).count()
+            database_count = self.rawgames_col.find({'game_date': yyyy_mm_dd,
+                                                     'src': 'G'}).count()
             tarfile_count = len(t.getmembers())
-            if tarfile_count <= database_count:
+            if tarfile_count == database_count:
                 log.info("Raw games for %s have already been loaded", yyyy_mm_dd)
             else:
+                log.info("Raw games for %s need to be loaded (%d of %d)", yyyy_mm_dd,
+                         database_count, tarfile_count)
+
                 # Insert all the games
                 for tarinfo in t:
-                    log.debug("Working on %s", yyyy_mm_dd+'/'+tarinfo.name)
-                    g = { u'_id': yyyy_mm_dd+'/'+tarinfo.name,
+                    log.debug("Working on %s", tarinfo.name)
+                    g = { u'_id': os.path.basename(tarinfo.name),
                           u'game_date': yyyy_mm_dd,
-                          u'src': 'goko',
+                          u'src': 'G',
                           u'text': bson.Binary(bz2.compress(t.extractfile(tarinfo).read())) }
                     self.rawgames_col.save(g, safe=True)
                     insert_count += 1

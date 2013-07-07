@@ -210,7 +210,10 @@ class IsotropicScraper:
         with tarfile.open(fileobj=rawgames_archive_contents) as t:
             # Figure out how many raw games are in the database,
             # compared with how many are in the tarfile
-            database_count = self.rawgames_col.find({'game_date': yyyy_mm_dd}).count()
+            database_count = self.rawgames_col.find({'game_date': yyyy_mm_dd,
+                                                     'src': 'I'}).count() + \
+                             self.rawgames_col.find({'game_date': yyyy_mm_dd,
+                                                     'src': None}).count()
             tarfile_count = len(t.getmembers())
             if tarfile_count == database_count:
                 log.info("Raw games for %s have already been loaded", yyyy_mm_dd)
@@ -220,7 +223,7 @@ class IsotropicScraper:
                     log.debug("Working on %s", tarinfo.name)
                     g = { u'_id': tarinfo.name,
                           u'game_date': yyyy_mm_dd,
-                          u'src': 'iso',
+                          u'src': 'I',
                           u'text': bson.Binary(bz2.compress(t.extractfile(tarinfo).read())) }
                     self.rawgames_col.save(g, safe=True)
                     insert_count += 1
