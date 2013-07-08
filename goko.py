@@ -104,6 +104,16 @@ class ScrapeError(Exception):
         return '<scrape error %s>' % self.reason
 
 
+def count_files(opened_tarfile):
+    """ Examine the contents of tarfile and return the count of files
+    """
+    count = 0
+    for tarinfo in opened_tarfile.getmember():
+        if not tarinfo.isfile():
+            count += 1
+    return count
+
+
 class GokoScraper:
     """Implements the functions necessary to scrape data (games, not yet
     leaderboards) from Goko or its related mirrors.
@@ -235,7 +245,9 @@ class GokoScraper:
             # compared with how many are in the tarfile
             database_count = self.rawgames_col.find({'game_date': yyyy_mm_dd,
                                                      'src': 'G'}).count()
-            tarfile_count = len(t.getmembers())
+            # TODO: This has to decompress the full archive.. Maybe we
+            # should just keep track of the day's status in a table?
+            tarfile_count = count_files(t)
             if tarfile_count == database_count:
                 log.info("Raw games for %s have already been loaded", yyyy_mm_dd)
             else:
@@ -243,7 +255,11 @@ class GokoScraper:
                          database_count, tarfile_count)
 
                 # Insert all the games
-                for tarinfo in t:
+                for tarinfo in t.getmembers():
+                    if not tarinfo.isfile():
+                        # Skip non-files
+                        continue
+
                     log.debug("Working on %s", tarinfo.name)
                     g = { u'_id': os.path.basename(tarinfo.name),
                           u'game_date': yyyy_mm_dd,
