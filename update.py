@@ -1,4 +1,4 @@
- #!/usr/bin/python
+#!/usr/bin/python
 
 """Standard update script to keep data up-to-date."""
 
