@@ -120,7 +120,7 @@ def parse_supply(log_lines):
     for card_name in supply_cards_text:
         try:
             card = get_card(card_name)
-        except KeyError, exception:
+        except CardNameError, exception:
             raise parse_common.ParsingError('%s is not a card in the supply!'
                                             % card_name)
         supply_cards.append(card.index)
@@ -130,7 +130,7 @@ def parse_supply(log_lines):
         try:
             bane_card = get_card(bane_match.groups()[0])
             log_lines.pop(0)
-        except KeyError, exception:
+        except CardNameError, exception:
             raise parse_common.ParsingError('%s is not a valid bane!'
                                             % card_name)
     return supply_cards
@@ -215,7 +215,7 @@ def capture_cards(line, return_dict=False):
 
         try: 
             card = get_card(sect)
-        except KeyError, exception:
+        except CardNameError, exception:
             raise parse_common.ParsingError('Failed to find card in line: %s'
                                              % line)
         if return_dict:

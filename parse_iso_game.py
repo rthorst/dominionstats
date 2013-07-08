@@ -120,7 +120,7 @@ def capture_cards(line):
                 continue
             try:
                 card = get_card(maybe_plural)
-            except KeyError, exception:
+            except CardNameError, exception:
                 raise parse_common.ParsingError('Failed to find card in line: %s'
                                                 % line)
             cards.extend([card] * mult)
@@ -288,7 +288,7 @@ def parse_deck(deck_str):
             card_name = card_blob[right_bracket_index + 1:]
             try:
                 card = get_card(card_name)
-            except KeyError, exception:
+            except CardNameError, exception:
                 raise parse_common.ParsingError("Failed to get card. chunk: '%s', card_name: '%s', card_blob: '%s'" % \
                                        (chunk, card_name, card_blob[right_bracket_index - 10:]))
             card_quant = int(card_blob.split()[0])
