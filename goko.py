@@ -108,8 +108,8 @@ def count_files(opened_tarfile):
     """ Examine the contents of tarfile and return the count of files
     """
     count = 0
-    for tarinfo in opened_tarfile.getmember():
-        if not tarinfo.isfile():
+    for tarinfo in opened_tarfile.getmembers():
+        if tarinfo.isfile():
             count += 1
     return count
 
