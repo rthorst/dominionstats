@@ -18,7 +18,7 @@ import pymongo
 import re
 import sys
 
-from dominioncards import get_card, CardEncoder, indexes, index_to_card
+from dominioncards import get_card, CardEncoder, indexes, index_to_card, CardNameError
 from game import Game
 from keys import *
 from utils import segments
