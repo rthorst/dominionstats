@@ -3,52 +3,36 @@
 
 """Parse raw goko game into JSON list of game documents."""
 
-import bz2
-import codecs
 import collections
-import datetime
-import itertools
 import logging
 import logging.handlers
-import multiprocessing
-import os
-import os.path
-import pprint
-import pymongo
 import re
-import sys
 
-from dominioncards import get_card, CardEncoder, indexes, index_to_card, CardNameError
-from game import Game
+from dominioncards import get_card, indexes, index_to_card, CardNameError
 from keys import *
-from utils import segments
 import dominioncards
-import game
-import name_merger
-import simplejson as json
-import utils
 import parse_common
 
-RECEIVES_COIN_TOKENS_RE = re.compile('receives (\d+) coin token')
-USES_COIN_TOKENS_RE = re.compile('uses (\d+) coin token')
+RECEIVES_COIN_TOKENS_RE = re.compile(r'receives (\d+) coin token')
+USES_COIN_TOKENS_RE = re.compile(r'uses (\d+) coin token')
 KW_OVERPAYS = 'overpays for'
 
-RATING_SYSTEM_RE = re.compile('^Rating system: (.*)$')
-GAME_OVER_RE = re.compile('^------------ Game Over ------------$')
-EMPTY_LINE_RE = re.compile('^\s*$')
-ENDGAME_VP_CHIP_RE = re.compile('^.* - victory point chips: (\d+)$')
-ENDGAME_POINTS_RE = re.compile('^.* - total victory points: (-?\d+)$')
-START_TURN_RE = re.compile('^---------- (.*): turn (.*?) (\[possessed\] )?----------$')
-VP_CHIPS_RE = re.compile('receives (\d+) victory point chips')
-HYPHEN_SPLIT_RE = re.compile('^(.*) - (.*)$')
-COMMA_SPLIT_RE = re.compile(', ')
-NUMBER_CARD_RE = re.compile('\s*(\d+) (.*)')
-BANE_RE = re.compile('^Bane card: (.*)$')
-PLAYER_AND_START_DECK_RE = re.compile('^(.*) - starting cards: (.*)$')
-TAKES_COINS_RE = re.compile('takes (\d+) coin')
-RECEIVES_COINS_RE = re.compile('receives (\d+) coin')
-TAKES_ACTIONS_RE = re.compile('takes (\d+) action')
-RECEIVES_ACTIONS_RE = re.compile('receives (\d+) action')
+RATING_SYSTEM_RE = re.compile(r'^Rating system: (.*)$')
+GAME_OVER_RE = re.compile(r'^------------ Game Over ------------$')
+EMPTY_LINE_RE = re.compile(r'^\s*$')
+ENDGAME_VP_CHIP_RE = re.compile(r'^.* - victory point chips: (\d+)$')
+ENDGAME_POINTS_RE = re.compile(r'^.* - total victory points: (-?\d+)$')
+START_TURN_RE = re.compile(r'^---------- (.*): turn (.*?) (\[possessed\] )?----------$')
+VP_CHIPS_RE = re.compile(r'receives (\d+) victory point chips')
+HYPHEN_SPLIT_RE = re.compile(r'^(.*) - (.*)$')
+COMMA_SPLIT_RE = re.compile(r', ')
+NUMBER_CARD_RE = re.compile(r'\s*(\d+) (.*)')
+BANE_RE = re.compile(r'^Bane card: (.*)$')
+PLAYER_AND_START_DECK_RE = re.compile(r'^(.*) - starting cards: (.*)$')
+TAKES_COINS_RE = re.compile(r'takes (\d+) coin')
+RECEIVES_COINS_RE = re.compile(r'receives (\d+) coin')
+TAKES_ACTIONS_RE = re.compile(r'takes (\d+) action')
+RECEIVES_ACTIONS_RE = re.compile(r'receives (\d+) action')
 
 KW_SCHEME_CHOICE = 'Scheme choice: '
 KW_MOVES = 'moves '
@@ -104,7 +88,7 @@ def parse_player_start_decks(log_lines):
     start_decks = []
     start_match = PLAYER_AND_START_DECK_RE.match(log_lines[0])
     while start_match:
-        line=log_lines.pop(0)
+        line = log_lines.pop(0)
         name = start_match.group(1)
         start_deck = indexes(capture_cards(start_match.group(2)))
         start_decks.append({NAME:name, START_DECK:start_deck})
@@ -131,6 +115,7 @@ def parse_supply(log_lines):
             bane_card = get_card(bane_match.groups()[0])
             log_lines.pop(0)
         except CardNameError, exception:
+            # FIXME: This refers to card_name, which probably isn't valid
             raise parse_common.ParsingError('%s is not a valid bane!'
                                             % card_name)
     return supply_cards
@@ -193,7 +178,7 @@ def capture_cards(line, return_dict=False):
     returns: list of the card objects, eg, [Silver, Copper, Copper, Copper]
     """
     for kw in KEYWORDS:
-        line=line.replace(kw, '')
+        line = line.replace(kw, '')
 
 
     if return_dict:
@@ -294,7 +279,7 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
         if (sum([removed_from_supply[c] for c in removed_from_supply.keys() if c.is_ruins()]) == pile_size(dominioncards.Knights, n_players)):
             empty_piles.append(dominioncards.Knights)
 
-        for pile,num in removed_from_supply.items():
+        for pile, num in removed_from_supply.items():
             if pile_size(pile, n_players) == num:
                 empty_piles.append(pile)
         return empty_piles
@@ -321,7 +306,7 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
            RECEIVES: []}
     durations = []
     turn_money = 0
-    turn_coin_tokens = 0
+    turn_coin_tokens = 0  # FIXME: Not referenced
     vp_tokens = 0
     ps_tokens = 0
 
@@ -331,7 +316,7 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
     last_play = None
     harvest_reveal = []
     trashed_to_mercenary = 0
-    current_phase = None
+    current_phase = None  # FIXME: Not referenced
     dup_plays_remaining = -1
     done_self_trashing = False
     bom_plays = 0 # For throne room/procession/KC - don't get to rechoose BoM
@@ -354,7 +339,7 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
             action_counter = 1
             ret[NAME] = turn_start.group(1)
             ret[NUMBER] = int(turn_start.group(2))
-            current_phase = ACTION_PHASE
+            current_phase = ACTION_PHASE  # FIXME: Not referenced
             if turn_start.group(3):
                 ret[POSSESSION] = True
             if previous_name and previous_name not in masq_targets:
@@ -391,7 +376,7 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
 
                 d = opp_turn_info[opp]
                 for k, v in d.iteritems():
-                    if k==VP_TOKENS:
+                    if k == VP_TOKENS:
                         d[k] = v
                     else:
                         d[k] = indexes(v)
@@ -527,7 +512,7 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
                     done_self_trashing = False
 
                 if play.is_treasure():
-                    phase = BUY_PHASE
+                    current_phase = BUY_PHASE  # FIXME: Not referenced
                 elif (last_play == dominioncards.ThroneRoom or 
                         last_play == dominioncards.Procession or 
                         last_play == dominioncards.Golem):
@@ -588,7 +573,7 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
 
             # easier to deal with the on-buy attack by making it a fake play
             if dominioncards.NobleBrigand in buys:
-                last_play == dominioncards.NobleBrigand  
+                last_play = dominioncards.NobleBrigand  
                 done_resolving = False
             continue
 
@@ -691,7 +676,7 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
                     trash_pile.extend(trashed)
 
                 if last_play == dominioncards.Forager and not done_resolving:
-                    turn_money +=sum([d.is_treasure() for d in set(trash_pile)])
+                    turn_money += sum([d.is_treasure() for d in set(trash_pile)])
                     done_resolving = True
 
             else:
@@ -707,12 +692,12 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
         match = USES_COIN_TOKENS_RE.match(action_taken)
         if match:
             turn_money += int(match.group(1))
-            turn_coin_tokens -= int(match.group(1))
+            turn_coin_tokens -= int(match.group(1))  # FIXME: Not referenced
             continue
 
         match = RECEIVES_COIN_TOKENS_RE.match(action_taken)
         if match:
-            turn_coin_tokens += int(match.group(1))
+            turn_coin_tokens += int(match.group(1))  # FIXME: Not referenced
             continue
 
         if KW_PASSES in action_taken:
@@ -751,6 +736,7 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
             if last_play == dominioncards.BandofMisfits and not done_resolving:
                 bom_choice = capture_cards(action_taken)
             if bom_choice[0] == dominioncards.Knights:
+                # FIXME: Following statement has no effect... Should it be "=" instead?
                 bom_choice[0] == dominioncards.SirMartin
             continue
 
@@ -875,8 +861,8 @@ def parse_turns(log_lines, names_list, removed_from_supply):
 
     Starting decks are removed from supply (count supply for city empty piles)
     """
-    turns = [];
-    trash_pile = [];
+    turns = []
+    trash_pile = []
     trade_route_set = set([])
 
     masq_targets = {}
@@ -955,7 +941,7 @@ def parse_endgame(log_lines):
         vp_chip_match = ENDGAME_VP_CHIP_RE.match(line)
         if vp_chip_match:
             vp_tokens = int(vp_chip_match.group(1))
-            line=log_lines.pop(0)
+            line = log_lines.pop(0)
         else:
             vp_tokens = 0
 

@@ -3,49 +3,34 @@
 
 """Parse raw iso game into JSON list of game documents."""
 
-import bz2
-import codecs
 import collections
-import datetime
-import itertools
 import logging
 import logging.handlers
-import multiprocessing
-import os
-import os.path
-import pprint
-import pymongo
 import re
-import sys
 
-from dominioncards import get_card, CardEncoder, indexes, index_to_card, CardNameError
-from game import Game
+from dominioncards import get_card, indexes, CardNameError
 from keys import *
-from utils import segments
 import dominioncards
-import game
 import name_merger
-import simplejson as json
-import utils
 import parse_common
 
-SECTION_SEP = re.compile('^----------------------$', re.MULTILINE)
+SECTION_SEP = re.compile(r'^----------------------$', re.MULTILINE)
 
 NORM_TURN_HEADER_RE = re.compile(
-    "--- (?P<name>.+)'s turn (?P<turn_no>\d+) ---")
+    r"--- (?P<name>.+)'s turn (?P<turn_no>\d+) ---")
 POSS_TURN_HEADER_RE = re.compile(
-    "--- (?P<name>.+)'s turn \(possessed by (?P<pname>.*)\) ---")
+    r"--- (?P<name>.+)'s turn \(possessed by (?P<pname>.*)\) ---")
 OUTPOST_TURN_HEADER_RE = re.compile(
-    "--- (?P<name>.+)'s " + re.escape(
-        "extra turn (from <span class=card-duration>Outpost</span>)"))
+    r"--- (?P<name>.+)'s " + re.escape(
+        r"extra turn (from <span class=card-duration>Outpost</span>)"))
 
-TURN_HEADER_NO_GROUP_RE = re.compile("--- .+'s turn [^-]* ---")
-SPLIT_COMMA_AND_RE = re.compile(',| and ')
-NUMBER_BEFORE_SPAN = re.compile('(\d+) <span')
-NUMBER_COPIES = re.compile('(0|2) copies to')
-GETTING_MONEY_RE = re.compile(' \+\$(\d)+')
-WHICH_IS_WORTH_RE = re.compile(' which is worth \+\$(\d)+')
-FOR_MONEY_RE = re.compile(' for \+\$(\d)+')
+TURN_HEADER_NO_GROUP_RE = re.compile(r"--- .+'s turn [^-]* ---")
+SPLIT_COMMA_AND_RE = re.compile(r',| and ')
+NUMBER_BEFORE_SPAN = re.compile(r'(\d+) <span')
+NUMBER_COPIES = re.compile(r'(0|2) copies to')
+GETTING_MONEY_RE = re.compile(r' \+\$(\d)+')
+WHICH_IS_WORTH_RE = re.compile(r' which is worth \+\$(\d)+')
+FOR_MONEY_RE = re.compile(r' for \+\$(\d)+')
 VP_TOKEN_RE = re.compile(u'(?P<num>\d+) ▼', re.UNICODE)
 
 KW_ANOTHER_ONE = 'another one'
@@ -120,7 +105,7 @@ def capture_cards(line):
                 continue
             try:
                 card = get_card(maybe_plural)
-            except CardNameError, exception:
+            except CardNameError:
                 raise parse_common.ParsingError('Failed to find card in line: %s'
                                                 % line)
             cards.extend([card] * mult)
@@ -133,7 +118,7 @@ def associate_game_with_norm_names(game_dict):
         normed_name = name_merger.norm_name(player_deck[NAME])
         game_dict[PLAYERS].append(normed_name)
 
-ONLY_NUMBERS_RE = re.compile('^\d+$')
+ONLY_NUMBERS_RE = re.compile(r'^\d+$')
 
 def validate_names(decks):
     """ Raise an exception for names that might screw up the parsing.
@@ -181,9 +166,9 @@ def canonicalize_names(turns_str, player_names):
         # can allow for annoying names like 'd' that occur as
         # substrings of regular text.
         match_player_name = re.compile(
-            '(^|[ \(])' +       # start with newline, space, or open paren
+            r'(^|[ \(])' +      # start with newline, space, or open paren
             re.escape(player) + # followed by player name
-            "([ '\)])",         # ending with space or ' or close paren
+            r"([ '\)])",        # ending with space or ' or close paren
             re.MULTILINE)
         def _replace_name_by_label(match):
             """ keep surrounding delims, replace player name with playerX"""
@@ -210,8 +195,8 @@ def parse_header(header_str):
     supply = indexes(capture_cards(supply_str))
     return {GAME_END: indexes(gone), SUPPLY: supply, RESIGNED: resigned}
 
-PLACEMENT_RE = re.compile('#\d (.*)')
-POINTS_RE = re.compile(': (-*\d+) point(s?)(\s|(' + re.escape('</b>') + '))')
+PLACEMENT_RE = re.compile(r'#\d (.*)')
+POINTS_RE = re.compile(r': (-*\d+) point(s?)(\s|(' + re.escape('</b>') + '))')
 
 def make_start_decks(names):
     """ 
@@ -238,8 +223,8 @@ def parse_deck(deck_str):
       """
     try:
         name_vp_list, _opening, deck_contents = deck_str.split('\n')
-    except ValueError, e:
-        raise parse_common,ParsingError('Failed to split the deck')
+    except ValueError:
+        raise parse_common.ParsingError('Failed to split the deck')
     vp_tokens = 0
     #print 'vp', name_vp_list
 
@@ -288,7 +273,7 @@ def parse_deck(deck_str):
             card_name = card_blob[right_bracket_index + 1:]
             try:
                 card = get_card(card_name)
-            except CardNameError, exception:
+            except CardNameError:
                 raise parse_common.ParsingError("Failed to get card. chunk: '%s', card_name: '%s', card_blob: '%s'" % \
                                        (chunk, card_name, card_blob[right_bracket_index - 10:]))
             card_quant = int(card_blob.split()[0])
@@ -302,7 +287,7 @@ def parse_decks(decks_blob):
     deck_blobs = [s for s in decks_blob.split('\n\n') if s]
     return [parse_deck(deck_blob) for deck_blob in deck_blobs]
 
-VETO_RE = re.compile('(.*) vetoes (.*)\.')
+VETO_RE = re.compile(r'(.*) vetoes (.*)\.')
 def parse_vetoes(game_dict, veto_str):
     matches = VETO_RE.findall(veto_str)
     v_dict = {}
@@ -631,7 +616,7 @@ def parse_turn(turn_blob, names_list):
 
         d = opp_turn_info[opp]
         for k, v in d.iteritems():
-            if k==VP_TOKENS:
+            if k == VP_TOKENS:
                 d[k] = v
             else:
                 d[k] = indexes(v)
@@ -658,7 +643,7 @@ def split_turns(turns_blob):
         try:
             parse_turn_header(line)
             turn_texts.append(line + '\n')
-        except parse_common.ParseTurnHeaderError, e:
+        except parse_common.ParseTurnHeaderError:
             turn_texts[-1] += line + '\n'
     return [t for t in turn_texts if t]
 
@@ -688,7 +673,7 @@ def parse_game(game_str, dubious_check = False):
     try:
         split_sects = SECTION_SEP.split(game_str)
         header_str, decks_blob, trash_and_turns = split_sects
-    except ValueError, exception:
+    except ValueError:
         raise parse_common.ParsingError('Failed to split sections')
     game_dict = parse_header(header_str)
     game_dict[SRC] = 'I'

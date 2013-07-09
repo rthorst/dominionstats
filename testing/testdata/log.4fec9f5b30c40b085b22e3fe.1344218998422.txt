@@ -1,0 +1,23 @@
+------------ Game Setup ------------
+supply cards: Secret Chamber, Haven, Loan, Pirate Ship, Explorer, Outpost, Treasury, Venture, Mountebank, Harem, Copper, Silver, Gold, Curse, Estate, Duchy, Province
+DG - starting cards: Estate, Estate, Estate, Copper, Copper, Copper, Copper, Copper, Copper, Copper
+Lord Bottington - starting cards: Estate, Estate, Estate, Copper, Copper, Copper, Copper, Copper, Copper, Copper
+DG - shuffles deck
+Lord Bottington - shuffles deck
+DG - draws Copper, Estate, Estate, Copper, Estate
+Lord Bottington - draws Copper, Copper, Estate, Copper, Copper
+ 
+---------- Lord Bottington: turn 1 ----------
+Lord Bottington - plays 4 Copper
+Lord Bottington - gains Silver
+Lord Bottington - draws Estate, Copper, Copper, Estate, Copper
+ 
+---------- DG: turn 1 ----------
+ 
+------------ Game Over ------------
+DG - cards: 7 Copper, 3 Estate
+DG - victory point chips: 0
+DG - total victory points: 3
+Lord Bottington - cards: 7 Copper, 1 Silver, 3 Estate
+Lord Bottington - victory point chips: 0
+Lord Bottington - total victory points: 3

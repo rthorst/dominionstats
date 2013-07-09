@@ -1798,6 +1798,9 @@ class ParseGokoGameTest(unittest.TestCase):
         assert_equal_card_lists(parsed_game[DECKS][0][TURNS][4][OPP]['0'][GAINS], ["Gold", "Gold", "Gold"])
         assert_equal_card_lists(parsed_game[DECKS][0][TURNS][4][OPP]['0'][TRASHES], ["Copper"])
         
+    def test_goko_Old_Format(self):
+        game_contents = codecs.open('testing/testdata/log.4fec9f5b30c40b085b22e3fe.1344218998422.txt', encoding='utf-8').read()
+        self.assertRaises(parse_common.ParsingError, parse_game.parse_game, game_contents)
 
 
 class ParseIsoGameTest(unittest.TestCase):

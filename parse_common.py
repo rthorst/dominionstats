@@ -5,73 +5,31 @@
 Low-level functionality that isn't implementation-specific.
 Called from parse_goko_game and parse_iso_game."""
 
-import bz2
-import codecs
-import collections
-import datetime
-import itertools
 import logging
 import logging.handlers
-import multiprocessing
-import os
-import os.path
-import pprint
-import pymongo
 import re
-import sys
 
-from dominioncards import get_card, CardEncoder, indexes, index_to_card
-from game import Game
 from keys import *
-from utils import segments
 import dominioncards
-import game
-import name_merger
-import simplejson as json
-import utils
 
 class BogusGameError(Exception):
     """ Exception for a degenerate game that should not be
     parsed. These are common, and by design, so they should not be
     logged except in debug mode.
     """
-    def __init__(self, reason):
-        Exception.__init__(self)
-        self.reason = reason
-
-    def __str__(self):
-        return repr(self)
-
-    def __repr__(self):
-        return 'BogusGameError %s' % self.reason
-
+    pass
 
 class ParsingError(Exception):
     """ Exception for a game that cannot be parsed.
     """
-    def __init__(self, reason):
-        Exception.__init__(self)
-        self.reason = reason
-
-    def __str__(self):
-        return repr(self)
-
-    def __repr__(self):
-        return 'ParsingError %s' % self.reason
+    pass
 
 class ParseTurnHeaderError(Exception):
     """ Exception for a game where a turn header cannot be parsed.
     """
-    def __init__(self, line):
-        self.line = line
+    pass
 
-    def __str__(self):
-        return repr(self)
-
-    def __repr__(self):
-        return 'ParseTurnHeaderError %s' % self.line
-
-PLAYER_IND_RE = re.compile('player(?P<num>\d+)')
+PLAYER_IND_RE = re.compile(r'player(?P<num>\d+)')
 
 def _player_label(ind):
     return 'player' + str(ind)

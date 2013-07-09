@@ -1,37 +1,25 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-"""Parse raw game into JSON list of game documents.
+"""Parse raw game into parsed game documents.
 High-level functionality that isn't implementation-specific.
 Calls parse_goko_game and parse_iso_game."""
 
 import bz2
-import codecs
 import collections
 import datetime
-import itertools
 import logging
 import logging.handlers
-import multiprocessing
-import os
-import os.path
-import pprint
-import pymongo
 import re
 import sys
 
-from dominioncards import get_card, CardEncoder, indexes, index_to_card
+from dominioncards import index_to_card
 from game import Game
 from keys import *
-from utils import segments
-import dominioncards
-import game
-import name_merger
-import simplejson as json
-import utils
 import parse_iso_game
 import parse_goko_game
 import parse_common
+
 
 KEYWORDS = [locals()[w] for w in dict(locals()) if w.startswith('KW_')]
 
@@ -54,8 +42,8 @@ def assign_win_points(game_dict):
         player[WIN_POINTS] = win_points if player in winners else 0.0
 
 
-GOKO_LOG_RE = re.compile("^------------ Game Setup ------------",re.MULTILINE)
-ISO_LOG_RE = re.compile("^<html><head>",re.MULTILINE)
+GOKO_LOG_RE = re.compile(r"^------------ Game Setup ------------", re.MULTILINE)
+ISO_LOG_RE = re.compile(r"^<html><head>", re.MULTILINE)
 
 def parse_game(game_str, dubious_check = False):
     """ Parse game_str into game dictionary
@@ -77,11 +65,18 @@ def parse_game(game_str, dubious_check = False):
       rating_type: how the game was rated. 
     """
 
-    if ISO_LOG_RE.match(game_str):
-        game_dict = parse_iso_game.parse_game(game_str, dubious_check)
-    elif GOKO_LOG_RE.match(game_str):
-        game_dict = parse_goko_game.parse_game(game_str, dubious_check)
-        
+    try:
+        if ISO_LOG_RE.match(game_str):
+            game_dict = parse_iso_game.parse_game(game_str, dubious_check)
+        elif GOKO_LOG_RE.match(game_str):
+            game_dict = parse_goko_game.parse_game(game_str, dubious_check)
+    except (parse_common.BogusGameError, parse_common.ParsingError,
+            parse_common.ParseTurnHeaderError):
+        # These are anticipated, and should just be passed upwards
+        raise
+    except:
+        # Unexpected exception
+        raise parse_common.ParsingError("Unexpected exception while parsing: %s" % sys.exc_info()[0])
 
     assign_win_points(game_dict)
     if dubious_check and Game(game_dict).dubious_quality():
@@ -98,7 +93,7 @@ def save_parse_error(parse_error_col, log, game, message):
                    }
     try:
         parse_error_col.save(parse_error, safe=True, check_keys=True)
-    except Exception, e:
+    except Exception:
         log.exception("Got exception on trying to save parsing error for game %s", game['_id'])
 
 
@@ -110,67 +105,23 @@ def parse_game_from_dict(log, parse_error_col, game):
         log.debug('%s is empty game', game['_id'])
         return None
     if '<b>game aborted' in contents:
-        log.debug('%s is aborted game', game['_id'])
+        log.warning('%s is aborted game', game['_id'])
         return None
     if '<title>403 Forbidden' in contents or '<title>404 Not Found' in contents:
-        log.debug('%s mis-downloaded game', game['_id'])
+        log.warning('%s mis-downloaded game', game['_id'])
         return None
     try:
         parsed = parse_game(contents, dubious_check = True)
         parsed['_id'] = game['_id']
         parsed['game_date'] = game['game_date']
         return parsed
-    except parse_common.BogusGameError, bogus_game_exception:
-        log.debug('%s got BogusGameError: %s', game['_id'],
-                  bogus_game_exception.reason)
-        return None
-    except parse_common.ParsingError, pe:
-        log.warning('%s got ParsingError: %s', game['_id'], pe.reason)
-        save_parse_error(parse_error_col, log, game, pe)
-        return None
-    except parse_common.ParseTurnHeaderError, p:
-        log.warning('%s got ParseTurnHeaderError: %s', game['_id'], p)
-        save_parse_error(parse_error_col, log, game, p)
-        return None
-    except AssertionError, e:
-        log.warning('%s got AssertionError: %s', game['_id'], e)
-        save_parse_error(parse_error_col, log, game, e)
-        return None
-
-def outer_parse_game(filename):
-    """ Parse game from filename. """
-    contents = codecs.open(filename, 'r', encoding='utf-8').read()
-
-    if not contents:
-        # print 'empty game'
-        return None
-    if '<b>game aborted' in contents:
-        # print 'skipping aborted game', filename
-        return None
-    if '<title>403 Forbidden' in contents or '<title>404 Not Found' in contents:
-        return None
-    try:
-        parsed = parse_game(contents, dubious_check = True)
-        parsed['_id'] = filename.split('/')[-1]
-        return parsed
-    except parse_common.BogusGameError, bogus_game_exception:
-        # print 'skipped', filename, 'because', bogus_game_exception.reason
-        return None
-    except parse_common.ParseTurnHeaderError, p:
-        print 'parse turn header error', p, filename
-    except AssertionError, e:
-        print filename
-        raise e
-
-def dump_segment(arg_tuple):
-    """ Write a json serialized version of games to to name determined by
-    arg tuple.  arg_tuple is in this annoying format for compatibility with
-    multiprocessing.pool.map.
-    """
-    idx, year_month_day, segment = arg_tuple
-    out_name = 'parsed_out/%s-%d.json' % (year_month_day, idx)
-    json.dump(segment, open(out_name, 'w'), sort_keys=True, cls=CardEncoder, skipkeys=True)
-
+    except parse_common.BogusGameError as bge:
+        log.debug('%s got %s', game['_id'], bge)
+    except (parse_common.ParsingError, parse_common.ParseTurnHeaderError,
+            AssertionError) as ex:
+        log.warning('%s got %s', game['_id'], ex)
+        save_parse_error(parse_error_col, log, game, str(ex))
+    return None
 
 def parse_and_insert(log, raw_games, games_col, parse_error_col, year_month_day):
     """ Parse the list of games and insert them into the MongoDB.
@@ -193,50 +144,11 @@ def parse_and_insert(log, raw_games, games_col, parse_error_col, year_month_day)
     for game in parsed_games:
         try:
             games_col.save(game, safe=True, check_keys=True)
-        except Exception, e:
+        except Exception:
             log.exception("Got exception on trying to insert parsed game %s", game['_id'])
 
     return len(parsed_games)
 
-
-def convert_to_json(log, raw_games, year_month_day, game_list=None):
-    """ Parse the games in for given year_month_day and output them
-    into split local files.  Each local file should contain 4000 games or
-    less, and be smaller than 16 MB, for easy import into mongodb.
-
-    year_month_day: string in yyyymmdd format encoding date
-    games_to_parse: if given, use these games rather than all files in dir.
-    """
-    if game_list is None:
-        games_to_parse = raw_games.find({'game_date': year_month_day})
-    else:
-        # TODO: Enhance this to accept a list of games
-        log.warning("covert_to_json not able to parse subset of games, parsing the full day")
-        games_to_parse = raw_games.find({'game_date': year_month_day})
-
-    if games_to_parse.count() < 1:
-        log.info('no games to parse in %s', year_month_day)
-        return
-    else:
-        log.info('%s games to parse in %s', games_to_parse.count(), year_month_day)
-
-    # TODO: Temporarily commented out the Pool-based implementation
-    #pool = multiprocessing.Pool()
-    #parsed_games = pool.map(outer_parse_game, games_to_parse, chunksize=50)
-    parsed_games = map(lambda x: parse_game_from_dict(log, x), games_to_parse)
-    log.debug('%s before filtering %s', year_month_day, len(parsed_games))
-    parsed_games = [x for x in parsed_games if x]
-
-    track_brokenness(log, parsed_games)
-
-    log.debug('%s after filtering %s', year_month_day, len(parsed_games))
-
-    game_segments = list(segments(parsed_games, 4000))
-    labelled_segments = [(i, year_month_day, c) for i, c in
-                         enumerate(game_segments)]
-    #pool.map(dump_segment, labelled_segments)
-    map(dump_segment, labelled_segments)
-    #pool.close()
 
 def track_brokenness(log, parse_error_col, parsed_games):
     """Print some summary statistics about cards that cause bad parses."""
@@ -244,7 +156,7 @@ def track_brokenness(log, parse_error_col, parsed_games):
     wrongness = collections.defaultdict(int)
     overall = collections.defaultdict(int)
     for raw_game in parsed_games:
-        accurately_parsed = check_game_sanity(game.Game(raw_game), log)
+        accurately_parsed = check_game_sanity(Game(raw_game), log)
         if not accurately_parsed:
             log.warning('Failed to accurately parse game %s', raw_game['_id'])
             save_parse_error(parse_error_col, log, raw_game, 'check_game_sanity failed')
@@ -264,10 +176,6 @@ def track_brokenness(log, parse_error_col, parsed_games):
     else:
         log.debug('Perfect parsing, %d games!', len(parsed_games))
 
-def parse_game_from_file(filename):
-    """ Return a parsed version of a given filename. """
-    contents = codecs.open(filename, 'r', encoding='utf-8').read()
-    return parse_game(contents, dubious_check = True)
 
 __problem_deck_index__ = 0
 def check_game_sanity(game_val, log):
@@ -316,88 +224,7 @@ def check_game_sanity(game_val, log):
                 try:
                     log.debug('[%d] insane game for %s %s: %s', __problem_deck_index__, player_deck.name(), game_val.get_id(),
                               ' '.join(map(str, game_val.get_supply())))
-                except UnicodeEncodeError, e:
-                    None
+                except UnicodeEncodeError:
+                    pass
                 return False
     return True
-
-def main(args, log):
-    log.warning("DEPRECATED: DO NOT USE THIS METHOD")
-    BEEN_PARSED_KEY = 'day_analyzed'
-
-    if args.incremental:
-        log.info("Performing incremental parsing from %s to %s", args.startdate, args.enddate)
-    else:
-        log.info("Performing non-incremental (re)parsing from %s to %s", args.startdate, args.enddate)
-
-    connection = pymongo.Connection()
-    db = connection.test
-    raw_games = db.raw_games
-    raw_games.ensure_index('game_date')
-
-    utils.ensure_exists('parsed_out')
-
-    day_status_col = db.day_status
-    days = day_status_col.find({'raw_games_loaded': True})
-
-    for day in days:
-        year_month_day = day['_id']
-
-        if not utils.includes_day(args, year_month_day):
-            log.debug("Raw games for %s available in the database but not in date range, skipping", year_month_day)
-            continue
-
-        if BEEN_PARSED_KEY not in day:
-            day[BEEN_PARSED_KEY] = False
-            day_status_col.save(day)
-
-        if day[BEEN_PARSED_KEY] and args.incremental:
-            log.debug("Raw games for %s have been parsed, and we're running incrementally, skipping", year_month_day)
-            continue
-
-        try:
-            log.info("Parsing %s", year_month_day)
-            convert_to_json(log, raw_games, year_month_day)
-            continue
-            day[BEEN_PARSED_KEY] = True
-            day_status_col.save(day)
-        except ParseTurnHeaderError, e:
-            log.error("ParseTurnHeaderError occurred while parsing %s: %s", year_month_day, e)
-            return
-        except Exception, e:
-            log.error("Exception occurred while parsing %s: %s", year_month_day, e)
-            return
-
-
-if __name__ == '__main__':
-    args = utils.incremental_date_range_cmd_line_parser().parse_args()
-
-    script_root = os.path.splitext(sys.argv[0])[0]
-
-    # Create the basic logger
-    #logging.basicConfig()
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
-
-    # Log to a file
-    fh = logging.handlers.TimedRotatingFileHandler(script_root + '.log', when='midnight')
-    if args.debug:
-        fh.setLevel(logging.DEBUG)
-    else:
-        fh.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
-    fh.setFormatter(formatter)
-    logger.addHandler(fh)
-
-    # Put logging output on stdout, too
-    ch = logging.StreamHandler(sys.stdout)
-    if args.debug:
-        ch.setLevel(logging.DEBUG)
-    else:
-        ch.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
-
-    main(args, logger)
-
