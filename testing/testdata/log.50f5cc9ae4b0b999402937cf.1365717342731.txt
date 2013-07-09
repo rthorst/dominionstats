@@ -1,0 +1,478 @@
+------------ Game Setup ------------
+Supply cards: Chancellor, Village, Workshop, Feast, Moneylender, Remodel, Throne Room, Festival, Laboratory, Witch, Copper, Silver, Gold, Estate, Duchy, Province, Curse
+Art Fey - starting cards: Copper, Copper, Copper, Copper, Copper, Copper, Copper, Estate, Estate, Estate
+Gentleman Keaton - starting cards: Copper, Copper, Copper, Copper, Copper, Copper, Copper, Estate, Estate, Estate
+Art Fey - shuffles deck
+Gentleman Keaton - shuffles deck
+Art Fey - draws Estate, Copper, Estate, Copper, Copper
+Gentleman Keaton - draws Copper, Copper, Estate, Copper, Copper
+ 
+---------- Art Fey: turn 1 ----------
+Art Fey - plays 3 Copper
+Art Fey - buys Workshop
+Art Fey - gains Workshop
+Art Fey - draws Copper, Copper, Estate, Copper, Copper
+ 
+---------- Gentleman Keaton: turn 1 ----------
+Gentleman Keaton - plays 4 Copper
+Gentleman Keaton - buys Moneylender
+Gentleman Keaton - gains Moneylender
+Gentleman Keaton - draws Copper, Estate, Copper, Copper, Estate
+ 
+---------- Art Fey: turn 2 ----------
+Art Fey - plays 4 Copper
+Art Fey - buys Moneylender
+Art Fey - gains Moneylender
+Art Fey - shuffles deck
+Art Fey - draws Moneylender, Workshop, Copper, Copper, Estate
+ 
+---------- Gentleman Keaton: turn 2 ----------
+Gentleman Keaton - plays 3 Copper
+Gentleman Keaton - buys Silver
+Gentleman Keaton - gains Silver
+Gentleman Keaton - shuffles deck
+Gentleman Keaton - draws Copper, Estate, Copper, Estate, Estate
+ 
+---------- Art Fey: turn 3 ----------
+Art Fey - plays Moneylender
+Art Fey - trashes Copper
+Art Fey - plays 1 Copper
+Art Fey - buys Silver
+Art Fey - gains Silver
+Art Fey - draws Copper, Copper, Copper, Estate, Copper
+ 
+---------- Gentleman Keaton: turn 3 ----------
+Gentleman Keaton - plays 2 Copper
+Gentleman Keaton - draws Moneylender, Copper, Copper, Silver, Copper
+ 
+---------- Art Fey: turn 4 ----------
+Art Fey - plays 4 Copper
+Art Fey - buys Feast
+Art Fey - gains Feast
+Art Fey - draws Copper, Estate
+Art Fey - shuffles deck
+Art Fey - draws Estate, Workshop, Copper
+ 
+---------- Gentleman Keaton: turn 4 ----------
+Gentleman Keaton - plays Moneylender
+Gentleman Keaton - trashes Copper
+Gentleman Keaton - plays 2 Copper, 1 Silver
+Gentleman Keaton - buys Gold
+Gentleman Keaton - gains Gold
+Gentleman Keaton - draws Copper, Copper
+Gentleman Keaton - shuffles deck
+Gentleman Keaton - draws Copper, Estate, Moneylender
+ 
+---------- Art Fey: turn 5 ----------
+Art Fey - plays Workshop
+Art Fey - gains Feast
+Art Fey - plays 2 Copper
+Art Fey - buys Estate
+Art Fey - gains Estate
+Art Fey - draws Copper, Copper, Copper, Silver, Feast
+ 
+---------- Gentleman Keaton: turn 5 ----------
+Gentleman Keaton - plays Moneylender
+Gentleman Keaton - trashes Copper
+Gentleman Keaton - plays 2 Copper
+Gentleman Keaton - buys Witch
+Gentleman Keaton - gains Witch
+Gentleman Keaton - draws Copper, Silver, Gold, Estate, Copper
+ 
+---------- Art Fey: turn 6 ----------
+Art Fey - plays Feast
+Art Fey - trashes Feast
+Art Fey - gains Throne Room
+Art Fey - plays 3 Copper, 1 Silver
+Art Fey - buys Festival
+Art Fey - gains Festival
+Art Fey - draws Moneylender, Estate, Copper
+Art Fey - shuffles deck
+Art Fey - draws Estate, Estate
+ 
+---------- Gentleman Keaton: turn 6 ----------
+Gentleman Keaton - plays 2 Copper, 1 Silver, 1 Gold
+Gentleman Keaton - buys Gold
+Gentleman Keaton - gains Gold
+Gentleman Keaton - draws Estate, Copper
+Gentleman Keaton - shuffles deck
+Gentleman Keaton - draws Copper, Copper, Moneylender
+ 
+---------- Art Fey: turn 7 ----------
+Art Fey - plays Moneylender
+Art Fey - trashes Copper
+Art Fey - buys Silver
+Art Fey - gains Silver
+Art Fey - draws Copper, Copper, Festival, Estate, Copper
+ 
+---------- Gentleman Keaton: turn 7 ----------
+Gentleman Keaton - plays Moneylender
+Gentleman Keaton - trashes Copper
+Gentleman Keaton - plays 2 Copper
+Gentleman Keaton - buys Witch
+Gentleman Keaton - gains Witch
+Gentleman Keaton - draws Silver, Copper, Estate, Gold, Witch
+ 
+---------- Art Fey: turn 8 ----------
+Art Fey - plays Festival
+Art Fey - plays 3 Copper
+Art Fey - buys Witch
+Art Fey - gains Witch
+Art Fey - draws Feast, Silver, Throne Room, Copper, Copper
+ 
+---------- Gentleman Keaton: turn 8 ----------
+Gentleman Keaton - plays Witch
+Gentleman Keaton - draws Estate, Copper
+Art Fey - gains Curse
+Gentleman Keaton - plays 2 Copper, 1 Silver, 1 Gold
+Gentleman Keaton - buys Gold
+Gentleman Keaton - gains Gold
+Gentleman Keaton - draws Gold
+Gentleman Keaton - shuffles deck
+Gentleman Keaton - draws Estate, Copper, Copper, Witch
+ 
+---------- Art Fey: turn 9 ----------
+Art Fey - plays Throne Room
+Art Fey - plays Feast
+Art Fey - trashes Feast
+Art Fey - gains Remodel
+Art Fey - plays Feast
+Art Fey - trashes Feast
+Art Fey - gains Feast
+Art Fey - plays 2 Copper, 1 Silver
+Art Fey - buys Silver
+Art Fey - gains Silver
+Art Fey - draws Workshop
+Art Fey - shuffles deck
+Art Fey - draws Estate, Festival, Copper, Witch
+ 
+---------- Gentleman Keaton: turn 9 ----------
+Gentleman Keaton - plays Witch
+Gentleman Keaton - draws Silver, Estate
+Art Fey - gains Curse
+Gentleman Keaton - plays 2 Copper, 1 Gold, 1 Silver
+Gentleman Keaton - buys Gold
+Gentleman Keaton - gains Gold
+Gentleman Keaton - draws Copper, Moneylender, Witch, Gold, Copper
+ 
+---------- Art Fey: turn 10 ----------
+Art Fey - plays Festival
+Art Fey - plays Witch
+Art Fey - draws Silver, Moneylender
+Gentleman Keaton - gains Curse
+Art Fey - plays Moneylender
+Art Fey - trashes Copper
+Art Fey - plays 1 Silver
+Art Fey - buys Gold
+Art Fey - gains Gold
+Art Fey - draws Copper, Feast, Throne Room, Estate, Curse
+ 
+---------- Gentleman Keaton: turn 10 ----------
+Gentleman Keaton - plays Witch
+Gentleman Keaton - draws Gold, Estate
+Art Fey - gains Curse
+Gentleman Keaton - plays 2 Copper, 2 Gold
+Gentleman Keaton - buys Province
+Gentleman Keaton - gains Province
+Gentleman Keaton - shuffles deck
+Gentleman Keaton - draws Witch, Gold, Province, Estate, Estate
+ 
+---------- Art Fey: turn 11 ----------
+Art Fey - plays Throne Room
+Art Fey - plays Feast
+Art Fey - trashes Feast
+Art Fey - gains Festival
+Art Fey - plays Feast
+Art Fey - trashes Feast
+Art Fey - gains Laboratory
+Art Fey - draws Copper, Copper, Estate, Silver, Remodel
+ 
+---------- Gentleman Keaton: turn 11 ----------
+Gentleman Keaton - plays Witch
+Gentleman Keaton - draws Estate, Copper
+Art Fey - gains Curse
+Gentleman Keaton - plays 1 Gold, 1 Copper
+Gentleman Keaton - buys Throne Room
+Gentleman Keaton - gains Throne Room
+Gentleman Keaton - draws Copper, Witch, Copper, Silver, Copper
+ 
+---------- Art Fey: turn 12 ----------
+Art Fey - plays Remodel
+Art Fey - trashes Silver
+Art Fey - gains Laboratory
+Art Fey - plays 2 Copper
+Art Fey - buys Estate
+Art Fey - gains Estate
+Art Fey - draws Silver, Estate, Copper
+Art Fey - shuffles deck
+Art Fey - draws Curse, Curse
+ 
+---------- Gentleman Keaton: turn 12 ----------
+Gentleman Keaton - plays Witch
+Gentleman Keaton - draws Gold, Gold
+Art Fey - gains Curse
+Gentleman Keaton - plays 3 Copper, 2 Gold, 1 Silver
+Gentleman Keaton - buys Province
+Gentleman Keaton - gains Province
+Gentleman Keaton - draws Gold, Curse, Moneylender
+Gentleman Keaton - shuffles deck
+Gentleman Keaton - draws Copper, Estate
+ 
+---------- Art Fey: turn 13 ----------
+Art Fey - plays 1 Silver, 1 Copper
+Art Fey - buys Silver
+Art Fey - gains Silver
+Art Fey - draws Copper, Festival, Remodel, Laboratory, Estate
+ 
+---------- Gentleman Keaton: turn 13 ----------
+Gentleman Keaton - plays Moneylender
+Gentleman Keaton - trashes Copper
+Gentleman Keaton - plays 1 Gold
+Gentleman Keaton - buys Gold
+Gentleman Keaton - gains Gold
+Gentleman Keaton - draws Estate, Throne Room, Witch, Gold, Silver
+ 
+---------- Art Fey: turn 14 ----------
+Art Fey - plays Laboratory
+Art Fey - draws Estate, Silver
+Art Fey - plays Festival
+Art Fey - plays Remodel
+Art Fey - trashes Estate
+Art Fey - gains Feast
+Art Fey - plays 1 Copper, 1 Silver
+Art Fey - buys Festival
+Art Fey - gains Festival
+Art Fey - draws Estate, Curse, Estate, Workshop, Moneylender
+ 
+---------- Gentleman Keaton: turn 14 ----------
+Gentleman Keaton - plays Throne Room
+Gentleman Keaton - plays Witch
+Gentleman Keaton - draws Copper, Copper
+Art Fey - gains Curse
+Gentleman Keaton - plays Witch
+Gentleman Keaton - draws Province, Gold
+Art Fey - gains Curse
+Gentleman Keaton - plays 2 Gold, 2 Copper, 1 Silver
+Gentleman Keaton - buys Province
+Gentleman Keaton - gains Province
+Gentleman Keaton - draws Witch, Province, Gold, Copper, Estate
+ 
+---------- Art Fey: turn 15 ----------
+Art Fey - plays Workshop
+Art Fey - gains Throne Room
+Art Fey - draws Festival, Copper, Gold, Copper, Witch
+ 
+---------- Gentleman Keaton: turn 15 ----------
+Gentleman Keaton - plays Witch
+Gentleman Keaton - shuffles deck
+Gentleman Keaton - draws Gold, Gold
+Art Fey - gains Curse
+Gentleman Keaton - plays 3 Gold, 1 Copper
+Gentleman Keaton - buys Province
+Gentleman Keaton - gains Province
+Gentleman Keaton - draws Copper, Moneylender, Witch, Province, Estate
+ 
+---------- Art Fey: turn 16 ----------
+Art Fey - plays Festival
+Art Fey - plays Witch
+Art Fey - draws Laboratory, Curse
+Gentleman Keaton - gains Curse
+Art Fey - plays Laboratory
+Art Fey - draws Throne Room
+Art Fey - shuffles deck
+Art Fey - draws Silver
+Art Fey - plays 2 Copper, 1 Gold, 1 Silver
+Art Fey - buys Gold
+Art Fey - gains Gold
+Art Fey - buys Village
+Art Fey - gains Village
+Art Fey - draws Copper, Curse, Festival, Remodel, Throne Room
+ 
+---------- Gentleman Keaton: turn 16 ----------
+Gentleman Keaton - plays Moneylender
+Gentleman Keaton - trashes Copper
+Gentleman Keaton - buys Village
+Gentleman Keaton - gains Village
+Gentleman Keaton - draws Throne Room, Gold, Silver, Estate, Gold
+ 
+---------- Art Fey: turn 17 ----------
+Art Fey - plays Festival
+Art Fey - plays Throne Room
+Art Fey - plays Remodel
+Art Fey - trashes Curse
+Art Fey - gains Estate
+Art Fey - plays Remodel
+Art Fey - trashes Copper
+Art Fey - gains Estate
+Art Fey - buys Estate
+Art Fey - gains Estate
+Art Fey - draws Estate, Silver, Curse, Curse, Curse
+ 
+---------- Gentleman Keaton: turn 17 ----------
+Gentleman Keaton - plays 2 Gold, 1 Silver
+Gentleman Keaton - buys Province
+Gentleman Keaton - gains Province
+Gentleman Keaton - draws Copper, Curse, Province
+Gentleman Keaton - shuffles deck
+Gentleman Keaton - draws Gold, Curse
+ 
+---------- Art Fey: turn 18 ----------
+Art Fey - plays 1 Silver
+Art Fey - buys Estate
+Art Fey - gains Estate
+Art Fey - draws Estate, Curse, Curse, Laboratory, Silver
+ 
+---------- Gentleman Keaton: turn 18 ----------
+Gentleman Keaton - plays 1 Copper, 1 Gold
+Gentleman Keaton - buys Throne Room
+Gentleman Keaton - gains Throne Room
+Gentleman Keaton - draws Throne Room, Gold, Witch, Estate, Province
+ 
+---------- Art Fey: turn 19 ----------
+Art Fey - plays Laboratory
+Art Fey - draws Estate, Feast
+Art Fey - plays Feast
+Art Fey - trashes Feast
+Art Fey - gains Duchy
+Art Fey - plays 1 Silver
+Art Fey - buys Estate
+Art Fey - gains Estate
+Art Fey - draws Copper, Workshop, Festival, Curse, Estate
+ 
+---------- Gentleman Keaton: turn 19 ----------
+Gentleman Keaton - plays Throne Room
+Gentleman Keaton - plays Witch
+Gentleman Keaton - draws Gold, Gold
+Gentleman Keaton - plays Witch
+Gentleman Keaton - draws Gold, Estate
+Gentleman Keaton - plays 4 Gold
+Gentleman Keaton - buys Province
+Gentleman Keaton - gains Province
+Gentleman Keaton - draws Province, Province, Province, Estate, Village
+ 
+---------- Art Fey: turn 20 ----------
+Art Fey - plays Festival
+Art Fey - plays Workshop
+Art Fey - gains Feast
+Art Fey - plays 1 Copper
+Art Fey - buys Silver
+Art Fey - gains Silver
+Art Fey - draws Moneylender
+Art Fey - shuffles deck
+Art Fey - draws Estate, Estate, Curse, Estate
+ 
+---------- Gentleman Keaton: turn 20 ----------
+Gentleman Keaton - plays Village
+Gentleman Keaton - draws Witch
+Gentleman Keaton - plays Witch
+Gentleman Keaton - draws Copper, Silver
+Gentleman Keaton - plays 1 Copper, 1 Silver
+Gentleman Keaton - buys Silver
+Gentleman Keaton - gains Silver
+Gentleman Keaton - draws Moneylender
+Gentleman Keaton - shuffles deck
+Gentleman Keaton - draws Witch, Province, Province, Gold
+ 
+---------- Art Fey: turn 21 ----------
+Art Fey - draws Estate, Remodel, Laboratory, Silver, Silver
+ 
+---------- Gentleman Keaton: turn 21 ----------
+Gentleman Keaton - plays Witch
+Gentleman Keaton - draws Estate, Copper
+Gentleman Keaton - plays 1 Gold, 1 Copper
+Gentleman Keaton - buys Remodel
+Gentleman Keaton - gains Remodel
+Gentleman Keaton - draws Gold, Gold, Estate, Copper, Estate
+ 
+---------- Art Fey: turn 22 ----------
+Art Fey - plays Laboratory
+Art Fey - draws Festival, Curse
+Art Fey - plays Festival
+Art Fey - plays Remodel
+Art Fey - trashes Curse
+Art Fey - gains Estate
+Art Fey - plays 2 Silver
+Art Fey - buys Gold
+Art Fey - gains Gold
+Art Fey - draws Silver, Estate, Village, Laboratory, Estate
+ 
+---------- Gentleman Keaton: turn 22 ----------
+Gentleman Keaton - plays 2 Gold, 1 Copper
+Gentleman Keaton - buys Duchy
+Gentleman Keaton - gains Duchy
+Gentleman Keaton - draws Curse, Province, Province, Silver, Witch
+ 
+---------- Art Fey: turn 23 ----------
+Art Fey - plays Village
+Art Fey - draws Curse
+Art Fey - plays Laboratory
+Art Fey - draws Duchy, Gold
+Art Fey - plays 1 Silver, 1 Gold
+Art Fey - buys Duchy
+Art Fey - gains Duchy
+Art Fey - draws Feast, Curse, Witch, Curse, Throne Room
+ 
+---------- Gentleman Keaton: turn 23 ----------
+Gentleman Keaton - plays Witch
+Gentleman Keaton - draws Village, Silver
+Gentleman Keaton - plays 2 Silver
+Gentleman Keaton - buys Silver
+Gentleman Keaton - gains Silver
+Gentleman Keaton - draws Throne Room, Gold, Province, Gold, Throne Room
+ 
+---------- Art Fey: turn 24 ----------
+Art Fey - plays Throne Room
+Art Fey - plays Feast
+Art Fey - trashes Feast
+Art Fey - gains Duchy
+Art Fey - plays Feast
+Art Fey - trashes Feast
+Art Fey - gains Duchy
+Art Fey - draws Copper, Estate, Gold, Curse, Estate
+ 
+---------- Gentleman Keaton: turn 24 ----------
+Gentleman Keaton - plays 2 Gold
+Gentleman Keaton - buys Duchy
+Gentleman Keaton - gains Duchy
+Gentleman Keaton - draws Curse, Province
+Gentleman Keaton - shuffles deck
+Gentleman Keaton - draws Curse, Estate, Province
+ 
+---------- Art Fey: turn 25 ----------
+Art Fey - plays 1 Copper, 1 Gold
+Art Fey - buys Feast
+Art Fey - gains Feast
+Art Fey - draws Silver, Festival, Copper, Curse, Workshop
+ 
+---------- Gentleman Keaton: turn 25 ----------
+Gentleman Keaton - draws Duchy, Moneylender, Gold, Estate, Silver
+ 
+---------- Art Fey: turn 26 ----------
+Art Fey - plays Festival
+Art Fey - plays Workshop
+Art Fey - gains Feast
+Art Fey - plays 1 Silver, 1 Copper
+Art Fey - buys Duchy
+Art Fey - gains Duchy
+Art Fey - draws Copper, Throne Room, Festival, Estate
+Art Fey - shuffles deck
+Art Fey - draws Remodel
+ 
+---------- Gentleman Keaton: turn 26 ----------
+Gentleman Keaton - plays 1 Gold, 1 Silver
+Gentleman Keaton - buys Duchy
+Gentleman Keaton - gains Duchy
+Gentleman Keaton - draws Gold, Province, Province, Province, Witch
+ 
+------------ Game Over ------------
+Gentleman Keaton - cards: 2 Witch, 2 Throne Room, 1 Village, 1 Remodel, 1 Moneylender, 5 Gold, 3 Silver, 2 Copper, 6 Province, 3 Duchy, 3 Estate, 2 Curse
+Gentleman Keaton - total victory points: 46
+Gentleman Keaton - turns: 26
+ 
+Art Fey - cards: 3 Festival, 2 Throne Room, 2 Laboratory, 2 Feast, 1 Village, 1 Moneylender, 1 Remodel, 1 Workshop, 1 Witch, 4 Silver, 3 Copper, 3 Gold, 10 Estate, 5 Duchy, 6 Curse
+Art Fey - total victory points: 19
+Art Fey - turns: 26
+ 
+1st place: Gentleman Keaton
+2nd place: Art Fey
+ 
