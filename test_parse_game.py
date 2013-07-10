@@ -1803,6 +1803,21 @@ class ParseGokoGameTest(unittest.TestCase):
         self.assertRaises(parse_common.ParsingError, parse_game.parse_game, game_contents)
 
 
+    def test_Goko_Chooses_Handling(self):
+        """ Test handling of player choices.
+
+        These three specific test cases are games where the
+        parse_goko_game.parse_turn() method throws an exception when
+        handling a player's choice.
+        """
+        game_contents = codecs.open('testing/testdata/log.50f0e2e6e4b0e2a9e029a286.1366510125184.txt', encoding='utf-8').read()
+        parsed_game = parse_game.parse_game(game_contents)
+        game_contents = codecs.open('testing/testdata/log.506737690cf2366f588d85bc.1364157930978.txt', encoding='utf-8').read()
+        parsed_game = parse_game.parse_game(game_contents)
+        game_contents = codecs.open('testing/testdata/log.5067a71bfca284ca612070b1.1366414886714.txt', encoding='utf-8').read()
+        parsed_game = parse_game.parse_game(game_contents)
+
+
 class ParseIsoGameTest(unittest.TestCase):
     def test_iso_parse_game(self):
         parsed_game = parse_game.parse_game(u"""<html><head><link rel="stylesheet" href="/dom/client.css"><title>Dominion Game #2083</title></head><body><pre>Alenia wins!

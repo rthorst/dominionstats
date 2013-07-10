@@ -1,0 +1,389 @@
+------------ Game Setup ------------
+Supply cards: Native Village, Squire, Moneylender, Cache, Explorer, Festival, Governor, Highway, Rebuild, Stables, Copper, Silver, Gold, Estate, Duchy, Province, Curse
+MadisonMom - starting cards: Necropolis, Overgrown Estate, Hovel, Copper, Copper, Copper, Copper, Copper, Copper, Copper
+aoe_conqueror - starting cards: Necropolis, Overgrown Estate, Hovel, Copper, Copper, Copper, Copper, Copper, Copper, Copper
+MadisonMom - shuffles deck
+aoe_conqueror - shuffles deck
+MadisonMom - draws Copper, Copper, Necropolis, Copper, Hovel
+aoe_conqueror - draws Copper, Hovel, Copper, Overgrown Estate, Copper
+ 
+---------- MadisonMom: turn 1 ----------
+MadisonMom - plays Necropolis
+MadisonMom - plays 3 Copper
+MadisonMom - buys Squire
+MadisonMom - gains Squire
+MadisonMom - draws Overgrown Estate, Copper, Copper, Copper, Copper
+ 
+---------- aoe_conqueror: turn 1 ----------
+aoe_conqueror - plays 3 Copper
+aoe_conqueror - buys Silver
+aoe_conqueror - gains Silver
+aoe_conqueror - draws Copper, Copper, Necropolis, Copper, Copper
+ 
+---------- MadisonMom: turn 2 ----------
+MadisonMom - plays 4 Copper
+MadisonMom - buys Moneylender
+MadisonMom - gains Moneylender
+MadisonMom - shuffles deck
+MadisonMom - draws Moneylender, Copper, Copper, Copper, Copper
+ 
+---------- aoe_conqueror: turn 2 ----------
+aoe_conqueror - plays 4 Copper
+aoe_conqueror - buys Moneylender
+aoe_conqueror - gains Moneylender
+aoe_conqueror - shuffles deck
+aoe_conqueror - draws Silver, Hovel, Copper, Copper, Necropolis
+ 
+---------- MadisonMom: turn 3 ----------
+MadisonMom - plays Moneylender
+MadisonMom - trashes Copper
+MadisonMom - plays 3 Copper
+MadisonMom - buys Gold
+MadisonMom - gains Gold
+MadisonMom - draws Copper, Copper, Squire, Copper, Necropolis
+ 
+---------- aoe_conqueror: turn 3 ----------
+aoe_conqueror - plays 2 Copper, 1 Silver
+aoe_conqueror - buys Silver
+aoe_conqueror - gains Silver
+aoe_conqueror - draws Copper, Copper, Moneylender, Copper, Copper
+ 
+---------- MadisonMom: turn 4 ----------
+MadisonMom - plays Necropolis
+MadisonMom - plays Squire
+MadisonMom - gains Silver
+MadisonMom - plays 3 Copper
+MadisonMom - buys Moneylender
+MadisonMom - gains Moneylender
+MadisonMom - draws Overgrown Estate, Hovel
+MadisonMom - shuffles deck
+MadisonMom - draws Moneylender, Gold, Copper
+ 
+---------- aoe_conqueror: turn 4 ----------
+aoe_conqueror - plays Moneylender
+aoe_conqueror - trashes Copper
+aoe_conqueror - plays 3 Copper
+aoe_conqueror - buys Gold
+aoe_conqueror - gains Gold
+aoe_conqueror - draws Copper, Overgrown Estate
+aoe_conqueror - shuffles deck
+aoe_conqueror - draws Gold, Copper, Copper
+ 
+---------- MadisonMom: turn 5 ----------
+MadisonMom - plays Moneylender
+MadisonMom - trashes Copper
+MadisonMom - plays 1 Gold
+MadisonMom - buys Governor
+MadisonMom - gains Governor
+MadisonMom - draws Silver, Squire, Moneylender, Copper, Copper
+ 
+---------- aoe_conqueror: turn 5 ----------
+aoe_conqueror - plays 3 Copper, 1 Gold
+aoe_conqueror - buys Gold
+aoe_conqueror - gains Gold
+aoe_conqueror - draws Silver, Silver, Copper, Copper, Necropolis
+ 
+---------- MadisonMom: turn 6 ----------
+MadisonMom - plays Squire
+MadisonMom - takes 2 actions
+MadisonMom - plays Moneylender
+MadisonMom - trashes Copper
+MadisonMom - plays 1 Silver, 1 Copper
+MadisonMom - buys Rebuild
+MadisonMom - gains Rebuild
+MadisonMom - draws Necropolis, Copper, Copper, Copper
+MadisonMom - shuffles deck
+MadisonMom - draws Moneylender
+ 
+---------- aoe_conqueror: turn 6 ----------
+aoe_conqueror - plays 2 Silver, 2 Copper
+aoe_conqueror - buys Gold
+aoe_conqueror - gains Gold
+aoe_conqueror - draws Hovel, Copper, Moneylender
+aoe_conqueror - shuffles deck
+aoe_conqueror - draws Copper, Copper
+ 
+---------- MadisonMom: turn 7 ----------
+MadisonMom - plays Necropolis
+MadisonMom - plays Moneylender
+MadisonMom - trashes Copper
+MadisonMom - plays 2 Copper
+MadisonMom - buys Governor
+MadisonMom - gains Governor
+MadisonMom - draws Moneylender, Copper, Governor, Hovel, Silver
+ 
+---------- aoe_conqueror: turn 7 ----------
+aoe_conqueror - plays Moneylender
+aoe_conqueror - trashes Copper
+aoe_conqueror - plays 2 Copper
+aoe_conqueror - buys Festival
+aoe_conqueror - gains Festival
+aoe_conqueror - draws Silver, Copper, Overgrown Estate, Silver, Copper
+ 
+---------- MadisonMom: turn 8 ----------
+MadisonMom - plays Governor
+MadisonMom - chooses to gain a gold
+MadisonMom - gains Gold
+aoe_conqueror - gains Silver
+MadisonMom - plays Moneylender
+MadisonMom - trashes Copper
+MadisonMom - plays 1 Silver
+MadisonMom - buys Duchy
+MadisonMom - trashes Hovel
+MadisonMom - gains Duchy
+MadisonMom - draws Overgrown Estate, Squire, Gold, Rebuild
+MadisonMom - shuffles deck
+MadisonMom - draws Copper
+ 
+---------- aoe_conqueror: turn 8 ----------
+aoe_conqueror - plays 2 Silver, 2 Copper
+aoe_conqueror - buys Highway
+aoe_conqueror - gains Highway
+aoe_conqueror - draws Gold, Necropolis, Gold, Copper, Gold
+ 
+---------- MadisonMom: turn 9 ----------
+MadisonMom - plays Rebuild
+MadisonMom - names Province
+MadisonMom - reveals Moneylender, Duchy
+MadisonMom - discards Moneylender
+MadisonMom - trashes Duchy
+MadisonMom - gains Province
+MadisonMom - plays Squire
+MadisonMom - gains Silver
+MadisonMom - plays 1 Gold, 1 Copper
+MadisonMom - buys Duchy
+MadisonMom - gains Duchy
+MadisonMom - draws Necropolis, Silver, Copper, Governor, Governor
+ 
+---------- aoe_conqueror: turn 9 ----------
+aoe_conqueror - plays 3 Gold, 1 Copper
+aoe_conqueror - buys Province
+aoe_conqueror - gains Province
+aoe_conqueror - shuffles deck
+aoe_conqueror - draws Gold, Necropolis, Copper, Copper, Highway
+ 
+---------- MadisonMom: turn 10 ----------
+MadisonMom - plays Necropolis
+MadisonMom - plays Governor
+MadisonMom - chooses to draw cards
+MadisonMom - draws Moneylender, Gold
+MadisonMom - shuffles deck
+MadisonMom - draws Squire
+aoe_conqueror - draws Moneylender
+MadisonMom - plays Governor
+MadisonMom - chooses to trash a card
+MadisonMom - trashes Silver
+MadisonMom - gains Duchy
+aoe_conqueror - trashes Necropolis
+aoe_conqueror - gains Squire
+MadisonMom - plays Squire
+MadisonMom - gains Silver
+MadisonMom - plays Moneylender
+MadisonMom - trashes Copper
+MadisonMom - plays Gold
+MadisonMom - buys Governor
+MadisonMom - gains Governor
+MadisonMom - draws Gold, Duchy, Province, Rebuild, Moneylender
+ 
+---------- aoe_conqueror: turn 10 ----------
+aoe_conqueror - plays Highway
+aoe_conqueror - draws Festival
+aoe_conqueror - plays Festival
+aoe_conqueror - plays Moneylender
+aoe_conqueror - trashes Copper
+aoe_conqueror - plays 1 Gold, 1 Copper
+aoe_conqueror - buys Highway
+aoe_conqueror - gains Highway
+aoe_conqueror - buys Rebuild
+aoe_conqueror - gains Rebuild
+aoe_conqueror - draws Silver, Hovel, Copper, Overgrown Estate, Gold
+ 
+---------- MadisonMom: turn 11 ----------
+MadisonMom - plays Rebuild
+MadisonMom - names Province
+MadisonMom - reveals Copper, Overgrown Estate
+MadisonMom - discards Copper
+MadisonMom - trashes Overgrown Estate
+MadisonMom - draws Silver
+MadisonMom - gains Estate
+MadisonMom - plays Moneylender
+MadisonMom - plays 1 Gold, 1 Silver
+MadisonMom - buys Duchy
+MadisonMom - gains Duchy
+MadisonMom - shuffles deck
+MadisonMom - draws Squire, Governor, Duchy, Copper, Province
+ 
+---------- aoe_conqueror: turn 11 ----------
+aoe_conqueror - plays 1 Silver, 1 Copper, 1 Gold
+aoe_conqueror - buys Festival
+aoe_conqueror - gains Festival
+aoe_conqueror - draws Copper, Silver, Copper, Province, Gold
+ 
+---------- MadisonMom: turn 12 ----------
+MadisonMom - plays Governor
+MadisonMom - chooses to draw cards
+MadisonMom - draws Necropolis, Moneylender, Rebuild
+aoe_conqueror - draws Silver
+MadisonMom - plays Necropolis
+MadisonMom - plays Rebuild
+MadisonMom - names Province
+MadisonMom - reveals Governor, Estate
+MadisonMom - discards Governor
+MadisonMom - trashes Estate
+MadisonMom - gains Duchy
+MadisonMom - plays Squire
+MadisonMom - gains Silver
+MadisonMom - plays Moneylender
+MadisonMom - trashes Copper
+MadisonMom - buys Estate
+MadisonMom - gains Estate
+MadisonMom - draws Gold, Duchy, Silver, Moneylender, Duchy
+ 
+---------- aoe_conqueror: turn 12 ----------
+aoe_conqueror - plays 2 Copper, 2 Silver, 1 Gold
+aoe_conqueror - buys Province
+aoe_conqueror - gains Province
+aoe_conqueror - shuffles deck
+aoe_conqueror - draws Moneylender, Silver, Festival, Copper, Gold
+ 
+---------- MadisonMom: turn 13 ----------
+MadisonMom - plays Moneylender
+MadisonMom - plays 1 Gold, 1 Silver
+MadisonMom - buys Governor
+MadisonMom - gains Governor
+MadisonMom - draws Gold, Governor, Silver
+MadisonMom - shuffles deck
+MadisonMom - draws Governor, Duchy
+ 
+---------- aoe_conqueror: turn 13 ----------
+aoe_conqueror - plays Festival
+aoe_conqueror - plays Moneylender
+aoe_conqueror - trashes Copper
+aoe_conqueror - plays 1 Silver, 1 Gold
+aoe_conqueror - buys Highway
+aoe_conqueror - gains Highway
+aoe_conqueror - buys Highway
+aoe_conqueror - gains Highway
+aoe_conqueror - draws Province, Copper, Silver, Province, Highway
+ 
+---------- MadisonMom: turn 14 ----------
+MadisonMom - plays Governor
+MadisonMom - chooses to draw cards
+MadisonMom - draws Moneylender, Moneylender, Gold
+aoe_conqueror - draws Highway
+MadisonMom - plays Governor
+MadisonMom - chooses to trash a card
+MadisonMom - trashes Moneylender
+MadisonMom - gains Gold
+aoe_conqueror - trashes Copper
+MadisonMom - plays Moneylender
+MadisonMom - plays 2 Gold, 1 Silver
+MadisonMom - buys Province
+MadisonMom - gains Province
+MadisonMom - draws Estate, Silver, Duchy, Duchy, Duchy
+ 
+---------- aoe_conqueror: turn 14 ----------
+aoe_conqueror - plays Highway
+aoe_conqueror - draws Overgrown Estate
+aoe_conqueror - plays Highway
+aoe_conqueror - draws Silver
+aoe_conqueror - plays 2 Silver
+aoe_conqueror - buys Highway
+aoe_conqueror - gains Highway
+aoe_conqueror - draws Squire, Hovel, Gold, Festival, Copper
+ 
+---------- MadisonMom: turn 15 ----------
+MadisonMom - plays Silver
+MadisonMom - buys Estate
+MadisonMom - gains Estate
+MadisonMom - draws Necropolis, Squire, Governor, Province, Silver
+ 
+---------- aoe_conqueror: turn 15 ----------
+aoe_conqueror - plays Festival
+aoe_conqueror - plays Squire
+aoe_conqueror - takes 2 actions
+aoe_conqueror - plays 1 Gold, 1 Copper
+aoe_conqueror - buys Highway
+aoe_conqueror - gains Highway
+aoe_conqueror - buys Estate
+aoe_conqueror - trashes Hovel
+aoe_conqueror - gains Estate
+aoe_conqueror - draws Rebuild, Gold, Copper
+aoe_conqueror - shuffles deck
+aoe_conqueror - draws Silver, Gold
+ 
+---------- MadisonMom: turn 16 ----------
+MadisonMom - plays Necropolis
+MadisonMom - plays Governor
+MadisonMom - chooses to draw cards
+MadisonMom - draws Rebuild, Governor
+MadisonMom - shuffles deck
+MadisonMom - draws Governor
+aoe_conqueror - draws Highway
+MadisonMom - plays Governor
+MadisonMom - chooses to draw cards
+MadisonMom - draws Gold, Duchy, Gold
+aoe_conqueror - draws Moneylender
+MadisonMom - plays Governor
+MadisonMom - chooses to draw cards
+MadisonMom - draws Silver, Duchy, Moneylender
+aoe_conqueror - draws Highway
+MadisonMom - plays Rebuild
+MadisonMom - names Province
+MadisonMom - reveals Silver, Province, Duchy
+MadisonMom - discards: Silver, Province
+MadisonMom - trashes Duchy
+MadisonMom - gains Province
+MadisonMom - plays Moneylender
+MadisonMom - plays Squire
+MadisonMom - takes 2 buys
+MadisonMom - plays 2 Silver, 2 Gold
+MadisonMom - buys Province
+MadisonMom - gains Province
+MadisonMom - buys Estate
+MadisonMom - gains Estate
+MadisonMom - draws Estate, Governor, Duchy, Gold, Estate
+ 
+---------- aoe_conqueror: turn 16 ----------
+aoe_conqueror - plays Rebuild
+aoe_conqueror - names Province
+aoe_conqueror - reveals Festival, Silver, Festival, Squire, Highway, Highway, Highway, Copper, Highway, Overgrown Estate
+aoe_conqueror - discards: Festival, Silver, Festival, Squire, Highway, Highway, Highway, Copper, Highway
+aoe_conqueror - trashes Overgrown Estate
+aoe_conqueror - draws Silver
+aoe_conqueror - gains Estate
+aoe_conqueror - plays Highway
+aoe_conqueror - draws Gold
+aoe_conqueror - plays Highway
+aoe_conqueror - draws Province
+aoe_conqueror - plays Moneylender
+aoe_conqueror - trashes Copper
+aoe_conqueror - plays 3 Gold, 2 Silver
+aoe_conqueror - buys Province
+aoe_conqueror - gains Province
+aoe_conqueror - draws Province, Estate
+aoe_conqueror - shuffles deck
+aoe_conqueror - draws Gold, Gold, Silver
+ 
+---------- MadisonMom: turn 17 ----------
+MadisonMom - plays Governor
+MadisonMom - chooses to trash a card
+MadisonMom - trashes Gold
+MadisonMom - gains Province
+aoe_conqueror - trashes Silver
+aoe_conqueror - gains Moneylender
+MadisonMom - shuffles deck
+MadisonMom - draws Silver, Governor, Rebuild, Estate, Province
+ 
+------------ Game Over ------------
+MadisonMom - cards: 4 Governor, 1 Rebuild, 1 Necropolis, 1 Moneylender, 1 Squire, 3 Silver, 2 Gold, 5 Province, 3 Estate, 3 Duchy
+MadisonMom - total victory points: 42
+MadisonMom - turns: 17
+ 
+aoe_conqueror - cards: 6 Highway, 2 Moneylender, 2 Festival, 1 Squire, 1 Rebuild, 3 Gold, 2 Silver, 1 Copper, 3 Province, 2 Estate
+aoe_conqueror - total victory points: 20
+aoe_conqueror - turns: 16
+ 
+1st place: MadisonMom
+2nd place: aoe_conqueror
+ 

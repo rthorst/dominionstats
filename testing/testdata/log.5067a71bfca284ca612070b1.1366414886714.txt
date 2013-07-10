@@ -1,0 +1,437 @@
+------------ Game Setup ------------
+Supply cards: Poor House, Masquerade, Smugglers, Warehouse, Bureaucrat, Marauder, Governor, Laboratory, Mint, Witch, Copper, Silver, Gold, Estate, Duchy, Province, Curse, Ruins
+GastonNcy - starting cards: Estate, Estate, Estate, Copper, Copper, Copper, Copper, Copper, Copper, Copper
+dscarpac - starting cards: Estate, Estate, Estate, Copper, Copper, Copper, Copper, Copper, Copper, Copper
+GastonNcy - shuffles deck
+dscarpac - shuffles deck
+GastonNcy - draws Estate, Estate, Copper, Copper, Copper
+dscarpac - draws Estate, Copper, Estate, Copper, Copper
+ 
+---------- dscarpac: turn 1 ----------
+dscarpac - plays 3 Copper
+dscarpac - buys Silver
+dscarpac - gains Silver
+dscarpac - draws Copper, Copper, Copper, Copper, Estate
+ 
+---------- GastonNcy: turn 1 ----------
+GastonNcy - plays 3 Copper
+GastonNcy - buys Smugglers
+GastonNcy - gains Smugglers
+GastonNcy - draws Copper, Copper, Copper, Estate, Copper
+ 
+---------- dscarpac: turn 2 ----------
+dscarpac - plays 4 Copper
+dscarpac - buys Marauder
+dscarpac - gains Marauder
+dscarpac - shuffles deck
+dscarpac - draws Copper, Copper, Copper, Estate, Silver
+ 
+---------- GastonNcy: turn 2 ----------
+GastonNcy - plays 4 Copper
+GastonNcy - buys Marauder
+GastonNcy - gains Marauder
+GastonNcy - shuffles deck
+GastonNcy - draws Copper, Copper, Estate, Estate, Estate
+ 
+---------- dscarpac: turn 3 ----------
+dscarpac - plays 3 Copper, 1 Silver
+dscarpac - buys Governor
+dscarpac - gains Governor
+dscarpac - draws Copper, Estate, Copper, Marauder, Estate
+ 
+---------- GastonNcy: turn 3 ----------
+GastonNcy - plays 2 Copper
+GastonNcy - buys Poor House
+GastonNcy - gains Poor House
+GastonNcy - draws Marauder, Copper, Smugglers, Copper, Copper
+ 
+---------- dscarpac: turn 4 ----------
+dscarpac - plays Marauder
+dscarpac - gains Spoils
+GastonNcy - gains Ruined Village
+dscarpac - draws Copper, Copper
+dscarpac - shuffles deck
+dscarpac - draws Silver, Copper, Estate
+ 
+---------- GastonNcy: turn 4 ----------
+GastonNcy - plays Marauder
+GastonNcy - gains Spoils
+dscarpac - gains Abandoned Mine
+GastonNcy - plays 3 Copper
+GastonNcy - buys Masquerade
+GastonNcy - gains Masquerade
+GastonNcy - draws Copper, Copper
+GastonNcy - shuffles deck
+GastonNcy - draws Poor House, Copper, Copper
+ 
+---------- dscarpac: turn 5 ----------
+dscarpac - plays 3 Copper, 1 Silver
+dscarpac - buys Governor
+dscarpac - gains Governor
+dscarpac - draws Governor, Estate, Copper, Copper, Marauder
+ 
+---------- GastonNcy: turn 5 ----------
+GastonNcy - plays 4 Copper
+GastonNcy - buys Marauder
+GastonNcy - gains Marauder
+GastonNcy - draws Marauder, Estate, Estate, Ruined Village, Smugglers
+ 
+---------- dscarpac: turn 6 ----------
+dscarpac - plays Governor
+dscarpac - chooses to gain a gold
+dscarpac - gains Gold
+GastonNcy - gains Silver
+dscarpac - plays Marauder
+dscarpac - gains Spoils
+GastonNcy - gains Abandoned Mine
+dscarpac - draws Copper, Estate, Copper, Spoils
+dscarpac - shuffles deck
+dscarpac - draws Estate
+ 
+---------- GastonNcy: turn 6 ----------
+GastonNcy - plays Smugglers
+GastonNcy - gains Gold
+GastonNcy - draws Copper, Copper, Estate, Masquerade, Spoils
+ 
+---------- dscarpac: turn 7 ----------
+dscarpac - plays 2 Copper
+dscarpac - plays Spoils
+dscarpac - buys Governor
+dscarpac - gains Governor
+dscarpac - draws Gold, Silver, Marauder, Copper, Copper
+ 
+---------- GastonNcy: turn 7 ----------
+GastonNcy - plays Masquerade
+GastonNcy - draws Copper
+GastonNcy - shuffles deck
+GastonNcy - draws Copper
+GastonNcy - passes Estate
+dscarpac - passes Copper
+GastonNcy - trashes Copper
+GastonNcy - plays 4 Copper
+GastonNcy - plays Spoils
+GastonNcy - buys Mint
+GastonNcy - trashes Copper, Copper, Copper, Copper
+GastonNcy - gains Mint
+GastonNcy - draws Gold, Poor House, Estate, Copper, Smugglers
+ 
+---------- dscarpac: turn 8 ----------
+dscarpac - plays Marauder
+dscarpac - gains Spoils
+GastonNcy - gains Ruined Library
+dscarpac - plays 1 Gold, 1 Silver, 1 Copper
+dscarpac - buys Gold
+dscarpac - gains Gold
+dscarpac - draws Governor, Copper, Abandoned Mine, Governor, Copper
+ 
+---------- GastonNcy: turn 8 ----------
+GastonNcy - plays Smugglers
+GastonNcy - gains Gold
+GastonNcy - plays 1 Gold, 1 Copper
+GastonNcy - buys Warehouse
+GastonNcy - gains Warehouse
+GastonNcy - draws Estate, Abandoned Mine, Marauder, Copper, Ruined Village
+ 
+---------- dscarpac: turn 9 ----------
+dscarpac - plays Governor
+dscarpac - chooses to gain a gold
+dscarpac - gains Gold
+GastonNcy - gains Silver
+dscarpac - plays Governor
+dscarpac - chooses to gain a gold
+dscarpac - gains Gold
+GastonNcy - gains Silver
+dscarpac - plays Abandoned Mine
+dscarpac - plays 2 Copper
+dscarpac - buys Masquerade
+dscarpac - gains Masquerade
+dscarpac - draws Copper, Spoils, Estate
+dscarpac - shuffles deck
+dscarpac - draws Estate, Estate
+ 
+---------- GastonNcy: turn 9 ----------
+GastonNcy - plays Marauder
+GastonNcy - gains Spoils
+dscarpac - gains Survivors
+GastonNcy - draws Marauder, Copper, Silver
+GastonNcy - shuffles deck
+GastonNcy - draws Copper, Estate
+ 
+---------- dscarpac: turn 10 ----------
+dscarpac - plays 1 Copper
+dscarpac - plays Spoils
+dscarpac - buys Marauder
+dscarpac - gains Marauder
+dscarpac - draws Copper, Copper, Masquerade, Marauder, Gold
+ 
+---------- GastonNcy: turn 10 ----------
+GastonNcy - plays Marauder
+GastonNcy - gains Spoils
+dscarpac - gains Ruined Library
+GastonNcy - plays 2 Copper, 1 Silver
+GastonNcy - buys Warehouse
+GastonNcy - gains Warehouse
+GastonNcy - draws Warehouse, Copper, Marauder, Gold, Poor House
+ 
+---------- dscarpac: turn 11 ----------
+dscarpac - plays Masquerade
+dscarpac - draws Copper, Governor
+dscarpac - passes Copper
+GastonNcy - passes Copper
+dscarpac - trashes Copper
+dscarpac - plays 2 Copper, 1 Gold
+dscarpac - buys Governor
+dscarpac - gains Governor
+dscarpac - draws Abandoned Mine, Governor, Gold, Estate, Spoils
+ 
+---------- GastonNcy: turn 11 ----------
+GastonNcy - plays Warehouse
+GastonNcy - draws Abandoned Mine, Estate, Ruined Library
+GastonNcy - discards Estate
+GastonNcy - discards Abandoned Mine
+GastonNcy - discards Ruined Library
+GastonNcy - plays Poor House
+GastonNcy - reveals hand: Marauder, Gold, Copper
+GastonNcy - plays 1 Gold, 1 Copper
+GastonNcy - buys Witch
+GastonNcy - gains Witch
+GastonNcy - draws Ruined Village, Spoils, Gold, Silver, Mint
+ 
+---------- dscarpac: turn 12 ----------
+dscarpac - plays Governor
+dscarpac - chooses to draw cards
+dscarpac - draws Silver, Gold, Copper
+GastonNcy - draws Silver
+dscarpac - plays Abandoned Mine
+dscarpac - plays 2 Gold, 1 Silver, 1 Copper
+dscarpac - buys Province
+dscarpac - gains Province
+dscarpac - draws Gold, Copper, Governor
+dscarpac - shuffles deck
+dscarpac - draws Copper, Estate
+ 
+---------- GastonNcy: turn 12 ----------
+GastonNcy - plays Mint
+GastonNcy - reveals Gold
+GastonNcy - gains Gold
+GastonNcy - plays 2 Silver, 1 Gold
+GastonNcy - plays Spoils
+GastonNcy - buys Province
+GastonNcy - gains Province
+GastonNcy - draws Masquerade, Smugglers
+GastonNcy - shuffles deck
+GastonNcy - draws Ruined Library, Silver, Marauder
+ 
+---------- dscarpac: turn 13 ----------
+dscarpac - plays Governor
+dscarpac - chooses to gain a gold
+dscarpac - gains Gold
+GastonNcy - gains Silver
+dscarpac - plays 2 Copper, 1 Gold
+dscarpac - buys Laboratory
+dscarpac - gains Laboratory
+dscarpac - draws Estate, Gold, Survivors, Masquerade, Estate
+ 
+---------- GastonNcy: turn 13 ----------
+GastonNcy - plays Smugglers
+GastonNcy - gains Gold
+GastonNcy - draws Witch, Spoils, Poor House, Copper, Gold
+ 
+---------- dscarpac: turn 14 ----------
+dscarpac - plays Masquerade
+dscarpac - draws Abandoned Mine, Governor
+dscarpac - passes Survivors
+GastonNcy - passes Copper
+dscarpac - trashes Estate
+dscarpac - plays 1 Gold, 1 Copper
+dscarpac - buys Marauder
+dscarpac - gains Marauder
+dscarpac - draws Governor, Silver, Estate, Ruined Library, Copper
+ 
+---------- GastonNcy: turn 14 ----------
+GastonNcy - plays Witch
+GastonNcy - draws Estate, Copper
+dscarpac - gains Curse
+GastonNcy - plays 1 Gold, 1 Copper
+GastonNcy - plays Spoils
+GastonNcy - buys Governor
+GastonNcy - gains Governor
+GastonNcy - draws Silver, Ruined Village, Mint, Estate, Silver
+ 
+---------- dscarpac: turn 15 ----------
+dscarpac - plays Governor
+dscarpac - chooses to draw cards
+dscarpac - draws Governor, Gold, Marauder
+GastonNcy - draws Marauder
+dscarpac - plays Governor
+dscarpac - chooses to trash a card
+dscarpac - trashes Gold
+dscarpac - gains Province
+GastonNcy - trashes Ruined Village
+GastonNcy - gains Poor House
+dscarpac - plays Marauder
+dscarpac - gains Spoils
+GastonNcy - gains Ruined Village
+dscarpac - plays 1 Silver, 1 Copper
+dscarpac - buys Warehouse
+dscarpac - gains Warehouse
+dscarpac - draws Copper, Gold, Copper, Spoils, Marauder
+ 
+---------- GastonNcy: turn 15 ----------
+GastonNcy - plays Marauder
+GastonNcy - gains Spoils
+dscarpac - gains Survivors
+GastonNcy - plays 2 Silver
+GastonNcy - buys Masquerade
+GastonNcy - gains Masquerade
+GastonNcy - draws Warehouse, Province, Warehouse, Copper, Gold
+ 
+---------- dscarpac: turn 16 ----------
+dscarpac - plays Marauder
+dscarpac - gains Spoils
+GastonNcy - gains Survivors
+dscarpac - plays 2 Copper, 1 Gold
+dscarpac - plays Spoils
+dscarpac - buys Province
+dscarpac - gains Province
+dscarpac - draws Province
+dscarpac - shuffles deck
+dscarpac - draws Province, Laboratory, Copper, Gold
+ 
+---------- GastonNcy: turn 16 ----------
+GastonNcy - plays Warehouse
+GastonNcy - draws Gold, Abandoned Mine
+GastonNcy - shuffles deck
+GastonNcy - draws Poor House
+GastonNcy - discards Abandoned Mine
+GastonNcy - discards Copper
+GastonNcy - discards Province
+GastonNcy - plays Poor House
+GastonNcy - reveals hand: Warehouse, Gold, Gold
+GastonNcy - plays 2 Gold
+GastonNcy - buys Province
+GastonNcy - gains Province
+GastonNcy - draws Silver, Survivors, Silver, Ruined Village, Gold
+ 
+---------- dscarpac: turn 17 ----------
+dscarpac - plays Laboratory
+dscarpac - draws Silver, Gold
+dscarpac - plays 2 Gold, 1 Copper, 1 Silver
+dscarpac - buys Province
+dscarpac - gains Province
+dscarpac - draws Abandoned Mine, Estate, Copper, Masquerade, Copper
+ 
+---------- GastonNcy: turn 17 ----------
+GastonNcy - plays Survivors
+GastonNcy - looks at Governor, Spoils
+GastonNcy - places Governor on top of deck
+GastonNcy - places Spoils on top of deck
+GastonNcy - plays 2 Silver, 1 Gold
+GastonNcy - buys Duchy
+GastonNcy - gains Duchy
+GastonNcy - draws Spoils, Governor, Survivors, Estate, Copper
+ 
+---------- dscarpac: turn 18 ----------
+dscarpac - plays Masquerade
+dscarpac - draws Marauder, Gold
+dscarpac - passes Abandoned Mine
+GastonNcy - passes Survivors
+dscarpac - trashes Survivors
+dscarpac - plays 2 Copper, 1 Gold
+dscarpac - buys Duchy
+dscarpac - gains Duchy
+dscarpac - draws Survivors, Copper, Copper, Spoils, Marauder
+ 
+---------- GastonNcy: turn 18 ----------
+GastonNcy - plays Governor
+GastonNcy - chooses to draw cards
+GastonNcy - draws Masquerade, Marauder, Witch
+dscarpac - draws Warehouse
+GastonNcy - plays Witch
+GastonNcy - draws Mint, Masquerade
+dscarpac - gains Curse
+GastonNcy - plays 1 Copper
+GastonNcy - plays Spoils
+GastonNcy - buys Smugglers
+GastonNcy - gains Smugglers
+GastonNcy - draws Poor House, Estate, Marauder, Silver, Gold
+ 
+---------- dscarpac: turn 19 ----------
+dscarpac - plays Warehouse
+dscarpac - draws Governor, Gold, Estate
+dscarpac - discards Estate
+dscarpac - discards Survivors
+dscarpac - discards Copper
+dscarpac - plays Governor
+dscarpac - chooses to trash a card
+dscarpac - trashes Gold
+dscarpac - gains Province
+GastonNcy - trashes Estate
+GastonNcy - gains Masquerade
+dscarpac - plays Marauder
+dscarpac - gains Spoils
+GastonNcy - gains Ruined Village
+dscarpac - plays 1 Copper
+dscarpac - plays Spoils
+dscarpac - buys Estate
+dscarpac - gains Estate
+dscarpac - draws Province, Marauder, Governor, Spoils, Estate
+ 
+---------- GastonNcy: turn 19 ----------
+GastonNcy - plays Marauder
+GastonNcy - gains Spoils
+GastonNcy - plays 1 Silver, 1 Gold
+GastonNcy - buys Duchy
+GastonNcy - gains Duchy
+GastonNcy - draws Ruined Library, Silver, Smugglers
+GastonNcy - shuffles deck
+GastonNcy - draws Poor House, Smugglers
+ 
+---------- dscarpac: turn 20 ----------
+dscarpac - plays Governor
+dscarpac - chooses to draw cards
+dscarpac - draws Governor, Copper, Curse
+GastonNcy - draws Silver
+dscarpac - plays Governor
+dscarpac - chooses to draw cards
+dscarpac - draws Ruined Library, Governor
+dscarpac - shuffles deck
+dscarpac - draws Warehouse
+GastonNcy - draws Gold
+dscarpac - plays Warehouse
+dscarpac - draws Province, Marauder, Governor
+dscarpac - discards Province
+dscarpac - discards Province
+dscarpac - discards Marauder
+dscarpac - plays Governor
+dscarpac - chooses to draw cards
+dscarpac - draws Gold, Copper, Masquerade
+GastonNcy - draws Ruined Village
+dscarpac - plays Governor
+dscarpac - chooses to trash a card
+dscarpac - trashes Gold
+dscarpac - gains Province
+GastonNcy - trashes Poor House
+GastonNcy - gains Estate
+dscarpac - plays Masquerade
+dscarpac - draws Spoils, Gold
+dscarpac - passes Curse
+GastonNcy - passes Ruined Village
+dscarpac - trashes Ruined Village
+dscarpac - plays 2 Copper, 1 Gold
+dscarpac - buys Duchy
+dscarpac - gains Duchy
+dscarpac - draws Estate, Silver, Estate, Copper, Gold
+ 
+------------ Game Over ------------
+dscarpac - cards: 4 Governor, 3 Marauder, 1 Survivors, 1 Ruined Library, 1 Masquerade, 1 Laboratory, 1 Warehouse, 6 Copper, 2 Spoils, 2 Gold, 1 Silver, 6 Province, 4 Estate, 2 Duchy, 1 Curse
+dscarpac - total victory points: 45
+dscarpac - turns: 20
+ 
+GastonNcy - cards: 3 Masquerade, 2 Smugglers, 2 Marauder, 2 Warehouse, 2 Abandoned Mine, 1 Survivors, 1 Witch, 1 Poor House, 1 Mint, 1 Ruined Village, 1 Ruined Library, 1 Governor, 4 Silver, 4 Gold, 2 Copper, 1 Spoils, 2 Province, 2 Duchy, 2 Estate, 1 Curse
+GastonNcy - total victory points: 19
+GastonNcy - turns: 19
+ 
+1st place: dscarpac
+2nd place: GastonNcy
+ 

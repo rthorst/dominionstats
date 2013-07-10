@@ -1,0 +1,413 @@
+------------ Game Setup ------------
+Supply cards: Chancellor, Shanty Town, Baron, Nomad Camp, Scout, Spy, Contraband, Governor, Adventurer, Expand, Copper, Silver, Gold, Estate, Duchy, Province, Curse
+Veni-Vedi-Vici - starting cards: Estate, Estate, Estate, Copper, Copper, Copper, Copper, Copper, Copper, Copper
+Conqueror Bot - starting cards: Estate, Estate, Estate, Copper, Copper, Copper, Copper, Copper, Copper, Copper
+Lord Bottington - starting cards: Estate, Estate, Estate, Copper, Copper, Copper, Copper, Copper, Copper, Copper
+Veni-Vedi-Vici - shuffles deck
+Conqueror Bot - shuffles deck
+Lord Bottington - shuffles deck
+Veni-Vedi-Vici - draws Copper, Copper, Estate, Estate, Copper
+Conqueror Bot - draws Copper, Estate, Copper, Copper, Estate
+Lord Bottington - draws Estate, Copper, Copper, Copper, Estate
+ 
+---------- Conqueror Bot: turn 1 ----------
+Conqueror Bot - plays 3 Copper
+Conqueror Bot - buys Silver
+Conqueror Bot - gains Silver
+Conqueror Bot - draws Estate, Copper, Copper, Copper, Copper
+ 
+---------- Lord Bottington: turn 1 ----------
+Lord Bottington - plays 3 Copper
+Lord Bottington - buys Silver
+Lord Bottington - gains Silver
+Lord Bottington - draws Copper, Estate, Copper, Copper, Copper
+ 
+---------- Veni-Vedi-Vici: turn 1 ----------
+Veni-Vedi-Vici - plays 3 Copper
+Veni-Vedi-Vici - buys Shanty Town
+Veni-Vedi-Vici - gains Shanty Town
+Veni-Vedi-Vici - draws Copper, Copper, Copper, Estate, Copper
+ 
+---------- Conqueror Bot: turn 2 ----------
+Conqueror Bot - plays 4 Copper
+Conqueror Bot - buys Baron
+Conqueror Bot - gains Baron
+Conqueror Bot - shuffles deck
+Conqueror Bot - draws Estate, Silver, Copper, Copper, Estate
+ 
+---------- Lord Bottington: turn 2 ----------
+Lord Bottington - plays 4 Copper
+Lord Bottington - buys Silver
+Lord Bottington - gains Silver
+Lord Bottington - shuffles deck
+Lord Bottington - draws Estate, Silver, Estate, Silver, Estate
+ 
+---------- Veni-Vedi-Vici: turn 2 ----------
+Veni-Vedi-Vici - plays 4 Copper
+Veni-Vedi-Vici - buys Baron
+Veni-Vedi-Vici - gains Baron
+Veni-Vedi-Vici - shuffles deck
+Veni-Vedi-Vici - draws Copper, Copper, Copper, Shanty Town, Copper
+ 
+---------- Conqueror Bot: turn 3 ----------
+Conqueror Bot - plays 2 Copper, 1 Silver
+Conqueror Bot - buys Baron
+Conqueror Bot - gains Baron
+Conqueror Bot - draws Baron, Estate, Copper, Copper, Copper
+ 
+---------- Lord Bottington: turn 3 ----------
+Lord Bottington - plays 2 Silver
+Lord Bottington - buys Silver
+Lord Bottington - gains Silver
+Lord Bottington - draws Copper, Copper, Copper, Copper, Copper
+ 
+---------- Veni-Vedi-Vici: turn 3 ----------
+Veni-Vedi-Vici - plays Shanty Town
+Veni-Vedi-Vici - reveals Copper, Copper, Copper, Copper
+Veni-Vedi-Vici - draws Estate, Copper
+Veni-Vedi-Vici - plays 5 Copper
+Veni-Vedi-Vici - buys Governor
+Veni-Vedi-Vici - gains Governor
+Veni-Vedi-Vici - draws Estate, Baron, Copper, Copper, Estate
+ 
+---------- Conqueror Bot: turn 4 ----------
+Conqueror Bot - plays Baron
+Conqueror Bot - discards Estate
+Conqueror Bot - plays 3 Copper
+Conqueror Bot - buys Expand
+Conqueror Bot - gains Expand
+Conqueror Bot - draws Copper, Copper
+Conqueror Bot - shuffles deck
+Conqueror Bot - draws Estate, Estate, Estate
+ 
+---------- Lord Bottington: turn 4 ----------
+Lord Bottington - plays 5 Copper
+Lord Bottington - buys Governor
+Lord Bottington - gains Governor
+Lord Bottington - draws Copper, Copper
+Lord Bottington - shuffles deck
+Lord Bottington - draws Estate, Silver, Silver
+ 
+---------- Veni-Vedi-Vici: turn 4 ----------
+Veni-Vedi-Vici - plays Baron
+Veni-Vedi-Vici - discards Estate
+Veni-Vedi-Vici - plays 2 Copper
+Veni-Vedi-Vici - buys Gold
+Veni-Vedi-Vici - gains Gold
+Veni-Vedi-Vici - shuffles deck
+Veni-Vedi-Vici - draws Copper, Copper, Copper, Shanty Town, Estate
+ 
+---------- Conqueror Bot: turn 5 ----------
+Conqueror Bot - plays 2 Copper
+Conqueror Bot - draws Copper, Copper, Copper, Silver, Copper
+ 
+---------- Lord Bottington: turn 5 ----------
+Lord Bottington - plays 2 Copper, 2 Silver
+Lord Bottington - buys Gold
+Lord Bottington - gains Gold
+Lord Bottington - draws Estate, Governor, Estate, Copper, Copper
+ 
+---------- Veni-Vedi-Vici: turn 5 ----------
+Veni-Vedi-Vici - plays Shanty Town
+Veni-Vedi-Vici - reveals Copper, Copper, Copper, Estate
+Veni-Vedi-Vici - draws Copper, Baron
+Veni-Vedi-Vici - plays Baron
+Veni-Vedi-Vici - discards Estate
+Veni-Vedi-Vici - plays 4 Copper
+Veni-Vedi-Vici - buys Governor
+Veni-Vedi-Vici - gains Governor
+Veni-Vedi-Vici - buys Shanty Town
+Veni-Vedi-Vici - gains Shanty Town
+Veni-Vedi-Vici - draws Copper, Gold, Governor, Copper, Estate
+ 
+---------- Conqueror Bot: turn 6 ----------
+Conqueror Bot - plays 4 Copper, 1 Silver
+Conqueror Bot - buys Gold
+Conqueror Bot - gains Gold
+Conqueror Bot - draws Expand, Copper, Baron, Baron
+Conqueror Bot - shuffles deck
+Conqueror Bot - draws Copper
+ 
+---------- Lord Bottington: turn 6 ----------
+Lord Bottington - plays Governor
+Lord Bottington - chooses to gain a gold
+Lord Bottington - gains Gold
+Veni-Vedi-Vici - gains Silver
+Conqueror Bot - gains Silver
+Lord Bottington - plays 2 Copper
+Lord Bottington - draws Copper, Copper, Silver, Copper
+Lord Bottington - shuffles deck
+Lord Bottington - draws Governor
+ 
+---------- Veni-Vedi-Vici: turn 6 ----------
+Veni-Vedi-Vici - plays Governor
+Veni-Vedi-Vici - chooses to trash a card
+Veni-Vedi-Vici - trashes Estate
+Veni-Vedi-Vici - gains Nomad Camp
+Conqueror Bot - trashes Expand
+Conqueror Bot - gains Province
+Lord Bottington - trashes Governor
+Lord Bottington - gains Adventurer
+Veni-Vedi-Vici - plays 2 Copper, 1 Gold
+Veni-Vedi-Vici - buys Governor
+Veni-Vedi-Vici - gains Governor
+Veni-Vedi-Vici - draws Nomad Camp, Copper, Estate
+Veni-Vedi-Vici - shuffles deck
+Veni-Vedi-Vici - draws Estate, Baron
+ 
+---------- Conqueror Bot: turn 7 ----------
+Conqueror Bot - plays 2 Copper
+Conqueror Bot - draws Copper, Copper, Gold, Estate, Copper
+ 
+---------- Lord Bottington: turn 7 ----------
+Lord Bottington - plays 3 Copper, 1 Silver
+Lord Bottington - buys Governor
+Lord Bottington - gains Governor
+Lord Bottington - draws Estate, Copper, Estate, Estate, Silver
+ 
+---------- Veni-Vedi-Vici: turn 7 ----------
+Veni-Vedi-Vici - plays Baron
+Veni-Vedi-Vici - discards Estate
+Veni-Vedi-Vici - plays 1 Copper
+Veni-Vedi-Vici - buys Governor
+Veni-Vedi-Vici - gains Governor
+Veni-Vedi-Vici - draws Governor, Copper, Shanty Town, Gold, Copper
+ 
+---------- Conqueror Bot: turn 8 ----------
+Conqueror Bot - plays 3 Copper, 1 Gold
+Conqueror Bot - buys Gold
+Conqueror Bot - gains Gold
+Conqueror Bot - draws Silver, Estate, Estate, Copper, Copper
+ 
+---------- Lord Bottington: turn 8 ----------
+Lord Bottington - plays 1 Copper, 1 Silver
+Lord Bottington - buys Silver
+Lord Bottington - gains Silver
+Lord Bottington - draws Gold, Copper, Copper, Gold, Silver
+ 
+---------- Veni-Vedi-Vici: turn 8 ----------
+Veni-Vedi-Vici - plays Governor
+Veni-Vedi-Vici - chooses to gain a gold
+Veni-Vedi-Vici - gains Gold
+Conqueror Bot - gains Silver
+Lord Bottington - gains Silver
+Veni-Vedi-Vici - plays Shanty Town
+Veni-Vedi-Vici - reveals Copper, Gold, Copper
+Veni-Vedi-Vici - draws Governor, Governor
+Veni-Vedi-Vici - plays Governor
+Veni-Vedi-Vici - chooses to gain a gold
+Veni-Vedi-Vici - gains Gold
+Conqueror Bot - gains Silver
+Lord Bottington - gains Silver
+Veni-Vedi-Vici - plays Governor
+Veni-Vedi-Vici - chooses to draw cards
+Veni-Vedi-Vici - draws Shanty Town, Copper, Copper
+Conqueror Bot - shuffles deck
+Conqueror Bot - draws Copper
+Lord Bottington - draws Copper
+Veni-Vedi-Vici - plays Shanty Town
+Veni-Vedi-Vici - reveals Copper, Gold, Copper, Copper, Copper
+Veni-Vedi-Vici - draws Copper, Copper
+Veni-Vedi-Vici - plays 6 Copper, 1 Gold
+Veni-Vedi-Vici - buys Province
+Veni-Vedi-Vici - gains Province
+Veni-Vedi-Vici - draws Silver
+Veni-Vedi-Vici - shuffles deck
+Veni-Vedi-Vici - draws Shanty Town, Governor, Gold, Copper
+ 
+---------- Conqueror Bot: turn 9 ----------
+Conqueror Bot - plays 3 Copper, 1 Silver
+Conqueror Bot - buys Governor
+Conqueror Bot - gains Governor
+Conqueror Bot - draws Silver, Gold, Baron, Gold, Copper
+ 
+---------- Lord Bottington: turn 9 ----------
+Lord Bottington - plays 3 Copper, 2 Gold, 1 Silver
+Lord Bottington - buys Province
+Lord Bottington - gains Province
+Lord Bottington - shuffles deck
+Lord Bottington - draws Copper, Gold, Silver, Copper, Silver
+ 
+---------- Veni-Vedi-Vici: turn 9 ----------
+Veni-Vedi-Vici - plays Governor
+Veni-Vedi-Vici - chooses to gain a gold
+Veni-Vedi-Vici - gains Gold
+Conqueror Bot - gains Silver
+Lord Bottington - gains Silver
+Veni-Vedi-Vici - plays Shanty Town
+Veni-Vedi-Vici - reveals Silver, Gold, Copper
+Veni-Vedi-Vici - draws Governor, Estate
+Veni-Vedi-Vici - plays Governor
+Veni-Vedi-Vici - chooses to draw cards
+Veni-Vedi-Vici - draws Gold, Copper, Copper
+Conqueror Bot - draws Estate
+Lord Bottington - draws Copper
+Veni-Vedi-Vici - plays 3 Copper, 2 Gold, 1 Silver
+Veni-Vedi-Vici - buys Province
+Veni-Vedi-Vici - gains Province
+Veni-Vedi-Vici - draws Shanty Town, Baron, Nomad Camp, Copper, Estate
+ 
+---------- Conqueror Bot: turn 10 ----------
+Conqueror Bot - plays Baron
+Conqueror Bot - discards Estate
+Conqueror Bot - plays 2 Gold, 1 Silver, 1 Copper
+Conqueror Bot - buys Province
+Conqueror Bot - gains Province
+Conqueror Bot - buys Duchy
+Conqueror Bot - gains Duchy
+Conqueror Bot - draws Copper, Silver, Copper, Province, Baron
+ 
+---------- Lord Bottington: turn 10 ----------
+Lord Bottington - plays 3 Copper, 2 Silver, 1 Gold
+Lord Bottington - buys Province
+Lord Bottington - gains Province
+Lord Bottington - draws Gold, Copper, Province, Copper, Silver
+ 
+---------- Veni-Vedi-Vici: turn 10 ----------
+Veni-Vedi-Vici - plays Shanty Town
+Veni-Vedi-Vici - reveals Baron, Nomad Camp, Copper, Estate
+Veni-Vedi-Vici - plays Baron
+Veni-Vedi-Vici - discards Estate
+Veni-Vedi-Vici - plays Nomad Camp
+Veni-Vedi-Vici - plays 1 Copper
+Veni-Vedi-Vici - buys Expand
+Veni-Vedi-Vici - gains Expand
+Veni-Vedi-Vici - draws Copper, Copper, Governor, Governor, Gold
+ 
+---------- Conqueror Bot: turn 11 ----------
+Conqueror Bot - plays Baron
+Conqueror Bot - gains Estate
+Conqueror Bot - plays 2 Copper, 1 Silver
+Conqueror Bot - buys Estate
+Conqueror Bot - gains Estate
+Conqueror Bot - buys Estate
+Conqueror Bot - gains Estate
+Conqueror Bot - draws Copper, Silver
+Conqueror Bot - shuffles deck
+Conqueror Bot - draws Silver, Estate, Governor
+ 
+---------- Lord Bottington: turn 11 ----------
+Lord Bottington - plays 2 Copper, 1 Gold, 1 Silver
+Lord Bottington - buys Adventurer
+Lord Bottington - gains Adventurer
+Lord Bottington - draws Governor, Estate, Copper, Copper, Estate
+ 
+---------- Veni-Vedi-Vici: turn 11 ----------
+Veni-Vedi-Vici - plays Governor
+Veni-Vedi-Vici - chooses to draw cards
+Veni-Vedi-Vici - draws Province, Copper
+Veni-Vedi-Vici - shuffles deck
+Veni-Vedi-Vici - draws Copper
+Conqueror Bot - draws Duchy
+Lord Bottington - draws Estate
+Veni-Vedi-Vici - plays Governor
+Veni-Vedi-Vici - chooses to draw cards
+Veni-Vedi-Vici - draws Copper, Shanty Town, Silver
+Conqueror Bot - draws Copper
+Lord Bottington - draws Silver
+Veni-Vedi-Vici - plays Shanty Town
+Veni-Vedi-Vici - reveals Copper, Copper, Gold, Province, Copper, Copper, Copper, Silver
+Veni-Vedi-Vici - draws Baron, Province
+Veni-Vedi-Vici - plays Baron
+Veni-Vedi-Vici - gains Estate
+Veni-Vedi-Vici - plays 5 Copper, 1 Gold, 1 Silver
+Veni-Vedi-Vici - buys Province
+Veni-Vedi-Vici - gains Province
+Veni-Vedi-Vici - draws Gold, Estate, Copper, Governor, Gold
+ 
+---------- Conqueror Bot: turn 12 ----------
+Conqueror Bot - plays Governor
+Conqueror Bot - chooses to gain a gold
+Conqueror Bot - gains Gold
+Lord Bottington - gains Silver
+Veni-Vedi-Vici - gains Silver
+Conqueror Bot - plays 2 Copper, 2 Silver
+Conqueror Bot - buys Duchy
+Conqueror Bot - gains Duchy
+Conqueror Bot - draws Silver, Estate, Silver, Gold, Gold
+ 
+---------- Lord Bottington: turn 12 ----------
+Lord Bottington - plays Governor
+Lord Bottington - chooses to gain a gold
+Lord Bottington - gains Gold
+Veni-Vedi-Vici - gains Silver
+Conqueror Bot - gains Silver
+Lord Bottington - plays 2 Copper, 1 Silver
+Lord Bottington - buys Silver
+Lord Bottington - gains Silver
+Lord Bottington - draws Silver, Silver, Adventurer
+Lord Bottington - shuffles deck
+Lord Bottington - draws Copper, Adventurer
+ 
+---------- Veni-Vedi-Vici: turn 12 ----------
+Veni-Vedi-Vici - plays Governor
+Veni-Vedi-Vici - chooses to draw cards
+Veni-Vedi-Vici - draws Expand, Copper, Gold
+Conqueror Bot - draws Estate
+Lord Bottington - draws Silver
+Veni-Vedi-Vici - plays Expand
+Veni-Vedi-Vici - trashes Estate
+Veni-Vedi-Vici - gains Duchy
+Veni-Vedi-Vici - plays 3 Gold, 2 Copper
+Veni-Vedi-Vici - buys Province
+Veni-Vedi-Vici - gains Province
+Veni-Vedi-Vici - draws Governor, Nomad Camp, Estate, Shanty Town
+Veni-Vedi-Vici - shuffles deck
+Veni-Vedi-Vici - draws Silver
+ 
+---------- Conqueror Bot: turn 13 ----------
+Conqueror Bot - plays 2 Silver, 2 Gold
+Conqueror Bot - buys Province
+Conqueror Bot - gains Province
+Conqueror Bot - draws Estate, Estate, Estate, Silver, Copper
+ 
+---------- Lord Bottington: turn 13 ----------
+Lord Bottington - plays Adventurer
+Lord Bottington - reveals Copper, Estate, Estate, Copper
+Lord Bottington - places cards in hand:  Copper, Copper
+Lord Bottington - discards: Estate, Estate
+Lord Bottington - plays 3 Silver, 3 Copper
+Lord Bottington - buys Province
+Lord Bottington - gains Province
+Lord Bottington - draws Silver, Silver, Gold, Copper, Gold
+ 
+---------- Veni-Vedi-Vici: turn 13 ----------
+Veni-Vedi-Vici - plays Governor
+Veni-Vedi-Vici - chooses to draw cards
+Veni-Vedi-Vici - draws Gold, Baron, Governor
+Conqueror Bot - draws Baron
+Lord Bottington - draws Copper
+Veni-Vedi-Vici - plays Governor
+Veni-Vedi-Vici - chooses to draw cards
+Veni-Vedi-Vici - draws Copper, Silver, Gold
+Conqueror Bot - draws Province
+Lord Bottington - draws Province
+Veni-Vedi-Vici - plays Shanty Town
+Veni-Vedi-Vici - reveals Nomad Camp, Estate, Silver, Gold, Baron, Copper, Silver, Gold
+Veni-Vedi-Vici - plays Baron
+Veni-Vedi-Vici - discards Estate
+Veni-Vedi-Vici - plays Nomad Camp
+Veni-Vedi-Vici - plays 2 Silver, 2 Gold, 1 Copper
+Veni-Vedi-Vici - buys Province
+Veni-Vedi-Vici - gains Province
+Veni-Vedi-Vici - buys Province
+Veni-Vedi-Vici - gains Province
+Veni-Vedi-Vici - draws Estate, Province, Province, Province, Gold
+ 
+------------ Game Over ------------
+Veni-Vedi-Vici - cards: 4 Governor, 2 Shanty Town, 1 Baron, 1 Expand, 1 Nomad Camp, 7 Copper, 4 Gold, 3 Silver, 6 Province, 2 Estate, 1 Duchy
+Veni-Vedi-Vici - total victory points: 41
+Veni-Vedi-Vici - turns: 13
+ 
+Conqueror Bot - cards: 2 Baron, 1 Governor, 7 Copper, 6 Silver, 3 Gold, 6 Estate, 3 Province, 2 Duchy
+Conqueror Bot - total victory points: 30
+Conqueror Bot - turns: 13
+ 
+Lord Bottington - cards: 2 Adventurer, 1 Governor, 9 Silver, 7 Copper, 3 Gold, 3 Province, 3 Estate
+Lord Bottington - total victory points: 21
+Lord Bottington - turns: 13
+ 
+1st place: Veni-Vedi-Vici
+2nd place: Conqueror Bot
+3rd place: Lord Bottington
+ 
