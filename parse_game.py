@@ -76,7 +76,8 @@ def parse_game(game_str, dubious_check = False):
         raise
     except:
         # Unexpected exception
-        raise parse_common.ParsingError("Unexpected exception while parsing: %s" % sys.exc_info()[0])
+        import traceback
+        raise parse_common.ParsingError(traceback.format_exc())
 
     assign_win_points(game_dict)
     if dubious_check and Game(game_dict).dubious_quality():
