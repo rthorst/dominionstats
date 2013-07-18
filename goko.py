@@ -174,10 +174,13 @@ class GokoScraper:
         os.chdir(directory_name)
         str_date = time.strftime("%Y%m%d", date.timetuple())
         try:
-            subprocess.check_call([current_directory + '/multi_scrape.sh', str_date])
-        except subprocess.CalledProcessError, e:
-            logging.warning("Unexpected return from scraper: {msg}".format(msg=e.output))
-            os.chdir(orig_dir)
+            output = subprocess.check_output([os.path.join(current_directory,
+                                                           'multi_scrape.sh'),
+                                              str_date])
+        except subprocess.CalledProcessError as e:
+            logging.warning("Unexpected return code {e.returncode} from scraper: {e.output}" \
+                            .format(e=e))
+            os.chdir(current_directory)
             shutil.rmtree(directory_name)
             raise
 
