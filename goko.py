@@ -17,7 +17,6 @@ import shutil
 import subprocess
 import sys
 import tarfile
-import tempfile
 import time
 import urllib2
 
@@ -171,14 +170,10 @@ class GokoScraper:
         Does not save a local copy."""
 
         current_directory = os.getcwd()
-        directory_name = tempfile.mkdtemp()
+        directory_name = get_workdir()
         os.chdir(directory_name)
         str_date = time.strftime("%Y%m%d", date.timetuple())
         try:
-            # TODO: Improve multi_scrape.sh so that it uses puf for
-            # faster downloading, uses a configurable temporary
-            # storage location, and stores the downloaded files in a
-            # date-based subdirectory.
             subprocess.check_call([current_directory + '/multi_scrape.sh', str_date])
         except subprocess.CalledProcessError, e:
             logging.warning("Unexpected return from scraper: {msg}".format(msg=e.output))
