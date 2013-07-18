@@ -170,7 +170,7 @@ class GokoScraper:
         Does not save a local copy."""
 
         current_directory = os.getcwd()
-        directory_name = get_workdir()
+        directory_name = utils.get_workdir()
         os.chdir(directory_name)
         str_date = time.strftime("%Y%m%d", date.timetuple())
         try:
