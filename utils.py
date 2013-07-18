@@ -5,8 +5,10 @@ import ConfigParser
 import argparse
 import logging
 import os
-import pymongo
+import tempfile
 import time
+
+import pymongo
 
 import primitive_util
 
@@ -242,3 +244,26 @@ def lru_cache(maxsize=100):
         wrapper.hits = wrapper.misses = 0
         return wrapper
     return decorating_function
+
+
+def get_workdir():
+    """ Return the path to a temporary directory.
+
+    Use the value configured in the [environment] work_dir key in the
+    conf.ini file, if present.
+    """
+
+    try:
+        config = ConfigParser.ConfigParser()
+        config.read('conf.ini')
+
+        workdir = config.get('environment', 'work_dir')
+    except ConfigParser.Error:
+        workdir = None
+
+    if workdir:
+        tempdir = tempfile.mkdtemp(dir=workdir)
+    else:
+        tempdir = tempfile.mkdtemp()
+
+    return tempdir
