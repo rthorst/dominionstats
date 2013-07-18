@@ -735,9 +735,8 @@ def parse_turn(log_lines, names_list, trash_pile, trade_route_set, removed_from_
         if KW_CHOOSES in action_taken:
             if last_play == dominioncards.BandofMisfits and not done_resolving:
                 bom_choice = capture_cards(action_taken)
-            if bom_choice[0] == dominioncards.Knights:
-                # FIXME: Following statement has no effect... Should it be "=" instead?
-                bom_choice[0] == dominioncards.SirMartin
+                if bom_choice[0] == dominioncards.Knights:
+                    bom_choice[0] = dominioncards.SirMartin
             continue
 
         if KW_PIRATE_COIN in action_taken:
