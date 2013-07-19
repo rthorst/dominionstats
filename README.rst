@@ -7,6 +7,40 @@ The project is run by rrenaud (rrenaud@gmail.com), with contributions so far by
 Larry, rspeer, David Lu, and tlstyer.
 
 
+Setup in a Vagrant Environment
+==============================
+
+This project now includes files to enable you to use Vagrant
+(http://www.vagrantup.com) to create isolated environments for
+development, testing, and production release builds. This is much
+easier to recreate than trying to install all the pieces following the
+Installation instructions below. To create a Vagrant-managed virtual
+machine for local development and testing, use the following
+steps:
+
+#. Install the appropriate version of VirtualBox
+   (https://www.virtualbox.org/) for your host machine.
+
+#. Install the appropriate version of Vagrant
+   (http://www.vagrantup.com) for your host machine.
+
+#. Clone the source code repository to your machine::
+
+     git clone git@github.com:mikemccllstr/dominionstats.git dominionstats
+
+#. Launch the Vagrant instance and ssh into it::
+
+     vagrant up
+     vagrant ssh
+
+#. From within the Vagrant instance, you can import a day's worth of
+   data and then launch the web application with the following
+   commands::
+
+     cd /vagrant
+     virtualenv 
+
+
 Installation
 ====
 
