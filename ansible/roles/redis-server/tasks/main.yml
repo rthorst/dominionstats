@@ -1,0 +1,5 @@
+---
+
+# Shell playbook to support role structure
+
+- include: redis-server.yml

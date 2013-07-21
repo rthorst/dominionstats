@@ -1,0 +1,13 @@
+---
+
+# Installs the redis server
+
+- name: "Install pre-reqs for ansible's apt_repository module"
+  apt: pkg=python-software-properties
+
+- name: Add the redis-server PPA
+  apt_repository: repo=ppa:chris-lea/redis-server
+
+- name: Install redis-server itself
+  apt: pkg=redis-server=2:2.6.14-1chl1~precise1
+

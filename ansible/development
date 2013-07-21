@@ -1,0 +1,7 @@
+# This is the inventory file for development servers
+
+[vagrant-devservers]
+192.168.9.10 ansible_ssh_user=vagrant
+
+[devservers:children]
+vagrant-devservers

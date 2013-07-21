@@ -1,0 +1,6 @@
+---
+
+# Installs the common elements across all our managed servers
+
+- name: Install hello world
+  apt: pkg=hello

@@ -1,0 +1,31 @@
+---
+
+# Playbook for provisioning the packages and code needed to run
+# councilroom.com
+
+- name: Install the apt packages necessary to run councilroom.com
+  apt: pkg=$item
+  with_items:
+    - python-virtualenv
+    - python-pip
+    - mongodb-server
+
+- name: Create the production user
+  user: name=cr_prod state=present
+
+- include: redis-config.yml
+
+# Configure MongoDB
+
+- name: Configure the service directory for Mongo
+  # This is kept in /srv so that it is easier to back with a EBS
+  # volume when running on EC2.
+  file: path=/srv/mongodb state=directory owner=root group=root mode=0755
+
+- name: Mongo database dir
+  file: path=/srv/mongodb/mongodb state=directory owner=mongodb group=mongodb mode=0755
+
+- name: Deploy our MongoDB configuration file
+  copy: src=mongodb.conf dest=/etc/mongodb.conf owner=root group=root mode=0644
+  notify:
+    - restart mongodb

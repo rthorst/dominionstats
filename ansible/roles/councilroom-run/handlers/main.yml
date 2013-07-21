@@ -1,0 +1,10 @@
+---
+
+# Handlers for the councilroom-run role
+
+- name: restart procps
+  service: name=procps state=restarted
+
+- name: restart mongodb
+  service: name=mongodb state=restarted
+

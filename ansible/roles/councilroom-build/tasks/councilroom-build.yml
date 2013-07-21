@@ -1,0 +1,9 @@
+---
+
+# Provisions the elements needed to build the councilroom.com site.
+
+- name: Install the apt packages necessary to build councilroom.com
+  apt: pkg=$item
+  with_items:
+    - build-essential
+

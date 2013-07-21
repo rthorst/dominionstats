@@ -1,0 +1,26 @@
+---
+
+# Playbook for configuring redis as used by councilroom.com
+
+
+- name: Disable the Redis service so that it can be managed by Circus
+  service: name=redis-server enabled=no state=stopped
+
+- name: Configure the service directory for redis
+  # This is kept in /srv so that it is easier to back with a EBS
+  # volume when running on EC2.
+  file: path=/srv/redis state=directory owner=redis group=cr_prod mode=0775
+
+- name: Redis database dir
+  file: path=/srv/redis/database state=directory owner=redis group=cr_prod mode=0775
+
+- name: Redis run dir
+  file: path=/srv/redis/run state=directory owner=redis group=cr_prod mode=0775
+
+- name: Deploy our Redis configuration file
+  copy: src=redis.conf dest=/srv/redis/redis.conf owner=redis group=cr_prod mode=0664
+
+- name: Enable memory overcommit
+  lineinfile: dest=/etc/sysctl.d/60-councilroom-overcommit.conf create=yes owner=root group=root mode=0644 state=present regexp="vm\.overcommit_memory" line="vm.overcommit_memory=1"
+  notify:
+    - restart procps

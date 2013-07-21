@@ -1,0 +1,13 @@
+---
+
+# Playbook for provisioning development servers
+
+- hosts: devservers
+  sudo: True
+  roles:
+    - common
+    - redis-server
+#    - mongodb
+#    - nginx
+    - councilroom-run
+    - councilroom-build
