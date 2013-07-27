@@ -6,4 +6,10 @@
   apt: pkg=$item
   with_items:
     - build-essential
+    - python-dev
+    - debhelper
+    - dh-make
+    - devscripts
+    - gnupg
+    - lintian
 
