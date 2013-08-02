@@ -24,7 +24,8 @@ environments. The first of these is your *development host*. The
 development host is where high-level tools that manage the other
 environments run. This is where you will checkout and edit the source
 code. Unlike many models where development and testing is done on the
-local machine, you will not install the application here.
+local machine, you will not build, install, or test the code that runs
+the CouncilRoom.com site directly on your development host.
 
 The next environment is the *development guest*. A development guest
 is a temporary virtual machine instance where the application will
@@ -32,8 +33,18 @@ actually be installed and run. These environments will contain the
 numerous pieces that are required to run the application in a tidy,
 easy to recreate package.
 
-To set up your development host, use the following steps. This is a
-one-time activity.
+To make this magic work, these instructions (and the corresponding
+files in our source code repository) assume you will use the
+VirtualBox *provider* in Vagrant. They further assume you will use the
+Ansible *provisioner* in Vagrant. If you've gotten this far, you
+probably already realize that Git is the version control system in
+use.
+
+So in order to play along, you will need to outfit your development
+host with the necessary pieces. This is typically a one-time
+activity.
+
+Use the following steps on an Ubuntu machine:
 
 #. Install the appropriate version of VirtualBox
    (https://www.virtualbox.org/) for your host machine.
@@ -41,16 +52,40 @@ one-time activity.
 #. Install the appropriate version of Vagrant
    (http://www.vagrantup.com) for your host machine.
 
-#. Install `virtualenv`, `pip`, and `git`. This depends on the
-   platform you are using as your development host.
+#. Install Git and make sure it knows who you are::
 
-     * On an Ubuntu machine, the required commands are::
+       sudo apt-get install git
+       git config --global user.name "Mike McCallister"
+       git config --global user.email mike@mccllstr.com
 
-	 sudo apt-get install python-virtualenv python-pip git
+#. Install the tools that let us create the Python virtual environment
+   that some other Python-based tools, particularly Ansible, will run
+   from within the development host::
 
-     * On a Windows PC, the necessary steps are:
+       sudo apt-get install python-virtualenv python-pip
 
-       #. TODO
+#. Install the packages that Ansible depends on, or else install the
+   packages needed to build those dependencies in the Python
+   virtualenv that is used to run Ansible.
+
+   #. If you are in doubt, it is simplest and quickest just to install
+      the pre-built packages with this command::
+
+       sudo apt-get install python-paramiko python-jinja2 python-yaml
+
+   #. If Ansible is incompatible with the packages available in your
+      development host for some reason, install the build dependencies
+      so it can be compiled by pip when it is installed in the virtual
+      environment below::
+
+       sudo apt-get build-dep python-crypto python-paramiko python-jinja2 python-yaml
+
+      .. note:: This has not been specificically tested. Further work
+         may be requrired to enable Ansible to build.
+
+On a Windows PC, the necessary steps are:
+
+#. TODO
 
 With the above steps completed, you are ready to get a local copy of
 the source code and launch the development guest. Use the following
@@ -66,7 +101,7 @@ steps:
    itself::
 
      cd dev
-     virtualenv .venv-devhost
+     virtualenv --system-site-packages .venv-devhost
      . .venv-devhost/bin/activate
      pip install -r requirements/devhost.txt
 
