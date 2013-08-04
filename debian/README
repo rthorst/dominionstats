@@ -1,0 +1,8 @@
+The Debian Package councilroom
+------------------------------
+
+The CouncilRoom site is packaged for installation on a Debian or
+Ubuntu server. Consult the top-level docs directory in the source code
+repository for authoritative documentation.
+
+ -- Mike McCallister <mike@mccllstr.com>  Sun, 04 Aug 2013 21:23:03 +0000

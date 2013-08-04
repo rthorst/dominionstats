@@ -1,0 +1,15 @@
+Source: councilroom
+Section: web
+Priority: extra
+Maintainer: Mike McCallister <mike@mccllstr.com>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.2
+Homepage: http://councilroom.com
+Vcs-Git: git@github.com:mikemccllstr/dominionstats.git
+Vcs-Browser: https://github.com/mikemccllstr/dominionstats
+
+Package: councilroom
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Packaged code that operates the CouncilRoom.com site
+ This is the website and batch jobs that run the CouncilRoom.com site.
