@@ -16,7 +16,15 @@ DEPLOY_ROOT = '/srv/councilroom'
 DEPLOY_USER = 'cr_prod'
 
 
-@task 
+@task
+def clean():
+    ''' Clean the local directory of unnecessary files
+    '''
+    local("find . -type f -name '*~' -print0 |xargs -0 rm -f")
+    local("find . -type f -name '*.pyc' -print0 |xargs -0 rm -f")
+
+
+@task
 def build():
     ''' Build the app within the Vagrant host
     '''
@@ -35,4 +43,4 @@ def build():
         # Download and install Bootstrap and other external JavaScript
         # packages
 
-        
+
