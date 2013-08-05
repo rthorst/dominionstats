@@ -1,33 +1,38 @@
+''' Fabric's fabfile for use on the devhost. Invoke this with::
 
-from fabric.api import *
-import bz2
-import codecs
+    fab --list
+'''
 
-import utils
+from fabric.api import env
+from fabric.api import local
+from fabric.api import run
+from fabric.api import sudo
+from fabric.api import task
+from fabtools.vagrant import vagrant
+from fabtools.vagrant import vagrant_settings
 
 
-def retrieve_test_game(game_id):
-    """Store the raw game for the passed game id in the test data dir.
-    """
-    db = utils.get_mongo_database()
-    raw_games_col = db.raw_games
-    rawgame = raw_games_col.find_one({'_id': game_id})
+DEPLOY_ROOT = '/srv/councilroom'
+DEPLOY_USER = 'cr_prod'
 
-    if rawgame is None:
-        print('could not find game ' + game_id)
-    else:
-        contents = bz2.decompress(rawgame['text']).decode('utf-8')
-        with codecs.open('testing/testdata/'+game_id, encoding='utf-8', mode='w') as f:
-            f.write(contents)
 
-def install_build_deps():
-    """Install Debian/Ubuntu packages that are needed to install/build
-    the Python packages specified in the pip requirements files.
+@task 
+def build():
+    ''' Build the app within the Vagrant host
+    '''
+    with vagrant_settings():
+        # Blow away and recreate the deployment directory
+        sudo("echo rm -rf {0}".format(DEPLOY_ROOT), user=DEPLOY_USER)
 
-    We're working under the assumption (proven correct so far, but not
-    guaranteed) that the build dependencies for the Debian equivalent
-    of the python package are sufficient to build the latest version
-    of the package from pypi.
-    """
-    local('sudo apt-get build-dep python-matplotlib')
-    local('sudo apt-get build-dep python-sklearn')
+        # Create the virtualenv in which the application runs
+
+        # Create the static directory from which Nginx will serve
+        # necessary files
+
+        # Copy our images, CSS, JavaScript, etc. into the serving
+        # directory
+
+        # Download and install Bootstrap and other external JavaScript
+        # packages
+
+        

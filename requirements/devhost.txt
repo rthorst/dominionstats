@@ -1,1 +1,3 @@
 ansible==1.2.2
+fabric==1.7.0
+fabtools==0.15.0
