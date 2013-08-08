@@ -1,0 +1,4 @@
+# Requirements of the background applications (batch jobs that update
+# the database)
+
+-r common.txt

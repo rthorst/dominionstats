@@ -1,8 +1,15 @@
 ---
 
 # Provisions the elements needed to build the councilroom.com site.
+#
+# See the build() method in the fabfile.py at the top level of the
+# source code repository for more explanation on how the application
+# is built.
 
-- name: Install the apt packages necessary to build councilroom.com
+- name: Make sure the apt cache is fresh (less than one day old)
+  apt: update_cache=yes cache_valid_time=86400
+
+- name: Install the apt packages necessary to build the Deb package of councilroom
   apt: pkg=$item
   with_items:
     - build-essential
@@ -13,3 +20,11 @@
     - gnupg
     - lintian
 
+- name: Install the build-deps needed to install Python packages containing native code
+  command: apt-get -qq build-dep $item
+  with_items:
+    - python-redis
+    - python-mongoengine
+
+- name: Create the deployment directory and give it appropriate permissions
+  file: path=/srv/councilroom state=directory owner=cr_prod group=cr_prod mode=0755

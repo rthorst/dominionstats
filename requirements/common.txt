@@ -1,0 +1,4 @@
+# Requirements common to both the web and background applications.
+
+pymongo==2.3
+redis==2.7.2

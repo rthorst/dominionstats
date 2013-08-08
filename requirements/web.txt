@@ -1,0 +1,6 @@
+# Requirements of the web application
+
+-r common.txt
+
+gunicorn==0.16.1
+web.py==0.37
