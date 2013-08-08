@@ -3,6 +3,9 @@
 # Playbook for provisioning the packages and code needed to run
 # councilroom.com
 
+- name: Make sure the apt cache is fresh (less than one day old)
+  apt: update_cache=yes cache_valid_time=86400
+
 - name: Install the apt packages necessary to run councilroom.com
   apt: pkg=$item
   with_items:
