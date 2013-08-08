@@ -1,3 +1,4 @@
 -r requirements-worker.txt
-gunicorn
-web.py
+gunicorn==0.16.1
+tornado==2.4
+web.py==0.37

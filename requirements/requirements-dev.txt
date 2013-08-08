@@ -1,5 +1,5 @@
 -r requirements-web.txt
-ipdb
-flower
-pylint
 fabric
+flower==0.4.0
+ipdb
+pylint
