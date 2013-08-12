@@ -13,18 +13,25 @@
   apt: pkg=$item
   with_items:
     - build-essential
-    - python-dev
     - debhelper
-    - dh-make
     - devscripts
+    - dh-make
     - gnupg
+    - libopenblas-base
+    - libopenblas-dev
     - lintian
+    - python-dev
+    - python-pip
+    - python-virtualenv
 
 - name: Install the build-deps needed to install Python packages containing native code
   command: apt-get -qq build-dep $item
   with_items:
-    - python-redis
     - python-mongoengine
+    - python-numpy
+    - python-redis
+    - python-scipy
 
+# TODO: This should likly be removed since it is handled in the fab file
 - name: Create the deployment directory and give it appropriate permissions
   file: path=/srv/councilroom state=directory owner=cr_prod group=cr_prod mode=0755

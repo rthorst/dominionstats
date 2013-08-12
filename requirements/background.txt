@@ -6,3 +6,8 @@
 # within others (-r lines here) because Pip has limited dependency
 # resolution features (see https://github.com/pypa/pip/issues/56 and
 # https://github.com/pypa/pip/issues/993)
+
+boto==2.6.0
+celery==3.0.12
+flower==0.4.0
+tornado==2.4

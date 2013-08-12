@@ -86,7 +86,12 @@ def build(buildwheelhouse=False):
                 # the requirements file without rebuilding the world
                 # every time
 
-                sudo("cr-venv/bin/pip wheel {pipargs} --wheel-dir=/srv/councilroom_src/wheelhouse --no-deps {reqs}".format(pipargs=BASE_PIP_ARGS, reqs=REQUIREMENTS))
+                # Build and install the build-time dependencies
+                sudo("cr-venv/bin/pip wheel {pipargs} --wheel-dir=/srv/councilroom_src/wheelhouse  {reqs}".format(pipargs=BASE_PIP_ARGS, reqs='-r requirements/build-deps.txt'))
+                sudo("cr-venv/bin/pip install {pipargs} --no-index --use-wheel --find-links=/srv/councilroom_src/wheelhouse {reqs}".format(pipargs=BASE_PIP_ARGS, reqs='-r requirements/build-deps.txt'))
+
+                # Build the remaining dependencies
+                sudo("cr-venv/bin/pip wheel {pipargs} --wheel-dir=/srv/councilroom_src/wheelhouse  {reqs}".format(pipargs=BASE_PIP_ARGS, reqs=REQUIREMENTS))
 
             # Install the items in our requirements files using only the wheelhouse
             sudo("cr-venv/bin/pip install {pipargs} --no-index --use-wheel --find-links=/srv/councilroom_src/wheelhouse {reqs}".format(pipargs=BASE_PIP_ARGS, reqs=REQUIREMENTS))

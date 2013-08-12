@@ -6,19 +6,17 @@
 - name: Make sure the apt cache is fresh (less than one day old)
   apt: update_cache=yes cache_valid_time=86400
 
-- name: Install the apt packages necessary to run councilroom.com
-  apt: pkg=$item
-  with_items:
-    - python-virtualenv
-    - python-pip
-    - mongodb-server
-
 - name: Create the production user
   user: name=cr_prod state=present
 
 - include: redis-config.yml
 
 # Configure MongoDB
+
+- name: Install the apt packages necessary for MongoDB
+  apt: pkg=$item
+  with_items:
+    - mongodb-server
 
 - name: Configure the service directory for Mongo
   # This is kept in /srv so that it is easier to back with a EBS
@@ -32,3 +30,10 @@
   copy: src=mongodb.conf dest=/etc/mongodb.conf owner=root group=root mode=0644
   notify:
     - restart mongodb
+
+# Configure Nginx
+
+- name: Install the apt packages needed by Nginx
+  apt: pkg=$item
+  with_items:
+    - nginx-full

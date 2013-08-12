@@ -1,4 +1,4 @@
-# Requirements common to both the web and background applications.
+# Requirements that must be built and installed before others can be built
 
 # NOTE: We use composition of requirements files (multiple -r
 # parameters passed to pip) instead of including requirements files
@@ -6,7 +6,5 @@
 # resolution features (see https://github.com/pypa/pip/issues/56 and
 # https://github.com/pypa/pip/issues/993)
 
+# SciPy depends on NumPy
 numpy==1.6.2
-pymongo==2.3
-redis==2.7.2
-scipy==0.11.0
