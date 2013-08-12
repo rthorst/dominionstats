@@ -17,4 +17,8 @@ build
 *.log.*
 
 .ropeproject
+
+# Local files from development host
 .vagrant
+pip-cache
+wheelhouse

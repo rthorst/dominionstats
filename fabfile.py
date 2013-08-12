@@ -3,6 +3,9 @@
     fab --list
 '''
 
+import os
+import os.path
+
 from fabric.api import env
 from fabric.api import local
 from fabric.api import put
@@ -18,6 +21,8 @@ DEPLOY_ROOT = '/srv/councilroom'
 DEPLOY_USER = 'cr_prod'
 DEPLOY_GROUP = 'cr_prod'
 
+BASE_PIP_ARGS = '--download-cache /srv/councilroom_src/pip-cache'
+REQUIREMENTS = '-r requirements/common.txt -r requirements/web.txt -r requirements/background.txt'
 
 @task
 def clean():
@@ -28,7 +33,7 @@ def clean():
 
 
 @task
-def build():
+def build(buildwheelhouse=False):
     ''' Build the app within the Vagrant host
 
     The strategy being followed here is to use Ansible (as invoked by
@@ -49,27 +54,45 @@ def build():
     purposes. Ultimately, it will be converted into a Deb package for
     deployment into the production environment.
     '''
+    # Create the pip-cache and wheelhouse directories they are missing
+    # so so we can reduce repeated downloads and builds
+    if not os.path.exists('pip-cache'):
+        os.mkdir('pip-cache', 0755)
+    if not os.path.exists('wheelhouse'):
+        os.mkdir('wheelhouse', 0755)
+        buildwheelhouse = True  # Force build
 
     # Do the following on the vagrant host itself
     with vagrant_settings():
         # Blow away and recreate the deployment directory
-        sudo("rm -rf {0}".format(DEPLOY_ROOT), user='root')
-        sudo("mkdir {0}".format(DEPLOY_ROOT), user='root')
-        sudo("chown {1}:{2} {0}".format(DEPLOY_ROOT, DEPLOY_USER, DEPLOY_GROUP),
-             user='root')
-        sudo("chmod ug=rwx,o=rx {0}".format(DEPLOY_ROOT), user='root')
+        sudo("rm -rf {0}".format(DEPLOY_ROOT))
+        sudo("mkdir {0}".format(DEPLOY_ROOT))
 
         # Create the virtualenv in which the Council Room application
         # and its Python dependencies will be installed and run
         with cd(DEPLOY_ROOT):
-            sudo("virtualenv --no-site-packages cr-venv",
-                 user=DEPLOY_USER)
+            sudo("virtualenv cr-venv")
+
+            # Upgrade the pip, setuptools, and wheel in the virtualenv
+            sudo("cr-venv/bin/pip install {pipargs} --upgrade pip setuptools".format(pipargs=BASE_PIP_ARGS))
+            sudo("cr-venv/bin/pip install {pipargs} wheel".format(pipargs=BASE_PIP_ARGS))
+
             put(local_path='requirements', remote_path='.', use_sudo=True)
-            sudo("cr-venv/bin/pip install -r requirements/web.txt",
-                 user=DEPLOY_USER)
-            sudo("cr-venv/bin/pip install -r requirements/background.txt",
-                 user=DEPLOY_USER)
-            sudo("rm -rf requirements", user='root')
+
+            if (buildwheelhouse):
+                # Update the packages in the wheelhouse, if necessary
+
+                # TODO: Figure out how to do this upon a change within
+                # the requirements file without rebuilding the world
+                # every time
+
+                sudo("cr-venv/bin/pip wheel {pipargs} --wheel-dir=/srv/councilroom_src/wheelhouse --no-deps {reqs}".format(pipargs=BASE_PIP_ARGS, reqs=REQUIREMENTS))
+
+            # Install the items in our requirements files using only the wheelhouse
+            sudo("cr-venv/bin/pip install {pipargs} --no-index --use-wheel --find-links=/srv/councilroom_src/wheelhouse {reqs}".format(pipargs=BASE_PIP_ARGS, reqs=REQUIREMENTS))
+
+            # Clear the requirements files from the deployment directory
+            sudo("rm -rf requirements")
 
         # Create the static directory from which Nginx will serve
         # necessary files
@@ -80,4 +103,7 @@ def build():
         # Download and install Bootstrap and other external JavaScript
         # packages
 
+        # Set the permissions appropriately
+        #sudo("chown {1}:{2} {0}".format(DEPLOY_ROOT, DEPLOY_USER, DEPLOY_GROUP))
+        #sudo("chmod ug=rwx,o=rx {0}".format(DEPLOY_ROOT))
 

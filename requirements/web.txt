@@ -1,6 +1,10 @@
 # Requirements of the web application
 
--r common.txt
+# NOTE: We use composition of requirements files (multiple -r
+# parameters passed to pip) instead of including requirements files
+# within others (-r lines here) because Pip has limited dependency
+# resolution features (see https://github.com/pypa/pip/issues/56 and
+# https://github.com/pypa/pip/issues/993)
 
 gunicorn==0.16.1
 web.py==0.37
