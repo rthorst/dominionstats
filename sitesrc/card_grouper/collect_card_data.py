@@ -4,7 +4,7 @@ import sys
 sys.path.append('..')
 import card_info
 import urllib
-import simplejson as json
+import json
 import time
 
 def main():

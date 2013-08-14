@@ -4,7 +4,7 @@ import sys
 sys.path.append('../')
 
 import itertools
-import simplejson as json
+import json
 import card_info
 import collections
 import primitive_util

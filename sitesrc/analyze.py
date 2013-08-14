@@ -7,7 +7,7 @@ from __future__ import division
 import collections
 import logging
 import os
-import simplejson as json
+import json
 import time
 
 from dominioncards import EVERY_SET_CARDS

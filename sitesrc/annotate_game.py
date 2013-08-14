@@ -2,7 +2,7 @@
 the game as it progresses."""
 
 import itertools
-import simplejson as json
+import json
 
 import game
 import goals

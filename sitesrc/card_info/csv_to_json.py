@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import csv
-import simplejson as json
+import json
 import sys
 
 if __name__ == '__main__':

@@ -21,7 +21,7 @@ import pylab
 import scipy.cluster
 import scipy.cluster.hierarchy 
 import scipy.spatial.distance as distance
-import simplejson as json
+import json
 
 CARD_GROUPING_METHOD_BLURB = """
 <p>The cards are grouped together using data from the 
@@ -264,7 +264,7 @@ def dump_json(coords, names, abbrevs, fn):
         row['name'] = name
         row['abbrev'] = abbrev
         output_contents.append(row)
-    import simplejson as json
+    import json
     json.dump(output_contents, open(fn, 'w'))
 
 def main():

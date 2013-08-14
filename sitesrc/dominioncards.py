@@ -226,7 +226,7 @@ def get_expansion_weight(supply):
 
     return weights
 
-import simplejson as json
+import json
 class CardEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Card):

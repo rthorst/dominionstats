@@ -7,7 +7,7 @@ import operator
 import urlparse
 
 import pymongo
-import simplejson as json
+import json
 import web
 
 from name_merger import norm_name

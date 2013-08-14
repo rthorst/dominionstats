@@ -5,7 +5,7 @@
 import os
 import pymongo
 import pprint
-import simplejson as json
+import json
 
 conn = pymongo.Connection()
 games_coll = conn.test.games
