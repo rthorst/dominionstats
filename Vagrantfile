@@ -13,12 +13,15 @@ Vagrant.configure("2") do |config|
   # doesn't already exist on the user's system.
   config.vm.box_url = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-vagrant-amd64-disk1.box"
 
+  # --------------------------------------------------------------------------
   # Create a forwarded port mapping which allows access to a specific
-  # port within the machine from a port on the host machine. In the
-  # example below, accessing "localhost:8080" will access port 80 on
-  # the guest machine.
+  # port within the machine from a port on the host machine.
 
-  # config.vm.network :forwarded_port, guest: 80, host: 8080
+  # Primary web server
+  config.vm.network :forwarded_port, guest: 80, host: 8080
+
+  # Direct WSGI server
+  config.vm.network :forwarded_port, guest: 8888, host: 8888
 
   # Create a private network, which allows host-only access to the
   # machine using a specific IP.

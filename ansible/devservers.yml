@@ -9,5 +9,5 @@
     - redis-server
 #    - mongodb
 #    - nginx
-    - councilroom-run
     - councilroom-build
+    - councilroom-run

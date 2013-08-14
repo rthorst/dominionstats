@@ -13,6 +13,7 @@ from fabric.api import run
 from fabric.api import sudo
 from fabric.api import task
 from fabric.context_managers import cd
+from fabric.contrib.files import exists
 from fabtools.vagrant import vagrant
 from fabtools.vagrant import vagrant_settings
 
@@ -64,13 +65,14 @@ def build(buildwheelhouse=False):
 
     # Do the following on the vagrant host itself
     with vagrant_settings():
-        # Blow away and recreate the deployment directory
-        sudo("rm -rf {0}".format(DEPLOY_ROOT))
-        sudo("mkdir {0}".format(DEPLOY_ROOT))
+        # Create the deployment directory if necessary
+        if not exists(DEPLOY_ROOT):
+            sudo("mkdir {0}".format(DEPLOY_ROOT))
 
         # Create the virtualenv in which the Council Room application
         # and its Python dependencies will be installed and run
         with cd(DEPLOY_ROOT):
+            sudo("rm -rf cr-venv")
             sudo("virtualenv cr-venv")
 
             # Upgrade the pip, setuptools, and wheel in the virtualenv

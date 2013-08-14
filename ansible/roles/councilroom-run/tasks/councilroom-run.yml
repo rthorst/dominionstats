@@ -37,3 +37,22 @@
   apt: pkg=$item
   with_items:
     - nginx-full
+
+- name: Deploy our Nginx configuration file
+  copy: src=nginx/councilroom-prod.conf dest=/etc/nginx/sites-available owner=root group=root mode=0644
+
+- name: Make log directory used by Nginx
+  file: path=/srv/councilroom/logs state=directory owner=root group=root mode=0755
+
+- name: Disable the default Nginx site
+  file: path=/etc/nginx/sites-enabled/default state=absent
+  notify:
+    - restart nginx
+
+- name: Enable the Councilroom site in Nginx
+  file: src=/etc/nginx/sites-available/councilroom-prod.conf dest=/etc/nginx/sites-enabled/councilroom.com state=link 
+  notify:
+    - restart nginx
+
+- name: Make sure nginx is left running
+  service: name=nginx enabled=yes state=started
