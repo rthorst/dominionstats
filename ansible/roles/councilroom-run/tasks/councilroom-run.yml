@@ -11,6 +11,7 @@
 
 - include: redis-config.yml
 
+
 # Configure MongoDB
 
 - name: Install the apt packages necessary for MongoDB
@@ -30,6 +31,21 @@
   copy: src=mongodb.conf dest=/etc/mongodb.conf owner=root group=root mode=0644
   notify:
     - restart mongodb
+
+
+# Configure Circus
+
+- name: Install the Circus config file
+  copy: src=circus/circus.ini dest=/srv/councilroom/circus.ini owner=root group=root mode=0644
+
+- name: Install Circus as a service
+  copy: src=circus/councilroom.conf dest=/etc/init/councilroom.conf owner=root group=root mode=0644
+  notify:
+    - restart councilroom
+
+- name: Enable the Councilroom/circus service
+  service: name=councilroom enabled=yes
+
 
 # Configure Nginx
 

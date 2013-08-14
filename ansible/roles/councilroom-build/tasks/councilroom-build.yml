@@ -17,6 +17,7 @@
     - devscripts
     - dh-make
     - gnupg
+    - libevent-dev
     - libopenblas-base
     - libopenblas-dev
     - lintian
@@ -31,7 +32,3 @@
     - python-numpy
     - python-redis
     - python-scipy
-
-# TODO: This should likly be removed since it is handled in the fab file
-- name: Create the deployment directory and give it appropriate permissions
-  file: path=/srv/councilroom state=directory owner=cr_prod group=cr_prod mode=0755

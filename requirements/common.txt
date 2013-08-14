@@ -6,6 +6,8 @@
 # resolution features (see https://github.com/pypa/pip/issues/56 and
 # https://github.com/pypa/pip/issues/993)
 
+circus-web==0.4.1
+circus==0.9.2
 numpy==1.6.2
 pymongo==2.3
 redis==2.7.2

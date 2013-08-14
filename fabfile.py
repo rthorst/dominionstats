@@ -101,8 +101,12 @@ def build(buildwheelhouse=False):
             # Clear the requirements files from the deployment directory
             sudo("rm -rf requirements")
 
-        # Create the static directory from which Nginx will serve
-        # necessary files
+            # Create the static directory from which Nginx will serve
+            # necessary files
+            if not exists('app'):
+                sudo("mkdir app")
+            sudo("rm -rf app/*")
+            put(local_path='sitesrc/*', remote_path='app', use_sudo=True)
 
         # Copy our images, CSS, JavaScript, etc. into the serving
         # directory
