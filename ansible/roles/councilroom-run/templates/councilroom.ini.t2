@@ -1,0 +1,123 @@
+; This configuration file serves double-duty: It contains the
+; configuration of Circus (http://circus.readthedocs.org/), which
+; manages the overall processes that work together to run the
+; application. It also contains the configuration settings used by the
+; Councilroom.com application code itself.
+
+; ----------------------------------------------------------------------------
+; Application configuration values
+[mongo]
+connection: {{mongodb_server}}
+database: test
+
+[aws]
+aws_access_key_id = {{ aws_access_key_id }}
+aws_secret_access_key = {{aws_secret_access_key}}
+
+[environment]
+work_dir = /tmp
+
+[celery]
+backend = redis://{{redis_server}}:6379/0
+broker = redis://{{redis_server}}:6379/0
+
+[leaderboard]
+known bad dates:
+    2011-09-15
+    2011-11-24
+    2011-11-25
+    2011-11-26
+    2011-11-27
+    2011-11-28
+    2011-11-29
+    2011-11-30
+    2011-12-01
+    2011-12-02
+    2011-12-03
+    2011-12-04
+    2012-06-08
+
+
+; ----------------------------------------------------------------------------
+; Circus configuration values
+[circus]
+httpd = True
+statsd = True
+httpd_host = 0.0.0.0 ; FIXME: Would like to keep this more narrowly limited
+;debug = True ; Uncomment this line to get all output sent directly to stdout/stderr
+
+
+[env:councilroom*]
+; Environment values for all councilroom* watchers
+COUNCILROOM_CONFIG = /srv/councilroom/councilroom.ini
+PYTHONPATH = /srv/councilroom/app
+
+
+[plugin:flapping]
+use = circus.plugins.flapping.Flapping
+retry_in = 5
+max_retry = 6
+
+
+[watcher:redis-server]
+cmd = /usr/bin/redis-server /srv/redis/redis.conf
+singleton = True
+
+stdout_stream.filename = /srv/councilroom/logs/redis-server.log
+stdout_stream.max_bytes = 1000000000
+stdout_stream.backup_count = 2
+
+stderr_stream.filename = /srv/councilroom/logs/redis-server.err
+stderr_stream.max_bytes = 1000000000
+stderr_stream.backup_count = 2
+
+
+[plugin:redis]
+use = circus.plugins.redis_observer.RedisObserver
+redis_url = redis://{{redis_server}}:6379/0
+
+stdout_stream.filename = /srv/councilroom/logs/redis-observer.log
+stdout_stream.max_bytes = 1000000000
+stdout_stream.backup_count = 2
+
+stderr_stream.filename = /srv/councilroom/logs/redis-observer.err
+stderr_stream.max_bytes = 1000000000
+stderr_stream.backup_count = 2
+
+
+[watcher:councilroom-webapp]
+cmd = /srv/councilroom/cr-venv/bin/gunicorn --timeout 55 -w 3 --max-requests 32 frontend_wsgi -b 0.0.0.0:8888
+working_dir = /srv/councilroom/app
+send_hup = true
+uid = cr_prod
+gid = cr_prod
+
+stdout_stream.filename = /srv/councilroom/logs/councilroom-webapp.log
+stdout_stream.max_bytes = 1000000000
+stdout_stream.backup_count = 2
+
+stderr_stream.filename = /srv/councilroom/logs/councilroom-webapp.err
+stderr_stream.max_bytes = 1000000000
+stderr_stream.backup_count = 2
+
+
+[watcher:councilroom-background]
+cmd = /srv/councilroom/cr-venv/bin/celeryd --app=background -l debug
+working_dir = /srv/councilroom/app
+send_hup = true
+uid = cr_prod
+gid = cr_prod
+
+stdout_stream.filename = /srv/councilroom/logs/councilroom-background.log
+stdout_stream.max_bytes = 1000000000
+stdout_stream.backup_count = 2
+
+stderr_stream.filename = /srv/councilroom/logs/councilroom-background.err
+stderr_stream.max_bytes = 1000000000
+stderr_stream.backup_count = 2
+
+
+; Emacs settings (for editing this file)
+; Local Variables:
+; mode: conf
+; End:

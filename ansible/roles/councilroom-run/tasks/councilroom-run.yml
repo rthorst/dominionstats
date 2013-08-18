@@ -6,13 +6,27 @@
 - name: Make sure the apt cache is fresh (less than one day old)
   apt: update_cache=yes cache_valid_time=86400
 
+- name: Install the packages needed by the Councilroom app itself
+  apt: pkg=$item
+  with_items:
+    - puf
+
 - name: Create the production user
   user: name=cr_prod state=present
+
+- name: Create the Circus/Councilroom.com application conf file
+  template: src=councilroom.ini.t2 dest=/srv/councilroom/councilroom.ini owner=root group=cr_prod mode=0640
+
+- name: Make log directory used by application components
+  file: path=/srv/councilroom/logs state=directory owner=root group=cr_prod mode=0775
+
+
+# Configure Redis
 
 - include: redis-config.yml
 
 
-# Configure MongoDB
+# Install and configure MongoDB
 
 - name: Install the apt packages necessary for MongoDB
   apt: pkg=$item
@@ -35,11 +49,8 @@
 
 # Configure Circus
 
-- name: Install the Circus config file
-  copy: src=circus/circus.ini dest=/srv/councilroom/circus.ini owner=root group=root mode=0644
-
 - name: Install Circus as a service
-  copy: src=circus/councilroom.conf dest=/etc/init/councilroom.conf owner=root group=root mode=0644
+  copy: src=upstart/councilroom.conf dest=/etc/init/councilroom.conf owner=root group=root mode=0644
   notify:
     - restart councilroom
 
@@ -57,16 +68,13 @@
 - name: Deploy our Nginx configuration file
   copy: src=nginx/councilroom-prod.conf dest=/etc/nginx/sites-available owner=root group=root mode=0644
 
-- name: Make log directory used by Nginx
-  file: path=/srv/councilroom/logs state=directory owner=root group=root mode=0755
-
 - name: Disable the default Nginx site
   file: path=/etc/nginx/sites-enabled/default state=absent
   notify:
     - restart nginx
 
 - name: Enable the Councilroom site in Nginx
-  file: src=/etc/nginx/sites-available/councilroom-prod.conf dest=/etc/nginx/sites-enabled/councilroom.com state=link 
+  file: src=/etc/nginx/sites-available/councilroom-prod.conf dest=/etc/nginx/sites-enabled/councilroom.com state=link
   notify:
     - restart nginx
 

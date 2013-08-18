@@ -171,6 +171,8 @@ class GokoScraper:
 
         current_directory = os.getcwd()
         directory_name = utils.get_workdir()
+        log.debug("Was running in %s", current_directory)
+        log.debug("Downloading into %s", directory_name)
         os.chdir(directory_name)
         str_date = time.strftime("%Y%m%d", date.timetuple())
         try:

@@ -101,12 +101,25 @@ def build(buildwheelhouse=False):
             # Clear the requirements files from the deployment directory
             sudo("rm -rf requirements")
 
-            # Create the static directory from which Nginx will serve
-            # necessary files
+            # Copy the whole application directory
+            # FIXME: This directory needs to be split up as a proper
+            # module with a setup script and pieces in a better
+            # organization, but that is a task for another day.
+
             if not exists('app'):
                 sudo("mkdir app")
             sudo("rm -rf app/*")
             put(local_path='sitesrc/*', remote_path='app', use_sudo=True)
+
+            with cd('app'):
+                # Get rid of some things that don't need to be there
+                sudo("rm -rf test*")
+
+                # Fix up some permissions
+                sudo("chmod +x *.sh analyze2.py analyze.py count_buys.py game_stats.py goals.py goal_stats.py indexes.py load_leaderboard.py optimal_card_ratios.py run_trueskill.py scrape_leaderboard.py update.py")
+
+        # Create the static directory from which Nginx will serve
+        # necessary files
 
         # Copy our images, CSS, JavaScript, etc. into the serving
         # directory

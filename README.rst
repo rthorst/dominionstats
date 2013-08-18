@@ -105,6 +105,12 @@ steps:
      . .venv-devhost/bin/activate
      pip install -r requirements/devhost.txt
 
+#. Create the configuration file outside your source code repository
+   that contains private, local values such as your AWS credentials::
+
+     cp private_vars_example.yml ../private_vars.yml
+     vi ../private_vars.yml
+
 The above steps typically only need to be done once per local copy of
 the source code. Once you have this done, each time you want to do
 some development, you will repeat the following steps:
@@ -116,6 +122,10 @@ some development, you will repeat the following steps:
      . .venv-devhost/bin/activate
      vagrant up
      vagrant ssh
+
+#. Build the application into the devhost with the following command::
+
+     fab build
 
 #. From within the Vagrant instance, you can import a day's worth of
    data and then launch the web application with the following

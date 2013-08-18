@@ -23,7 +23,7 @@ def initialize_logging(debug=True):
         root_logger.setLevel(logging.INFO)
 
     # Log to a file
-    fh = logging.handlers.TimedRotatingFileHandler(script_root + '.log', when='midnight')
+    fh = logging.handlers.TimedRotatingFileHandler('/srv/councilroom/logs/councilroom-apps.log', when='midnight')
     formatter = logging.Formatter('%(asctime)s [%(levelname)s/%(process)d/%(name)s] %(message)s')
     fh.setFormatter(formatter)
     root_logger.addHandler(fh)

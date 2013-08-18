@@ -22,3 +22,4 @@ build
 .vagrant
 pip-cache
 wheelhouse
+private_vars.yml

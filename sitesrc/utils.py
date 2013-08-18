@@ -5,6 +5,7 @@ import ConfigParser
 import argparse
 import logging
 import os
+import os.path
 import tempfile
 import time
 
@@ -24,6 +25,40 @@ def segments(lis, chunk_size):
     for i in xrange(0, len(lis), chunk_size):
         yield lis[i:i + chunk_size]
 
+_config = None
+def get_config():
+    ''' Find and parse the application configuration file, returning a ConfigParser object
+
+    This method will obtain the configuration definiton in the
+    following places:
+
+    If the COUNCILROOM_CONFIG environment variable is set, the path it
+    contains will be the only one referenced.
+
+    Otherwise, the config will be searched for in the following two
+    files, with contents of the second overriding the contents of the
+    first:
+
+      * /etc/councilroom.ini
+      * ./councilroom.ini
+    '''
+
+    # Cache the _config value
+    global _config
+
+    if _config:
+        return _config
+
+    _config = ConfigParser.ConfigParser()
+
+    environment_path = os.getenv('COUNCILROOM_CONFIG')
+    if environment_path:
+        _config.read([environment_path])
+    else:
+        _config.read(['/etc/councilroom.ini', './councilroom.ini'])
+
+    return _config
+
 
 def get_aws_credentials():
     """Retrieve the AWS credentials from the config file
@@ -32,8 +67,7 @@ def get_aws_credentials():
 
         boto.s3.connection.S3Connection(**utils.get_aws_credentials())
     """
-    config = ConfigParser.ConfigParser()
-    config.read('conf.ini')
+    config = get_config()
 
     return {'aws_access_key_id': config.get('aws', 'aws_access_key_id'),
             'aws_secret_access_key': config.get('aws', 'aws_secret_access_key')}
@@ -43,8 +77,7 @@ def get_mongo_connection():
    mongo_connection = 'localhost'
 
    try:
-      config = ConfigParser.ConfigParser()
-      config.read('conf.ini')
+      config = get_config()
 
       mongo_connection = config.get('mongo', 'connection')
    #FIXME: this is too broad
@@ -60,8 +93,7 @@ def get_mongo_database():
 
    db = None
    try:
-      config = ConfigParser.ConfigParser()
-      config.read('conf.ini')
+      config = get_config()
 
       db = connection[config.get('mongo', 'database')]
    except:
@@ -84,8 +116,7 @@ def get_bad_leaderboard_dates():
     """
 
     try:
-        config = ConfigParser.ConfigParser()
-        config.read('conf.ini')
+        config = get_config()
         bad_dates = str(config.get('leaderboard', 'known bad dates')).strip().splitlines()
     except:
         log.exception("Got exception, using default list")
@@ -254,8 +285,7 @@ def get_workdir():
     """
 
     try:
-        config = ConfigParser.ConfigParser()
-        config.read('conf.ini')
+        config = get_config()
 
         workdir = config.get('environment', 'work_dir')
     except ConfigParser.Error:
@@ -267,3 +297,21 @@ def get_workdir():
         tempdir = tempfile.mkdtemp()
 
     return tempdir
+
+
+def get_celery_backend():
+    """ Return the config value for the Celery backend
+
+    This comes from the [celery] backend key in the application config
+    file.
+    """
+    return get_config().get('celery', 'backend')
+
+
+def get_celery_broker():
+    """ Return the config value for the Celery broker
+
+    This comes from the [celery] broker key in the application config
+    file.
+    """
+    return get_config().get('celery', 'broker')

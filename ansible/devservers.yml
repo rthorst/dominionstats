@@ -4,6 +4,12 @@
 
 - hosts: devservers
   sudo: True
+  vars:
+    redis_server: localhost
+    mongodb_server: localhost
+  vars_files:
+    # See README.rst for the creation of this file
+    - ../../private_vars.yml
   roles:
     - common
     - redis-server
