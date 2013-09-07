@@ -115,24 +115,73 @@ The above steps typically only need to be done once per local copy of
 the source code. Once you have this done, each time you want to do
 some development, you will repeat the following steps:
 
-#. Activate the devhost virtual environment, launch the Vagrant
-   instance, and ssh into it::
+#. From the development host, activate the virtual environment::
 
      cd dev
      . .venv-devhost/bin/activate
-     vagrant up
-     vagrant ssh
 
-#. Build the application into the devhost with the following command::
+#. Launch the Vagrant instance (the development guest)::
+
+     vagrant up
+
+   The vagrant up command will take a while to run.
+
+   The first time it is executed on a development host, it will
+   download a Vagrant "box" file that contains a minimal installation
+   of Ubuntu, though this box file will be cached for reuse on
+   subsequent executions.
+
+   Also on the first execution, several large Python packages (such as
+   SciPy) will be built as "wheels" before being installed in the
+   development guest. These, too, are cached for reuse on subsequent
+   executions.
+
+#. Due to some rough edges in the current Ansible playbooks, the above
+   command will error out, and you need to manually build the
+   application and tell Vagrant to finish the provisioning steps::
 
      fab build
+     vagrant provision
 
-#. From within the Vagrant instance, you can import a day's worth of
-   data and then launch the web application with the following
-   commands::
+The above steps should leave the application up and running in the
+development guest, though without any data. The following URLs should
+be reachable from the development host:
 
-     cd /vagrant
-     virtualenv
+* http://localhost:8080 Is the Councilroom.com web application itself,
+  as served by nginx.
+* http://localhost:8087 Is the Circus web console/dashboard.
+* http://localhost:8088 Is the Councilroom.com web application as
+  served by the WSGI container.
+
+To connect to the development guest, use the `vagrant ssh`
+command. Within this ssh session, here are some useful commands:
+
+* `sudo restart councilroom`: The Councilroom application is run as an
+  upstart service named `councilroom`. It can be managed with the
+  usual `start`, `stop`, and `restart` commands.
+* To import a day's worth of game logs, do the following::
+
+    sudo su - cr_prod
+    cd /srv/councilroom
+    . cr-venv/bin/activate
+    cd app
+    python update.py --start-date 2013-03-01 --end-date 2013-03-02
+
+From the development host, the following commands are useful:
+
+* `fab build`: This will build the application from the source code on
+  the development host, into the development guest.
+* `vagrant provision`: This will reapply the Ansible playbooks
+  contained in the `ansible` directory to the development guest. This
+  is especially useful if you are working on the playbooks themselves.
+* `vagrant destroy`: This removes the running development guest
+  completely. The next time you run `vagrant up` it will be recreated
+  as above.
+* `ssh-keygen -f ~/.ssh/known_hosts -R 192.168.9.10`: Vagrant uses
+  Ansible, which uses SSH. Since a new key is generated for each
+  development guest, SSH will warn you when this key changes. This
+  command removes the existing key from the known_hosts file.
+
 
 
 Installation

@@ -13,4 +13,3 @@
 
 - name: restart councilroom
   service: name=councilroom state=restarted
-

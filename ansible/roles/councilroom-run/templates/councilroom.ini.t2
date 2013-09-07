@@ -49,7 +49,7 @@ httpd_host = 0.0.0.0 ; FIXME: Would like to keep this more narrowly limited
 
 [env:councilroom*]
 ; Environment values for all councilroom* watchers
-COUNCILROOM_CONFIG = /srv/councilroom/councilroom.ini
+COUNCILROOM_CONFIG = /etc/councilroom.ini
 PYTHONPATH = /srv/councilroom/app
 
 
