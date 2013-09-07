@@ -9,5 +9,5 @@
   apt_repository: repo=ppa:chris-lea/redis-server
 
 - name: Install redis-server itself
-  apt: pkg=redis-server=2:2.6.14-1chl1~precise1
+  apt: pkg=redis-server=2:2.6.15-1chl1~precise1
 
