@@ -73,12 +73,33 @@ projected space, and are not directly interprettable.  Cards with no
 near neighbors in the fixed radius table are omitted from the graph.
 The following cards are the omitted ones: %s.
 <img src="plot_no_singletons.png">
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-47780825-1', 'councilroom.com');
+  ga('send', 'pageview');
+
+</script>
 </body></html>"""
 
 NEAREST_NEIGHBOR_TABLE_PAGE_TEMPLATE = """
 <html><head><title>%s</title> 
   <body>""" + CARD_GROUPING_METHOD_BLURB + """ 
-<p>%s<p>%s</body>
+<p>%s<p>%s
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-47780825-1', 'councilroom.com');
+  ga('send', 'pageview');
+
+</script>
+</body>
 </html>
 """
 
