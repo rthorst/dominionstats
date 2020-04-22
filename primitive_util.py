@@ -10,7 +10,7 @@ with previously serialized versions of data.
 
 import collections
 
-PRIMITIVES = [dict, str, int, list, float, unicode]
+PRIMITIVES = [dict, str, int, list, float, str]
 
 def to_primitive(val):
     if hasattr(val, 'to_primitive_object'):

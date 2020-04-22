@@ -160,7 +160,7 @@ def capture_cards(line):
                 continue
             try:
                 card = get_card(maybe_plural)
-            except KeyError, exception:
+            except KeyError as exception:
                 raise ParsingError('Failed to find card in line: %s' % line)
             cards.extend([card] * mult)
     return cards
@@ -291,7 +291,7 @@ def parse_game(game_str, dubious_check = False):
     try:
         split_sects = SECTION_SEP.split(game_str)
         header_str, decks_blob, trash_and_turns = split_sects
-    except ValueError, exception:
+    except ValueError as exception:
         raise ParsingError('Failed to split sections')
     game_dict = parse_header(header_str)
     decks = parse_decks(decks_blob)

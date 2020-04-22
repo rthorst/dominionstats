@@ -42,7 +42,7 @@ def process_file(filename, incremental, games_table, log):
     
     cmd = ('mongoimport -h localhost parsed_out/%s -c '
            'games --jsonArray' % filename)
-    print cmd
+    print(cmd)
     os.system(cmd)
 
 
@@ -53,7 +53,7 @@ def main(args, log):
     else:
         log.info("Performing non-incremental (re)parsing from %s to %s", args.startdate, args.enddate)
 
-    games_table = pymongo.Connection().test.games
+    games_table = pymongo.MongoClient().test.games
     games_table.ensure_index(PLAYERS)
     games_table.ensure_index(SUPPLY)
     data_files_to_load = os.listdir('parsed_out')

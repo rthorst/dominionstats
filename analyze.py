@@ -137,7 +137,7 @@ def main(args):
                 scanner.save()
                 log.info("Committed calculations to the DB in %5.2fs", time.time() - start)
 
-        except int, exception:
+        except exception:
             log.exception('Exception occurred for %s in raw game %s', Game(raw_game).isotropic_url(), raw_game)
             raise 
 

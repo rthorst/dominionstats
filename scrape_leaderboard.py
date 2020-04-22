@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import StringIO
+from io import StringIO
 import bz2
 import datetime
 import gzip
-import httplib
+import http.client
 import logging
 import os
 import re
@@ -40,7 +40,7 @@ def get_date_of_last_cached_leaderboard():
 
 def get_date_of_current_isotropic_leaderboard():
     try:
-        connection = httplib.HTTPConnection('dominion.isotropic.org', timeout=30)
+        connection = http.client.HTTPConnection('dominion.isotropic.org', timeout=30)
         connection.request('HEAD', '/leaderboard/')
         response = connection.getresponse()
         headers = dict(response.getheaders())
@@ -59,7 +59,7 @@ def save_file(date, data, is_gzipped):
         try:
             decompressed_data = f.read()
             data = decompressed_data
-        except IOError, ioe:
+        except IOError as ioe:
             log.warning('Received data was not in gzip format')
         f.close()
 

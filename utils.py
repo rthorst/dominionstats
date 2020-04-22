@@ -49,7 +49,7 @@ def get_mongo_connection():
    except:
       pass
 
-   return pymongo.Connection(mongo_connection)
+   return pymongo.MongoClient(mongo_connection)
 
 # Should I read once somewhere and cache?  I guess when
 #   we have more config things.

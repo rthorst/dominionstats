@@ -25,7 +25,7 @@ class Card(object):
     module, know about card characteristics and rules.
     """
     def __init__(self, cardlist_row):
-        for key, value in cardlist_row.iteritems():
+        for key, value in cardlist_row.items():
             prop = str.lower(key)
             setattr(self, prop, value)
 
