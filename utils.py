@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import ConfigParser
+import configparser
 import argparse
 import datetime
 import logging

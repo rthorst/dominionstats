@@ -33,10 +33,10 @@ while True:
                      date.today().isoformat() + '-' +
                      time.strftime('%H:%M:%S') + '.txt')
         cmd = cmd + ' ' + ' '.join(extra_args) + ' 2>&1 | tee -a ' + status_fn
-        print cmd
+        print(cmd)
         os.system(cmd)
         os.system('mv %s static/status' % status_fn)
-    print 'sleeping'
+    print('sleeping')
     time.sleep(60*15)  # try to update every 15 mins
 
 
