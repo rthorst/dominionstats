@@ -77,7 +77,8 @@ KW_WHICH_IS_WORTH = ' which is worth +$'
 KW_WITH_A = ' with a'
 KW_WISHING = ' wishing '
 KW_INSTEAD = ' instead.'
-KEYWORDS = [locals()[w] for w in dict(locals()) if w.startswith('KW_')]
+#KEYWORDS = [locals()[w] for w in dict(locals()) if w.startswith('KW_')]
+KEYWORDS = [v for k, v in dict(locals()).items() if k.startswith('KW_')]
 
 class BogusGameError(Exception):
     """ Exception for a degenerate game that should not be
@@ -351,7 +352,7 @@ def parse_deck(deck_str):
       """
     try:
         name_vp_list, _opening, deck_contents = deck_str.split('\n')
-    except ValueError, e:
+    except ValueError as e:
         raise ParsingError('Failed right off the bat to split the deck')
     vp_tokens = 0
     #print 'vp', name_vp_list
@@ -401,7 +402,7 @@ def parse_deck(deck_str):
             card_name = card_blob[right_bracket_index + 1:]
             try:
                 card = get_card(card_name)
-            except KeyError, exception:
+            except KeyError as exception:
                 raise ParsingError("Failed to get card. chunk: '%s', card_name: '%s', card_blob: '%s'" % \
                                        (chunk, card_name, card_blob[right_bracket_index - 10:]))
             card_quant = int(card_blob.split()[0])
@@ -428,7 +429,7 @@ def parse_vetoes(game_dict, veto_str):
             player = name_merger.norm_name(player)
             try:
                 v_dict[str(game_dict[PLAYERS].index(player))] = int(capture_cards(card)[0].index)
-            except ValueError, ve:
+            except ValueError as ve:
                 raise ParsingError("Failed to handle veto: %s" % ve)
 
     return v_dict
@@ -652,8 +653,7 @@ def parse_turn(turn_blob, names_list):
             if KW_REVEALS in lines[line_idx - 1] and not KW_DRAWS in line:
                 targ_obj[TRASHES].extend(capture_cards(lines[line_idx - 1]))
             if KW_REVEALING in line or KW_REVEALS in line:
-                # reveals watchtower trashing ...
-                # noble brigand reveals xx, yy and trashes yy
+                # reveals watchtower trashing ... python update_loop.py                # noble brigand reveals xx, yy and trashes yy
                 trashed = capture_cards(line[line.find(KW_TRASHING):])
                 targ_obj[TRASHES].extend(trashed)
             else:
@@ -778,7 +778,7 @@ def split_turns(turns_blob):
         try:
             parse_turn_header(line)
             turn_texts.append(line + '\n')
-        except ParseTurnHeaderError, e:
+        except ParseTurnHeaderError as e:
             turn_texts[-1] += line + '\n'
     return [t for t in turn_texts if t]
 
@@ -796,7 +796,7 @@ def save_parse_error(parse_error_col, log, game, message):
                    }
     try:
         parse_error_col.save(parse_error, safe=True, check_keys=True)
-    except Exception, e:
+    except Exception as e:
         log.exception("Got exception on trying to save parsing error for game %s", game['_id'])
 
 
@@ -815,18 +815,18 @@ def parse_game_from_dict(log, parse_error_col, game):
         parsed['_id'] = game['_id']
         parsed['game_date'] = game['game_date']
         return parsed
-    except BogusGameError, bogus_game_exception:
+    except BogusGameError as bogus_game_exception:
         log.debug('%s got BogusGameError: %s', game['_id'], bogus_game_exception.reason)
         return None
-    except ParsingError, pe:
+    except ParsingError as pe:
         log.warning('%s got ParsingError: %s', game['_id'], pe.reason)
         save_parse_error(parse_error_col, log, game, pe)
         return None
-    except ParseTurnHeaderError, p:
+    except ParseTurnHeaderError as p:
         log.warning('%s got ParseTurnHeaderError: %s', game['_id'], p)
         save_parse_error(parse_error_col, log, game, p)
         return None
-    except AssertionError, e:
+    except AssertionError as e:
         log.warning('%s got AssertionError: %s', game['_id'], e)
         save_parse_error(parse_error_col, log, game, e)
         return None
@@ -845,13 +845,13 @@ def outer_parse_game(filename):
         parsed = parse_game(contents, dubious_check = True)
         parsed['_id'] = filename.split('/')[-1]
         return parsed
-    except BogusGameError, bogus_game_exception:
+    except BogusGameError as bogus_game_exception:
         # print 'skipped', filename, 'because', bogus_game_exception.reason
         return None
-    except ParseTurnHeaderError, p:
-        print 'parse turn header error', p, filename
-    except AssertionError, e:
-        print filename
+    except ParseTurnHeaderError as p:
+        print('parse turn header error', p, filename)
+    except AssertionError as e:
+        print(filename)
         raise e
 
 def dump_segment(arg_tuple):
@@ -885,7 +885,7 @@ def parse_and_insert(log, raw_games, games_col, parse_error_col, year_month_day)
     for game in parsed_games:
         try:
             games_col.save(game, safe=True, check_keys=True)
-        except Exception, e:
+        except Exception as e:
             log.exception("Got exception on trying to insert parsed game %s", game['_id'])
 
     return len(parsed_games)
@@ -1005,7 +1005,7 @@ def check_game_sanity(game_val, log):
                 try:
                     log.debug('[%d] insane game for %s %s: %s', __problem_deck_index__, player_deck.name(), game_val.get_id(),
                               ' '.join(map(str, game_val.get_supply())))
-                except UnicodeEncodeError, e:
+                except UnicodeEncodeError as e:
                     None
                 return False
     return True
@@ -1018,8 +1018,8 @@ def main(args, log):
     else:
         log.info("Performing non-incremental (re)parsing from %s to %s", args.startdate, args.enddate)
 
-    connection = pymongo.Connection()
-    db = connection.test
+    connection = pymongo.MongoClient()
+    db = connection.test # RT: changed.
     raw_games = db.raw_games
     raw_games.ensure_index('game_date')
 
@@ -1049,10 +1049,10 @@ def main(args, log):
             continue
             day[BEEN_PARSED_KEY] = True
             day_status_col.save(day)
-        except ParseTurnHeaderError, e:
+        except ParseTurnHeaderError as e:
             log.error("ParseTurnHeaderError occurred while parsing %s: %s", year_month_day, e)
             return
-        except Exception, e:
+        except Exception as e:
             log.error("Exception occurred while parsing %s: %s", year_month_day, e)
             return
 

@@ -46,7 +46,7 @@ def CouncilroomGamesCollectionUrl(cur_date):
 def RemoveSmallFileIfExists(fn):
     if (os.path.exists(fn) and 
         os.stat(fn).st_size <= SMALL_FILE_SIZE):
-        print 'removing small existing file', fn
+        print('removing small existing file', fn)
         os.unlink(fn)
 
 def download_date(str_date, cur_date, saved_games_bundle):
@@ -57,24 +57,24 @@ def download_date(str_date, cur_date, saved_games_bundle):
 
     for url in urls_by_priority:
         if DEBUG:
-            print 'getting', saved_games_bundle, 'at', url
+            print('getting', saved_games_bundle, 'at', url)
 
         contents = urllib.urlopen(url).read()
         if len(contents) > SMALL_FILE_SIZE:
             if DEBUG:
-                print 'yay, success from', url, 'no more requests for', \
-                    str_date, 'needed'
+                print('yay, success from', url, 'no more requests for', \
+                    str_date, 'needed')
             open(saved_games_bundle, 'w').write(contents)
             return True
         elif DEBUG:
-            print 'request to', url, 'failed to find large file'
+            print('request to', url, 'failed to find large file')
     return False
 
 def unzip_date(directory, filename):
     os.chdir(directory)
     cmd = 'tar -xjvf %s >/dev/null 2>/dev/null'%filename
     if DEBUG:
-        print cmd
+        print(cmd)
 
     ret = os.system(cmd)
     if ret==0:
@@ -111,7 +111,7 @@ def repackage_archive(filename):
     try:
         subprocess.check_call(["tar", "--auto-compress", "-C", directory_name,
                                "-xf", source_filename])
-    except subprocess.CalledProcessError, e:  
+    except subprocess.CalledProcessError as e:  
         # Not handling this yet, just re-raise
         logging.warning("Unexpected return from tar >>{msg}<<".format(msg=e.output))
         raise
@@ -122,7 +122,7 @@ def repackage_archive(filename):
     if len(game_files) > 0:
         try:
             subprocess.check_call(["bzip2"] + game_files)
-        except subprocess.CalledProcessError, e:  #(retcode, cmd, output=output)
+        except subprocess.CalledProcessError as e:  #(retcode, cmd, output=output)
             # Not handling this yet, just re-raise
             logging.warning("Unexpected return from bzip >>{msg}<<".format(msg=e.output))
             raise
@@ -137,7 +137,7 @@ def repackage_archive(filename):
     game_files = glob.glob("game*.html.bz2")
     try:
         subprocess.check_call(["tar", "--remove", "-cf", dest_filename+".part"] + game_files)
-    except subprocess.CalledProcessError, e:  #(retcode, cmd, output=output)
+    except subprocess.CalledProcessError as e:  #(retcode, cmd, output=output)
         # Not handling this yet, just re-raise
         logging.warning("Unexpected return from tar >>{msg}<<".format(msg=e.output))
         raise
@@ -155,8 +155,8 @@ def scrape_date(str_date, cur_date, passive=False):
 
     if utils.at_least_as_big_as(saved_games_bundle, SMALL_FILE_SIZE):
         if DEBUG:
-            print 'skipping because exists', str_date, saved_games_bundle, \
-                'and not small (size=', os.stat(saved_games_bundle).st_size, ')'
+            print('skipping because exists', str_date, saved_games_bundle, \
+                'and not small (size=', os.stat(saved_games_bundle).st_size, ')')
         return_code = GOOD
     else:
         RemoveSmallFileIfExists(saved_games_bundle)
@@ -191,27 +191,26 @@ def scrape_games():
         str_date = time.strftime("%Y%m%d", cur_date.timetuple())
         if not utils.includes_day(args, str_date):
             if DEBUG:
-                print 'skipping', str_date, 'because not in cmd line arg daterange'
+                print('skipping', str_date, 'because not in cmd line arg daterange')
             continue
         mon = time.strftime("%b%y", cur_date.timetuple())
         if mon != last_month:
-            print
-            print mon, cur_date.day*"  ",
+            print(mon, cur_date.day*"  ")
             sys.stdout.flush()
             last_month = mon
         ret = scrape_date(str_date, cur_date, passive=args.passive)
         if ret==DOWNLOADED:
-            print 'o',
+            print('o')
         elif ret==REPACKAGED:
-            print 'O',
+            print('O')
         elif ret==ERROR:
-            print '!',
+            print('!')
         elif ret==MISSING:
-            print '_',
+            print('_')
         else:
-            print '.',
+            print('.')
         sys.stdout.flush()
-    print
+    print("")
     os.chdir('../..')
 
 
